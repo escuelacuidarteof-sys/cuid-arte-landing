@@ -73,6 +73,7 @@ FOR INSERT
 TO anon 
 WITH CHECK (true);
 
+DROP POLICY IF EXISTS "Permitir consulta por email" ON public.leads_escuela_cuidarte;
 CREATE POLICY "Permitir consulta por email" 
 ON public.leads_escuela_cuidarte 
 FOR SELECT 
