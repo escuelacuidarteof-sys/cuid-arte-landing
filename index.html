@@ -348,6 +348,8 @@
             const [formStep, setFormStep] = useState(1); // 1: Email, 2: Basic (if new), 3: Clinical (Extended)
             const [isValidatingEmail, setIsValidatingEmail] = useState(false);
             const [isSubmitting, setIsSubmitting] = useState(false);
+            const [fieldErrors, setFieldErrors] = useState({});
+            const [showPriorityBanner, setShowPriorityBanner] = useState(() => !sessionStorage.getItem('priorityBannerDismissed'));
 
             // Supabase Config (Placeholders for Easypanel injection)
             const SB_URL = "__SUPABASE_URL__";
@@ -618,6 +620,45 @@
                             {toast.message}
                         </div>
                     </div>
+
+                    {/* PRIORITY BANNER - aparece al cargar */}
+                    {showPriorityBanner && (
+                        <div className="fixed inset-0 z-[90] flex items-end sm:items-center justify-center p-4 animate-in fade-in duration-500" style={{background: 'rgba(0,0,0,0.4)'}}>
+                            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative animate-in slide-in-from-bottom-4 duration-500">
+                                <button
+                                    onClick={() => { setShowPriorityBanner(false); sessionStorage.setItem('priorityBannerDismissed', 'true'); }}
+                                    className="absolute top-3 right-3 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                                <div className="flex flex-col items-center text-center gap-4">
+                                    <div className="w-14 h-14 rounded-full bg-gradient-to-br from-cuidarte-gold to-yellow-500 flex items-center justify-center shadow-lg">
+                                        <Crown className="w-7 h-7 text-white" />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-heading font-bold text-lg text-cuidarte-dark-deep">Apertura de plazas Beta</h3>
+                                        <p className="text-sm text-slate-600 mt-2 leading-relaxed">
+                                            Si ya te apuntaste a la <strong className="text-cuidarte-gold-deep">lista prioritaria</strong>, debes <strong className="text-cuidarte-dark-deep">completar tu registro</strong> para optar a una de las plazas limitadas de la fase beta.
+                                        </p>
+                                    </div>
+                                    <div className="flex flex-col sm:flex-row gap-2 w-full">
+                                        <button
+                                            onClick={() => { setShowPriorityBanner(false); sessionStorage.setItem('priorityBannerDismissed', 'true'); openAdmission(); }}
+                                            className="flex-1 bg-gradient-to-r from-cuidarte-gold-deep to-cuidarte-gold text-white font-bold py-3 rounded-xl hover:from-cuidarte-gold hover:to-cuidarte-gold-deep transition-all shadow-md text-sm"
+                                        >
+                                            Completar mi registro
+                                        </button>
+                                        <button
+                                            onClick={() => { setShowPriorityBanner(false); sessionStorage.setItem('priorityBannerDismissed', 'true'); }}
+                                            className="flex-1 bg-slate-100 text-slate-600 font-semibold py-3 rounded-xl hover:bg-slate-200 transition-all text-sm"
+                                        >
+                                            Soy nuevo/a
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {/* NAVBAR */}
                     <nav className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? 'bg-white/90 backdrop-blur-lg shadow-sm py-3' : 'bg-transparent py-5 lg:py-8'}`}>
@@ -1188,9 +1229,9 @@
                                                         id="adm-nombre"
                                                         type="text"
                                                         required
-                                                        className="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cuidarte-green outline-none text-sm"
+                                                        className={`w-full px-4 py-2.5 rounded-lg border bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cuidarte-green outline-none text-sm ${fieldErrors.name ? 'border-red-400 ring-2 ring-red-100' : 'border-slate-200'}`}
                                                         value={admissionForm.name}
-                                                        onChange={(e) => setAdmissionForm({ ...admissionForm, name: e.target.value })}
+                                                        onChange={(e) => { setAdmissionForm({ ...admissionForm, name: e.target.value }); setFieldErrors(prev => ({...prev, name: false})); }}
                                                     />
                                                 </div>
 
@@ -1222,9 +1263,9 @@
                                                             type="tel"
                                                             required
                                                             placeholder="612 345 678"
-                                                            className="flex-1 px-4 py-2.5 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cuidarte-green outline-none text-sm"
+                                                            className={`flex-1 px-4 py-2.5 rounded-lg border bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cuidarte-green outline-none text-sm ${fieldErrors.phone ? 'border-red-400 ring-2 ring-red-100' : 'border-slate-200'}`}
                                                             value={admissionForm.phone}
-                                                            onChange={(e) => setAdmissionForm({ ...admissionForm, phone: e.target.value })}
+                                                            onChange={(e) => { setAdmissionForm({ ...admissionForm, phone: e.target.value }); setFieldErrors(prev => ({...prev, phone: false})); }}
                                                         />
                                                     </div>
                                                 </div>
@@ -1235,9 +1276,9 @@
                                                         <label className="text-[10px] font-bold text-slate-500 uppercase">Rango de edad</label>
                                                         <select
                                                             required
-                                                            className="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cuidarte-green outline-none text-sm"
+                                                            className={`w-full px-4 py-2.5 rounded-lg border bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cuidarte-green outline-none text-sm ${fieldErrors.age ? 'border-red-400 ring-2 ring-red-100' : 'border-slate-200'}`}
                                                             value={admissionForm.age}
-                                                            onChange={(e) => setAdmissionForm({ ...admissionForm, age: e.target.value })}
+                                                            onChange={(e) => { setAdmissionForm({ ...admissionForm, age: e.target.value }); setFieldErrors(prev => ({...prev, age: false})); }}
                                                         >
                                                             <option value="" disabled>Selecciona...</option>
                                                             <option>18-25</option>
@@ -1289,9 +1330,9 @@
                                                         <label className="text-[10px] font-bold text-slate-500 uppercase">Tu situación</label>
                                                         <select
                                                             required
-                                                            className="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cuidarte-green outline-none text-sm"
+                                                            className={`w-full px-4 py-2.5 rounded-lg border bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cuidarte-green outline-none text-sm ${fieldErrors.situation ? 'border-red-400 ring-2 ring-red-100' : 'border-slate-200'}`}
                                                             value={admissionForm.situation}
-                                                            onChange={(e) => setAdmissionForm({ ...admissionForm, situation: e.target.value })}
+                                                            onChange={(e) => { setAdmissionForm({ ...admissionForm, situation: e.target.value }); setFieldErrors(prev => ({...prev, situation: false})); }}
                                                         >
                                                             <option value="" disabled>Selecciona...</option>
                                                             <option>Paciente diagnosticada</option>
@@ -1307,9 +1348,9 @@
                                                             type="text"
                                                             required
                                                             placeholder="Ej: Mejorar mi alimentación..."
-                                                            className="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cuidarte-green outline-none text-sm"
+                                                            className={`w-full px-4 py-2.5 rounded-lg border bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cuidarte-green outline-none text-sm ${fieldErrors.interest ? 'border-red-400 ring-2 ring-red-100' : 'border-slate-200'}`}
                                                             value={admissionForm.interest}
-                                                            onChange={(e) => setAdmissionForm({ ...admissionForm, interest: e.target.value })}
+                                                            onChange={(e) => { setAdmissionForm({ ...admissionForm, interest: e.target.value }); setFieldErrors(prev => ({...prev, interest: false})); }}
                                                         />
                                                     </div>
                                                 </div>
@@ -1317,8 +1358,21 @@
                                                 <button
                                                     type="button"
                                                     onClick={() => {
-                                                        if (!admissionForm.name || !admissionForm.phone || !admissionForm.age || !admissionForm.situation || !admissionForm.interest) {
-                                                            showToast("Por favor, rellena todos los campos antes de continuar.", "error");
+                                                        const errors = {};
+                                                        if (!admissionForm.name) errors.name = true;
+                                                        if (!admissionForm.phone) errors.phone = true;
+                                                        if (!admissionForm.age) errors.age = true;
+                                                        if (!admissionForm.situation) errors.situation = true;
+                                                        if (!admissionForm.interest) errors.interest = true;
+                                                        setFieldErrors(errors);
+                                                        if (Object.keys(errors).length > 0) {
+                                                            const labels = [];
+                                                            if (errors.name) labels.push("Nombre");
+                                                            if (errors.phone) labels.push("Teléfono");
+                                                            if (errors.age) labels.push("Edad");
+                                                            if (errors.situation) labels.push("Situación");
+                                                            if (errors.interest) labels.push("Interés");
+                                                            showToast(`Faltan campos obligatorios: ${labels.join(", ")}`, "error");
                                                             return;
                                                         }
                                                         setFormStep(3);
