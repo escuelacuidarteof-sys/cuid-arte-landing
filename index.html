@@ -436,7 +436,6 @@
 
             const handleAdmissionSubmit = async (e) => {
                 e.preventDefault();
-                console.log("🚀 Iniciando sincronización con Supabase...", admissionForm);
 
                 if (supabase) {
                     try {
@@ -446,29 +445,31 @@
 
                         const upsertData = {
                             email: admissionForm.email.toLowerCase().trim(),
-                            name: admissionForm.name,
-                            phone: fullPhone,
-                            age: admissionForm.age,
-                            sex: admissionForm.sex,
-                            country: admissionForm.country,
-                            situation: admissionForm.situation,
-                            interest: admissionForm.interest,
+                            name: admissionForm.name || "Sin nombre",
+                            phone: fullPhone || null,
+                            age: admissionForm.age || "No indicado",
+                            sex: admissionForm.sex || "No indicado",
+                            country: admissionForm.country || "España",
+                            situation: admissionForm.situation || "No indicado",
+                            interest: admissionForm.interest || "No indicado",
                             consent: true,
-                            situacion: admissionForm.situacion,
-                            tipo_cancer: admissionForm.tipoCancer,
-                            estadio: admissionForm.estadio,
-                            perdida_peso: admissionForm.perdidaPeso,
-                            actividad_fisica: admissionForm.condicionFisica,
+                            situacion: admissionForm.situacion || null,
+                            tipo_cancer: admissionForm.tipoCancer || null,
+                            estadio: admissionForm.estadio || null,
+                            perdida_peso: admissionForm.perdidaPeso || null,
+                            actividad_fisica: admissionForm.condicionFisica || null,
                             nivel_compromiso: parseInt(admissionForm.compromiso) || 0,
-                            disponibilidad: admissionForm.disponibilidad,
-                            origen: admissionForm.origen,
-                            preocupacion_principal: admissionForm.preocupacion
+                            disponibilidad: admissionForm.disponibilidad || null,
+                            origen: admissionForm.origen || null,
+                            preocupacion_principal: admissionForm.preocupacion || null
                         };
 
                         // Mark kit as downloaded for new users
                         if (!admissionForm.isPrioritized) {
                             upsertData.downloaded_kit = true;
                         }
+
+                        console.log("🚀 Datos a enviar:", JSON.stringify(upsertData, null, 2));
 
                         const { data, error } = await supabase
                             .from('leads_escuela_cuidarte')
@@ -1297,7 +1298,13 @@
 
                                                 <button
                                                     type="button"
-                                                    onClick={() => setFormStep(3)}
+                                                    onClick={() => {
+                                                        if (!admissionForm.name || !admissionForm.phone || !admissionForm.age || !admissionForm.situation || !admissionForm.interest) {
+                                                            showToast("Por favor, rellena todos los campos antes de continuar.", "error");
+                                                            return;
+                                                        }
+                                                        setFormStep(3);
+                                                    }}
                                                     className="w-full bg-cuidarte-dark-deep text-white font-bold py-4 rounded-xl hover:bg-slate-800 transition-all shadow-lg flex items-center justify-center gap-2"
                                                 >
                                                     Paso Final
