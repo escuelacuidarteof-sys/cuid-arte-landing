@@ -1,3 +1,2 @@
 [start]
-cmd = "npx -y serve -s ."
-
+cmd = "npm start"

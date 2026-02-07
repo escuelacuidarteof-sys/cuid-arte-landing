@@ -1,0 +1,12 @@
+{
+  "name": "cuid-arte-landing",
+  "version": "1.0.0",
+  "description": "Landing page for Cuid-Arte",
+  "main": "index.html",
+  "scripts": {
+    "start": "serve -s ."
+  },
+  "dependencies": {
+    "serve": "^14.2.4"
+  }
+}
