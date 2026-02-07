@@ -691,6 +691,28 @@
                         </div>
                     </div>
 
+                    {/* RETURNING USER BANNER */}
+                    <div className="bg-gradient-to-r from-cuidarte-gold/10 via-yellow-50 to-cuidarte-gold/10 border-y border-cuidarte-gold/20">
+                        <div className="container mx-auto px-6 py-5">
+                            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-center sm:text-left">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-full bg-cuidarte-gold/20 flex items-center justify-center flex-shrink-0">
+                                        <Crown className="w-4 h-4 text-cuidarte-gold-deep" />
+                                    </div>
+                                    <p className="text-sm text-slate-700">
+                                        <strong className="text-cuidarte-dark-deep">¿Ya estás en la lista prioritaria?</strong> Debes completar tu registro para optar a una plaza.
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={openAdmission}
+                                    className="flex-shrink-0 bg-cuidarte-gold-deep text-white font-bold text-sm px-5 py-2.5 rounded-full hover:bg-cuidarte-gold transition-all shadow-sm"
+                                >
+                                    Completar registro
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
                     {/* EMOCIONES */}
                     <section id="emociones" className="py-24 bg-white relative">
                         <div className="container mx-auto px-6">
