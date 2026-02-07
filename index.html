@@ -347,6 +347,7 @@
             });
             const [formStep, setFormStep] = useState(1); // 1: Email, 2: Basic (if new), 3: Clinical (Extended)
             const [isValidatingEmail, setIsValidatingEmail] = useState(false);
+            const [isSubmitting, setIsSubmitting] = useState(false);
 
             // Supabase Config (Placeholders for Easypanel injection)
             const SB_URL = "__SUPABASE_URL__";
@@ -407,10 +408,23 @@
                         // Consider registration complete if clinical data exists
                         const registrationComplete = !!(data.tipo_cancer || data.situacion);
 
+                        // Parse phone: separate prefix from number
+                        let parsedPrefix = "+34";
+                        let parsedPhone = data.phone || "";
+                        const knownPrefixes = ["+593", "+351", "+34", "+44", "+49", "+33", "+39", "+52", "+54", "+56", "+57", "+51", "+1"];
+                        for (const prefix of knownPrefixes) {
+                            if (parsedPhone.startsWith(prefix)) {
+                                parsedPrefix = prefix;
+                                parsedPhone = parsedPhone.slice(prefix.length).trim();
+                                break;
+                            }
+                        }
+
                         setAdmissionForm(prev => ({
                             ...prev,
                             name: data.name || "",
-                            phone: data.phone || "",
+                            phonePrefix: parsedPrefix,
+                            phone: parsedPhone,
                             age: data.age || "",
                             sex: data.sex || "Mujer",
                             country: data.country || "España",
@@ -436,12 +450,13 @@
 
             const handleAdmissionSubmit = async (e) => {
                 e.preventDefault();
+                setIsSubmitting(true);
 
                 if (supabase) {
                     try {
-                        const fullPhone = admissionForm.isPrioritized
-                            ? admissionForm.phone
-                            : `${admissionForm.phonePrefix} ${admissionForm.phone}`.trim();
+                        const fullPhone = admissionForm.phone
+                            ? `${admissionForm.phonePrefix} ${admissionForm.phone}`.trim()
+                            : null;
 
                         const upsertData = {
                             email: admissionForm.email.toLowerCase().trim(),
@@ -492,10 +507,13 @@
                     } catch (err) {
                         console.error("❌ Error crítico en envío:", err);
                         showToast("Ha ocurrido un error inesperado.", "error");
+                    } finally {
+                        setIsSubmitting(false);
                     }
                 } else {
                     console.warn("⚠️ Supabase no configurado. Solo avance visual.");
                     setFormStep(4);
+                    setIsSubmitting(false);
                 }
             };
 
@@ -1440,8 +1458,13 @@
                                                         Acepto la <a href="privacidad.html" target="_blank" className="text-cuidarte-green-deep underline">Política de Privacidad</a>. Tus datos se tratarán para gestionar tu solicitud.
                                                     </span>
                                                 </label>
-                                                <button type="submit" className="w-full bg-cuidarte-green text-white font-bold py-3.5 rounded-xl hover:bg-cuidarte-green-deep transition-all shadow-lg text-sm">
-                                                    Completar Registro
+                                                <button type="submit" disabled={isSubmitting} className="w-full bg-cuidarte-green text-white font-bold py-3.5 rounded-xl hover:bg-cuidarte-green-deep transition-all shadow-lg text-sm disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                                                    {isSubmitting ? (
+                                                        <>
+                                                            <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                                                            Guardando...
+                                                        </>
+                                                    ) : "Completar Registro"}
                                                 </button>
                                             </div>
                                         )}
