@@ -342,7 +342,8 @@
                 disponibilidad: "Lo antes posible",
                 origen: "Instagram",
                 preocupacion: "",
-                isPrioritized: false
+                isPrioritized: false,
+                isFullyRegistered: false
             });
             const [formStep, setFormStep] = useState(1); // 1: Email, 2: Basic (if new), 3: Clinical (Extended)
             const [isValidatingEmail, setIsValidatingEmail] = useState(false);
@@ -389,12 +390,11 @@
                         return;
                     }
 
-                    console.log("🔍 Buscando lead por email:", admissionForm.email.toLowerCase().trim());
                     const { data, error } = await supabase
                         .from('leads_escuela_cuidarte')
-                        .select('name, phone')
+                        .select('*')
                         .eq('email', admissionForm.email.toLowerCase().trim())
-                        .maybeSingle(); // maybeSingle returns null instead of error if not found
+                        .maybeSingle();
 
                     if (error) {
                         console.error("❌ Error en la consulta de Supabase:", error);
@@ -404,13 +404,17 @@
 
                     if (data) {
                         console.log("✨ Lead encontrado:", data);
+                        // Consider registration complete if clinical data exists
+                        const registrationComplete = !!(data.tipo_cancer || data.situacion);
+
                         setAdmissionForm(prev => ({
                             ...prev,
                             name: data.name || "",
                             phone: data.phone || "",
-                            isPrioritized: true
+                            isPrioritized: true,
+                            isFullyRegistered: registrationComplete
                         }));
-                        setFormStep(2); // Show celebration screen for returning users
+                        setFormStep(2); // Show celebration or complete screen
                     } else {
                         console.log("🆕 Lead no encontrado. Continuando como nuevo registro.");
                         setFormStep(2); // Regular flow: ask for name/phone
@@ -1109,7 +1113,11 @@
                                                     <h4 className="text-2xl font-heading font-bold text-cuidarte-dark-deep leading-tight">
                                                         ¡{admissionForm.name.split(' ')[0].charAt(0).toUpperCase() + admissionForm.name.split(' ')[0].slice(1).toLowerCase()}!
                                                         <br />
-                                                        <span className="text-cuidarte-gold-deep">Ya formas parte de nuestra familia</span>
+                                                        <span className="text-cuidarte-gold-deep">
+                                                            {admissionForm.isFullyRegistered
+                                                                ? "Tu valoración médica ya está registrada"
+                                                                : "Ya formas parte de nuestra familia"}
+                                                        </span>
                                                     </h4>
 
                                                     <div className="badge-pop inline-flex items-center gap-2 bg-gradient-to-r from-cuidarte-gold/10 to-yellow-50 border border-cuidarte-gold/30 rounded-full px-5 py-2.5 shadow-sm">
@@ -1118,26 +1126,30 @@
                                                     </div>
 
                                                     <p className="text-slate-500 text-sm leading-relaxed max-w-xs mx-auto">
-                                                        Nos encanta verte de nuevo. Para completar tu inscripción necesitamos <strong className="text-cuidarte-dark-deep">unos datos más</strong> sobre tu situación. Solo te llevará un minuto.
+                                                        {admissionForm.isFullyRegistered
+                                                            ? "Tu equipo está revisando tu caso. Te contactaremos pronto para los siguientes pasos."
+                                                            : "Nos encanta verte de nuevo. Para completar tu inscripción necesitamos unos datos más sobre tu situación."}
                                                     </p>
                                                 </div>
 
-                                                {/* Incomplete registration notice */}
+                                                {/* Notice Box */}
                                                 <div className="bg-cuidarte-gold/5 border border-cuidarte-gold/20 rounded-2xl p-4 text-left">
                                                     <div className="flex items-start gap-3">
-                                                        <AlertTriangle className="w-5 h-5 text-cuidarte-gold flex-shrink-0 mt-0.5" />
+                                                        {admissionForm.isFullyRegistered ? <Sparkles className="w-5 h-5 text-cuidarte-gold flex-shrink-0 mt-0.5" /> : <AlertTriangle className="w-5 h-5 text-cuidarte-gold flex-shrink-0 mt-0.5" />}
                                                         <p className="text-sm text-slate-600 leading-relaxed">
-                                                            Tu registro <strong className="text-cuidarte-dark-deep">aún no está completo</strong>. Necesitamos conocer tu situación para poder valorar tu caso y asignarte plaza.
+                                                            {admissionForm.isFullyRegistered
+                                                                ? "Tu registro de valoración médica está confirmado. Ya tienes acceso prioritario total."
+                                                                : <>Tu registro <strong className="text-cuidarte-dark-deep">aún no está completo</strong>. Necesitamos conocer tu situación para poder valorar tu caso.</>}
                                                         </p>
                                                     </div>
                                                 </div>
 
                                                 <button
                                                     type="button"
-                                                    onClick={() => setFormStep(3)}
+                                                    onClick={() => admissionForm.isFullyRegistered ? window.location.href = KIT_SUPERVIVENCIA_URL : setFormStep(3)}
                                                     className="w-full bg-gradient-to-r from-cuidarte-gold-deep to-cuidarte-gold text-white font-bold py-4 rounded-xl hover:from-cuidarte-gold hover:to-cuidarte-gold-deep transition-all shadow-lg flex items-center justify-center gap-2"
                                                 >
-                                                    Completar Mi Registro
+                                                    {admissionForm.isFullyRegistered ? "Acceder a mi Kit de Supervivencia" : "Completar Mi Registro"}
                                                     <ArrowRight className="w-4 h-4" />
                                                 </button>
                                             </div>

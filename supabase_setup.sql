@@ -61,6 +61,35 @@ BEGIN
         ALTER TABLE public.leads_escuela_cuidarte ADD COLUMN preocupacion_principal TEXT;
     END IF;
 
+    -- Nuevas columnas de perfil expandido
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='leads_escuela_cuidarte' AND column_name='age') THEN
+        ALTER TABLE public.leads_escuela_cuidarte ADD COLUMN age INTEGER;
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='leads_escuela_cuidarte' AND column_name='sex') THEN
+        ALTER TABLE public.leads_escuela_cuidarte ADD COLUMN sex TEXT;
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='leads_escuela_cuidarte' AND column_name='country') THEN
+        ALTER TABLE public.leads_escuela_cuidarte ADD COLUMN country TEXT;
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='leads_escuela_cuidarte' AND column_name='situation') THEN
+        ALTER TABLE public.leads_escuela_cuidarte ADD COLUMN situation TEXT;
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='leads_escuela_cuidarte' AND column_name='interest') THEN
+        ALTER TABLE public.leads_escuela_cuidarte ADD COLUMN interest TEXT;
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='leads_escuela_cuidarte' AND column_name='consent') THEN
+        ALTER TABLE public.leads_escuela_cuidarte ADD COLUMN consent BOOLEAN DEFAULT false;
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='leads_escuela_cuidarte' AND column_name='downloaded_kit') THEN
+        ALTER TABLE public.leads_escuela_cuidarte ADD COLUMN downloaded_kit BOOLEAN DEFAULT false;
+    END IF;
+
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='leads_escuela_cuidarte' AND column_name='created_at') THEN
         ALTER TABLE public.leads_escuela_cuidarte ADD COLUMN created_at TIMESTAMPTZ DEFAULT now();
     END IF;
