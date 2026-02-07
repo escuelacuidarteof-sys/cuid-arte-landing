@@ -411,6 +411,11 @@
                             ...prev,
                             name: data.name || "",
                             phone: data.phone || "",
+                            age: data.age || "",
+                            sex: data.sex || "Mujer",
+                            country: data.country || "España",
+                            situation: data.situation || "",
+                            interest: data.interest || "",
                             isPrioritized: true,
                             isFullyRegistered: registrationComplete
                         }));
@@ -443,6 +448,12 @@
                             email: admissionForm.email.toLowerCase().trim(),
                             name: admissionForm.name,
                             phone: fullPhone,
+                            age: admissionForm.age,
+                            sex: admissionForm.sex,
+                            country: admissionForm.country,
+                            situation: admissionForm.situation,
+                            interest: admissionForm.interest,
+                            consent: true,
                             situacion: admissionForm.situacion,
                             tipo_cancer: admissionForm.tipoCancer,
                             estadio: admissionForm.estadio,
@@ -451,17 +462,11 @@
                             nivel_compromiso: parseInt(admissionForm.compromiso) || 0,
                             disponibilidad: admissionForm.disponibilidad,
                             origen: admissionForm.origen,
-                            preocupacion_principal: admissionForm.preocupacion,
-                            consent: true
+                            preocupacion_principal: admissionForm.preocupacion
                         };
 
-                        // Only set these for new users (returning users already have them)
+                        // Mark kit as downloaded for new users
                         if (!admissionForm.isPrioritized) {
-                            upsertData.age = admissionForm.age;
-                            upsertData.sex = admissionForm.sex;
-                            upsertData.country = admissionForm.country;
-                            upsertData.situation = admissionForm.situation;
-                            upsertData.interest = admissionForm.interest;
                             upsertData.downloaded_kit = true;
                         }
 
