@@ -163,6 +163,59 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #6BA06B;
         }
+
+        @keyframes golden-glow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 20px rgba(212, 175, 55, 0.3), 0 0 40px rgba(212, 175, 55, 0.1);
+            }
+
+            50% {
+                box-shadow: 0 0 30px rgba(212, 175, 55, 0.5), 0 0 60px rgba(212, 175, 55, 0.2);
+            }
+        }
+
+        @keyframes sparkle-float {
+            0% {
+                transform: translateY(0) scale(1) rotate(0deg);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(-60px) scale(0) rotate(180deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes badge-pop {
+            0% {
+                transform: scale(0) rotate(-12deg);
+                opacity: 0;
+            }
+
+            60% {
+                transform: scale(1.15) rotate(2deg);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+        }
+
+        .golden-glow-ring {
+            animation: golden-glow 2s ease-in-out infinite;
+        }
+
+        .badge-pop {
+            animation: badge-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both;
+        }
+
+        .sparkle-particle {
+            animation: sparkle-float 1.5s ease-out forwards;
+        }
     </style>
 </head>
 
@@ -219,6 +272,8 @@
         const Headphones = (props) => <IconBase {...props}><path d="M3 18v-6a9 9 0 0 1 18 0v6" /><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" /></IconBase>;
         const Microscope = (props) => <IconBase {...props}><path d="M6 18h8" /><path d="M3 22h18" /><path d="M14 22a7 7 0 1 0 0-14h-1" /><path d="M9 14h2" /><path d="M12 6a2 2 0 0 0 2 2h0a2 2 0 0 0 2-2 2 2 0 0 0-2-2h0a2 2 0 0 0-2 2z" /></IconBase>;
         const Star = (props) => <IconBase {...props}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="currentColor" /></IconBase>;
+        const Sparkles = (props) => <IconBase {...props}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" /><path d="M5 3v4" /><path d="M19 17v4" /><path d="M3 5h4" /><path d="M17 19h4" /></IconBase>;
+        const Crown = (props) => <IconBase {...props}><path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z" /><path d="M5 21h14" /></IconBase>;
 
         // --- COMPONENTS ---
         const FaqItem = ({ question, answer }) => {
@@ -352,8 +407,7 @@
                             phone: data.phone || "",
                             isPrioritized: true
                         }));
-                        showToast(`¡Hola de nuevo ${data.name || ''}! Completa el paso final.`);
-                        setFormStep(3); // Jump to extended fields
+                        setFormStep(2); // Show celebration screen for returning users
                     } else {
                         console.log("🆕 Lead no encontrado. Continuando como nuevo registro.");
                         setFormStep(2); // Regular flow: ask for name/phone
@@ -366,10 +420,20 @@
                 }
             };
 
+            // URL del Kit de Supervivencia (cambiar por la URL real de la herramienta)
+            const KIT_SUPERVIVENCIA_URL = "#kit-supervivencia";
+
             const handleAdmissionSubmit = async (e) => {
                 e.preventDefault();
-                setIsAdmissionOpen(false);
-                showToast("¡Solicitud enviada! Te llamaremos en 24h.");
+                const isReturning = admissionForm.isPrioritized;
+
+                if (isReturning) {
+                    setIsAdmissionOpen(false);
+                    showToast(`¡Valoración actualizada, ${admissionForm.name.split(' ')[0]}! Tu plaza prioritaria sigue reservada.`);
+                } else {
+                    // New user: show success screen with kit access
+                    setFormStep(4);
+                }
 
                 // In production, sync all data back to Supabase here
                 if (supabase) {
@@ -498,7 +562,8 @@
                     icon: <ShieldCheck className="w-8 h-8 text-white relative z-10" />,
                     title: "Entorno Saludable",
                     desc: "Detoxificación del hogar y reducción de disruptores endocrinos.",
-                    img: "https://images.unsplash.com/photo-1540331548438-5929971ae7ac?auto=format&fit=crop&q=80&w=800",
+                    /* v2-cache-bust */
+                    img: "https://images.unsplash.com/photo-1510076857177-7470076d4098?auto=format&fit=crop&q=80&w=800&v=2",
                     color: "bg-cuidarte-dark-deep"
                 }
             ];
@@ -931,27 +996,47 @@
                     {isAdmissionOpen && (
                         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="admission-title">
                             <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsAdmissionOpen(false)}></div>
-                            <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl relative z-10 overflow-hidden animate-in zoom-in-95 duration-200">
-                                <div className="bg-cuidarte-green p-6 text-white text-center relative">
+                            <div className="bg-white w-full max-w-lg max-h-[90vh] rounded-3xl shadow-2xl relative z-10 overflow-y-auto animate-in zoom-in-95 duration-200">
+                                <div className={`p-6 text-white text-center relative transition-colors duration-500 ${
+                                    formStep === 2 && admissionForm.isPrioritized
+                                        ? 'bg-gradient-to-r from-cuidarte-gold-deep via-cuidarte-gold to-cuidarte-gold-deep'
+                                        : 'bg-cuidarte-green'
+                                }`}>
                                     <button onClick={() => setIsAdmissionOpen(false)} className="absolute top-4 right-4 text-white/80 hover:text-white" aria-label="Cerrar formulario"><X /></button>
-                                    <HeartHandshake className="w-10 h-10 mx-auto mb-2 opacity-90" />
-                                    <h3 id="admission-title" className="text-2xl font-heading font-bold">Solicitud de Valoración</h3>
-                                    <p className="text-cuidarte-green-light text-sm mt-1 font-medium">
-                                        {formStep === 1 && "Ingresa tu email para comenzar"}
-                                        {formStep === 2 && "Cuéntanos quién eres"}
-                                        {formStep === 3 && (admissionForm.isPrioritized ?
-                                            `¡Hola de nuevo, ${admissionForm.name.split(' ')[0].charAt(0).toUpperCase() + admissionForm.name.split(' ')[0].slice(1).toLowerCase()}!` :
-                                            "Paso final: Tu situación")}
-                                    </p>
+                                    {formStep === 2 && admissionForm.isPrioritized ? (
+                                        <>
+                                            <Crown className="w-10 h-10 mx-auto mb-2 opacity-90" />
+                                            <h3 id="admission-title" className="text-2xl font-heading font-bold">Miembro Prioritario</h3>
+                                            <p className="text-yellow-100 text-sm mt-1 font-medium">Te estábamos esperando</p>
+                                        </>
+                                    ) : formStep === 4 ? (
+                                        <>
+                                            <CheckCircle className="w-10 h-10 mx-auto mb-2 opacity-90" />
+                                            <h3 id="admission-title" className="text-2xl font-heading font-bold">¡Bienvenida a la familia!</h3>
+                                            <p className="text-cuidarte-green-light text-sm mt-1 font-medium">Tu solicitud ha sido recibida</p>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <HeartHandshake className="w-10 h-10 mx-auto mb-2 opacity-90" />
+                                            <h3 id="admission-title" className="text-2xl font-heading font-bold">Solicitud de Valoración</h3>
+                                            <p className="text-cuidarte-green-light text-sm mt-1 font-medium">
+                                                {formStep === 1 && "Ingresa tu email para comenzar"}
+                                                {formStep === 2 && !admissionForm.isPrioritized && "Cuéntanos quién eres"}
+                                                {formStep === 3 && (admissionForm.isPrioritized ?
+                                                    `¡Hola de nuevo, ${admissionForm.name.split(' ')[0].charAt(0).toUpperCase() + admissionForm.name.split(' ')[0].slice(1).toLowerCase()}!` :
+                                                    "Paso final: Tu situación")}
+                                            </p>
+                                        </>
+                                    )}
                                 </div>
                                 <div className="p-8">
                                     <form className="space-y-4" onSubmit={(e) => {
-                                        if (formStep < 3 && !admissionForm.isPrioritized) {
+                                        if (formStep === 3) {
+                                            handleAdmissionSubmit(e);
+                                        } else {
                                             e.preventDefault();
                                             if (formStep === 1) checkEmailExists();
                                             else setFormStep(3);
-                                        } else {
-                                            handleAdmissionSubmit(e);
                                         }
                                     }}>
 
@@ -982,8 +1067,80 @@
                                             </div>
                                         )}
 
-                                        {/* STEP 2: BASIC INFO (FOR NEW USERS) */}
-                                        {formStep === 2 && (
+                                        {/* STEP 2: BASIC INFO (NEW) or CELEBRATION (RETURNING) */}
+                                        {formStep === 2 && admissionForm.isPrioritized && (
+                                            <div className="text-center space-y-5 animate-in fade-in zoom-in-95 duration-500">
+                                                {/* Sparkle particles */}
+                                                <div className="relative h-0">
+                                                    {[...Array(6)].map((_, i) => (
+                                                        <div key={i} className="sparkle-particle absolute text-cuidarte-gold" style={{
+                                                            left: `${15 + i * 14}%`,
+                                                            top: '40px',
+                                                            animationDelay: `${i * 0.2}s`,
+                                                            fontSize: ['14px', '10px', '16px', '12px', '14px', '10px'][i]
+                                                        }}>&#10022;</div>
+                                                    ))}
+                                                </div>
+
+                                                {/* Golden avatar circle */}
+                                                <div className="relative inline-block pt-2">
+                                                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-cuidarte-gold via-yellow-400 to-cuidarte-gold-deep flex items-center justify-center mx-auto golden-glow-ring">
+                                                        <span className="text-4xl font-heading font-bold text-white">
+                                                            {admissionForm.name ? admissionForm.name.charAt(0).toUpperCase() : '?'}
+                                                        </span>
+                                                    </div>
+                                                    <div className="absolute -bottom-1 -right-1 w-9 h-9 rounded-full bg-cuidarte-green flex items-center justify-center border-3 border-white shadow-md badge-pop">
+                                                        <Check className="w-5 h-5 text-white" />
+                                                    </div>
+                                                </div>
+
+                                                {/* Welcome text */}
+                                                <div className="space-y-3">
+                                                    <h4 className="text-2xl font-heading font-bold text-cuidarte-dark-deep leading-tight">
+                                                        ¡{admissionForm.name.split(' ')[0].charAt(0).toUpperCase() + admissionForm.name.split(' ')[0].slice(1).toLowerCase()}!
+                                                        <br />
+                                                        <span className="text-cuidarte-gold-deep">Ya formas parte de nuestra familia</span>
+                                                    </h4>
+
+                                                    <div className="badge-pop inline-flex items-center gap-2 bg-gradient-to-r from-cuidarte-gold/10 to-yellow-50 border border-cuidarte-gold/30 rounded-full px-5 py-2.5 shadow-sm">
+                                                        <Sparkles className="w-4 h-4 text-cuidarte-gold" />
+                                                        <span className="text-cuidarte-gold-deep font-bold text-sm">Lista Prioritaria Confirmada</span>
+                                                    </div>
+
+                                                    <p className="text-slate-500 text-sm leading-relaxed max-w-xs mx-auto">
+                                                        Nos encanta verte de nuevo. Tu compromiso con tu bienestar nos inspira. Actualiza tu valoración para que podamos seguir acompañándote.
+                                                    </p>
+                                                </div>
+
+                                                {/* Priority perks reminder */}
+                                                <div className="bg-slate-50 rounded-2xl p-4 space-y-2.5 text-left">
+                                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tus beneficios activos</p>
+                                                    {[
+                                                        'Acceso prioritario a nuevas plazas',
+                                                        'Valoración personalizada reservada',
+                                                        'Kit de Supervivencia ya enviado'
+                                                    ].map((perk, i) => (
+                                                        <div key={i} className="flex items-center gap-2.5">
+                                                            <div className="w-5 h-5 rounded-full bg-cuidarte-green/10 flex items-center justify-center flex-shrink-0">
+                                                                <Check className="w-3 h-3 text-cuidarte-green" />
+                                                            </div>
+                                                            <span className="text-sm text-slate-600">{perk}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setFormStep(3)}
+                                                    className="w-full bg-gradient-to-r from-cuidarte-gold-deep to-cuidarte-gold text-white font-bold py-4 rounded-xl hover:from-cuidarte-gold hover:to-cuidarte-gold-deep transition-all shadow-lg flex items-center justify-center gap-2"
+                                                >
+                                                    Actualizar Mi Valoración
+                                                    <ArrowRight className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        )}
+
+                                        {formStep === 2 && !admissionForm.isPrioritized && (
                                             <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
                                                 <div className="grid grid-cols-2 gap-4">
                                                     <div className="space-y-1">
@@ -1141,6 +1298,68 @@
                                             </div>
                                         )}
                                     </form>
+
+                                    {/* STEP 4: SUCCESS + KIT ACCESS (NEW USERS ONLY) */}
+                                    {formStep === 4 && (
+                                        <div className="text-center space-y-6 animate-in fade-in zoom-in-95 duration-500">
+                                            {/* Success animation */}
+                                            <div className="relative inline-block">
+                                                <div className="w-20 h-20 rounded-full bg-cuidarte-green/10 flex items-center justify-center mx-auto">
+                                                    <CheckCircle className="w-12 h-12 text-cuidarte-green badge-pop" />
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <h4 className="text-xl font-heading font-bold text-cuidarte-dark-deep">
+                                                    ¡Solicitud recibida, {admissionForm.name.split(' ')[0]}!
+                                                </h4>
+                                                <p className="text-slate-500 text-sm leading-relaxed">
+                                                    Te llamaremos en las próximas 24h. Mientras tanto, hemos preparado algo para ti:
+                                                </p>
+                                            </div>
+
+                                            {/* Kit de Supervivencia Card */}
+                                            <div className="bg-gradient-to-br from-cuidarte-dark-deep to-slate-800 rounded-2xl p-6 text-white text-left space-y-4 shadow-xl">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 rounded-xl bg-cuidarte-gold/20 flex items-center justify-center flex-shrink-0">
+                                                        <Gift className="w-5 h-5 text-cuidarte-gold" />
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-heading font-bold text-lg leading-tight">Kit de Supervivencia</p>
+                                                        <p className="text-slate-400 text-xs">Tu regalo de bienvenida</p>
+                                                    </div>
+                                                </div>
+                                                <ul className="space-y-2">
+                                                    {[
+                                                        '3 Recetas Antiinflamatorias SOS',
+                                                        'Audio de Calma Guiado',
+                                                        'Rutina de Movimiento Suave'
+                                                    ].map((item, i) => (
+                                                        <li key={i} className="flex items-center gap-2 text-sm text-slate-300">
+                                                            <Check className="w-3.5 h-3.5 text-cuidarte-green flex-shrink-0" />
+                                                            {item}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                                <a
+                                                    href={KIT_SUPERVIVENCIA_URL}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="block w-full bg-cuidarte-gold text-cuidarte-dark-deep font-bold py-3.5 rounded-xl hover:bg-yellow-400 transition-all shadow-lg text-center text-sm"
+                                                >
+                                                    Acceder a Mi Kit Gratuito
+                                                </a>
+                                            </div>
+
+                                            <button
+                                                type="button"
+                                                onClick={() => setIsAdmissionOpen(false)}
+                                                className="text-slate-400 text-sm hover:text-slate-600 transition-colors"
+                                            >
+                                                Cerrar ventana
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
