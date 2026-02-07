@@ -294,7 +294,14 @@
             const SB_KEY = "__SUPABASE_ANON_KEY__";
 
             // Initialize Supabase only if placeholders are replaced
-            const supabase = (SB_URL.startsWith('http')) ? window.supabase.createClient(SB_URL, SB_KEY) : null;
+            const isConfigured = SB_URL.startsWith('http');
+            const supabase = isConfigured ? window.supabase.createClient(SB_URL, SB_KEY) : null;
+
+            if (!isConfigured) {
+                console.log("ℹ️ Supabase: No configurado. (Esperando variables de entorno en Easypanel)");
+            } else {
+                console.log("✅ Supabase: Configurado y conectado.");
+            }
 
             useEffect(() => {
                 const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -324,13 +331,21 @@
                         return;
                     }
 
+                    console.log("🔍 Buscando lead por email:", admissionForm.email.toLowerCase().trim());
                     const { data, error } = await supabase
                         .from('leads_escuela_cuidarte')
                         .select('name, phone')
                         .eq('email', admissionForm.email.toLowerCase().trim())
-                        .single();
+                        .maybeSingle(); // maybeSingle returns null instead of error if not found
+
+                    if (error) {
+                        console.error("❌ Error en la consulta de Supabase:", error);
+                        setFormStep(2);
+                        return;
+                    }
 
                     if (data) {
+                        console.log("✨ Lead encontrado:", data);
                         setAdmissionForm(prev => ({
                             ...prev,
                             name: data.name || "",
@@ -340,6 +355,7 @@
                         showToast(`¡Hola de nuevo ${data.name || ''}! Completa el paso final.`);
                         setFormStep(3); // Jump to extended fields
                     } else {
+                        console.log("🆕 Lead no encontrado. Continuando como nuevo registro.");
                         setFormStep(2); // Regular flow: ask for name/phone
                     }
                 } catch (err) {
