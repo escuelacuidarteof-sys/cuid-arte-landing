@@ -273,8 +273,8 @@
             // Admission Form Advanced State
             const [admissionForm, setAdmissionForm] = useState({
                 email: "",
-                nombre: "",
-                telefono: "",
+                name: "",
+                phone: "",
                 situacion: "Recién diagnosticado/a",
                 tipoCancer: "",
                 estadio: "Desconocido",
@@ -326,18 +326,18 @@
 
                     const { data, error } = await supabase
                         .from('leads_escuela_cuidarte')
-                        .select('nombre, telefono')
+                        .select('name, phone')
                         .eq('email', admissionForm.email.toLowerCase().trim())
                         .single();
 
                     if (data) {
                         setAdmissionForm(prev => ({
                             ...prev,
-                            nombre: data.nombre || "",
-                            telefono: data.telefono || "",
+                            name: data.name || "",
+                            phone: data.phone || "",
                             isPrioritized: true
                         }));
-                        showToast(`¡Hola de nuevo ${data.nombre || ''}! Completa el paso final.`);
+                        showToast(`¡Hola de nuevo ${data.name || ''}! Completa el paso final.`);
                         setFormStep(3); // Jump to extended fields
                     } else {
                         setFormStep(2); // Regular flow: ask for name/phone
@@ -361,8 +361,8 @@
                         .from('leads_escuela_cuidarte')
                         .upsert({
                             email: admissionForm.email.toLowerCase().trim(),
-                            nombre: admissionForm.nombre,
-                            telefono: admissionForm.telefono,
+                            name: admissionForm.name,
+                            phone: admissionForm.phone,
                             situacion: admissionForm.situacion,
                             tipo_cancer: admissionForm.tipoCancer,
                             estadio: admissionForm.estadio,
@@ -923,7 +923,7 @@
                                     <p className="text-cuidarte-green-light text-sm mt-1 font-medium">
                                         {formStep === 1 && "Ingresa tu email para comenzar"}
                                         {formStep === 2 && "Cuéntanos quién eres"}
-                                        {formStep === 3 && (admissionForm.isPrioritized ? `Casi listo, ${admissionForm.nombre.split(' ')[0]}` : "Paso final: Tu situación")}
+                                        {formStep === 3 && (admissionForm.isPrioritized ? `Casi listo, ${admissionForm.name.split(' ')[0]}` : "Paso final: Tu situación")}
                                     </p>
                                 </div>
                                 <div className="p-8">
@@ -975,8 +975,8 @@
                                                             type="text"
                                                             required
                                                             className="w-full px-4 py-3 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cuidarte-green outline-none"
-                                                            value={admissionForm.nombre}
-                                                            onChange={(e) => setAdmissionForm({ ...admissionForm, nombre: e.target.value })}
+                                                            value={admissionForm.name}
+                                                            onChange={(e) => setAdmissionForm({ ...admissionForm, name: e.target.value })}
                                                         />
                                                     </div>
                                                     <div className="space-y-1">
@@ -986,8 +986,8 @@
                                                             type="tel"
                                                             required
                                                             className="w-full px-4 py-3 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cuidarte-green outline-none"
-                                                            value={admissionForm.telefono}
-                                                            onChange={(e) => setAdmissionForm({ ...admissionForm, telefono: e.target.value })}
+                                                            value={admissionForm.phone}
+                                                            onChange={(e) => setAdmissionForm({ ...admissionForm, phone: e.target.value })}
                                                         />
                                                     </div>
                                                 </div>
