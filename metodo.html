@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>El Método Cuid-Arte | Ciencia y Salud Integrativa</title>
+    <meta name="description" content="Conoce los 4 pilares del Método Cuid-Arte: nutrición oncológica, ejercicio como medicina, gestión emocional y salud ambiental. Basado en evidencia científica.">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="El Método Cuid-Arte | Los 4 Pilares de la Salud Integrativa">
+    <meta property="og:description" content="Nutrición oncológica, ejercicio como medicina, gestión emocional y salud ambiental. Abordaje 360º basado en biología pura.">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="es_ES">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="El Método Cuid-Arte | Ciencia y Salud Integrativa">
+    <meta name="twitter:description" content="Conoce los 4 pilares del Método Cuid-Arte. Abordaje 360º basado en evidencia científica.">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23D4AF37'/><text x='50' y='68' font-size='55' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='bold'>C</text></svg>">
+
+    <!-- Preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://unpkg.com">
+    <link rel="preconnect" href="https://images.unsplash.com">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'cuidarte-green': '#6BA06B',
+                        'cuidarte-mint': '#CDE8CD',
+                        'cuidarte-gold': '#D4AF37',
+                        'cuidarte-dark': '#2C3E50',
+                        'cuidarte-green-deep': '#4A704A',
+                        'cuidarte-green-light': '#E3F0E3',
+                        'cuidarte-gold-deep': '#9E7E22',
+                        'cuidarte-dark-deep': '#1A2530',
+                    },
+                    fontFamily: {
+                        sans: ['Open Sans', 'sans-serif'],
+                        heading: ['Montserrat', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft-gold': '0 10px 40px -10px rgba(212, 175, 55, 0.2)',
+                        'soft-green': '0 10px 40px -10px rgba(107, 160, 107, 0.2)',
+                        'card-hover': '0 25px 30px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Open+Sans:wght@300;400;600;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        h1,
+        h2,
+        h3,
+        .font-heading {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .reveal-hidden {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .reveal-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .bg-gradient-soft {
+            background: radial-gradient(circle at 10% 20%, rgb(255, 255, 255) 0%, rgb(240, 249, 240) 90.2%);
+        }
+
+        .delay-200 {
+            transition-delay: 200ms;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-600 antialiased selection:bg-cuidarte-mint selection:text-cuidarte-dark-deep">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- HOOKS ---
+        const useOnScreen = (options) => {
+            const ref = useRef(null);
+            const [isVisible, setIsVisible] = useState(false);
+            useEffect(() => {
+                const observer = new IntersectionObserver(([entry]) => {
+                    if (entry.isIntersecting) { setIsVisible(true); observer.disconnect(); }
+                }, options);
+                if (ref.current) observer.observe(ref.current);
+                return () => { if (ref.current) observer.unobserve(ref.current); };
+            }, [ref, options]);
+            return [ref, isVisible];
+        };
+
+        const Reveal = ({ children, className = "", delay = "" }) => {
+            const [ref, isVisible] = useOnScreen({ threshold: 0.1 });
+            return <div ref={ref} className={`reveal-hidden ${isVisible ? 'reveal-visible' : ''} ${delay} ${className}`}>{children}</div>;
+        };
+
+        // --- ICONOS ---
+        const IconBase = ({ children, className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>{children}</svg>;
+        const Leaf = (props) => <IconBase {...props}><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.5 2 4.5c0 3-1 5.5-2.5 7.5c-1.5 2-4 3.5-7.5 6" /><path d="M11 20v-9" /></IconBase>;
+        const Activity = (props) => <IconBase {...props}><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></IconBase>;
+        const Brain = (props) => <IconBase {...props}><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z" /><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z" /></IconBase>;
+        const ShieldCheck = (props) => <IconBase {...props}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" /><path d="m9 12 2 2 4-4" /></IconBase>;
+        const ArrowLeft = (props) => <IconBase {...props}><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></IconBase>;
+        const Menu = (props) => <IconBase {...props}><line x1="4" x2="20" y1="12" y2="12" /><line x1="4" x2="20" y1="6" y2="6" /><line x1="4" x2="20" y1="18" y2="18" /></IconBase>;
+        const X = (props) => <IconBase {...props}><path d="M18 6 6 18" /><path d="m6 6 12 12" /></IconBase>;
+        const Microscope = (props) => <IconBase {...props}><path d="M6 18h8" /><path d="M3 22h18" /><path d="M14 22a7 7 0 1 0 0-14h-1" /><path d="M9 14h2" /><path d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z" /><path d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3" /></IconBase>;
+        const HeartHandshake = (props) => <IconBase {...props}><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" /><path d="M12 5 9.04 7.96a2.17 2.17 0 0 0 0 3.08v0c.82.82 2.13.85 3 .07l2.07-1.9a2.82 2.82 0 0 1 3.15-4.9" /></IconBase>;
+
+        // --- PÁGINA DEL MÉTODO ---
+        const MethodPage = () => {
+            const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+            return (
+                <div className="font-sans text-slate-600 antialiased">
+
+                    {/* NAVBAR SIMPLIFICADA */}
+                    <nav className="fixed w-full z-40 bg-white/90 backdrop-blur-md shadow-sm py-4 top-0 border-b border-slate-100">
+                        <div className="container mx-auto px-6 flex justify-between items-center">
+                            <a href="index.html" className="flex items-center gap-2 group">
+                                <div className="w-8 h-8 bg-gradient-to-br from-cuidarte-gold to-yellow-600 rounded-full flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform">
+                                    <span className="font-heading font-bold text-lg">C</span>
+                                </div>
+                                <span className="font-heading font-bold text-cuidarte-dark-deep text-lg tracking-tight group-hover:text-cuidarte-green-deep transition-colors">Cuid-Arte</span>
+                            </a>
+                            <div className="hidden md:flex items-center gap-6 text-sm font-medium">
+                                <a href="index.html" className="flex items-center gap-2 text-slate-500 hover:text-cuidarte-green-deep transition-colors">
+                                    <ArrowLeft className="w-4 h-4" /> Volver al Inicio
+                                </a>
+                                <button onClick={() => window.location.href = 'index.html?openAdmission=true'} className="bg-cuidarte-dark-deep text-white px-6 py-2 rounded-full font-bold hover:bg-slate-800 transition-all shadow-lg active:scale-95">
+                                    Solicitar Valoración
+                                </button>
+                            </div>
+                            <button className="md:hidden text-slate-600" onClick={() => setIsMenuOpen(!isMenuOpen)}>{isMenuOpen ? <X /> : <Menu />}</button>
+                        </div>
+                        {isMenuOpen && (
+                            <div className="md:hidden bg-white border-t border-slate-100 py-4 px-6 flex flex-col gap-4 shadow-xl">
+                                <a href="index.html" className="text-slate-700">Volver al Inicio</a>
+                                <button className="font-bold text-cuidarte-green-deep text-left">Solicitar Valoración</button>
+                            </div>
+                        )}
+                    </nav>
+
+                    {/* HERO MÉTODO */}
+                    <header className="pt-36 pb-24 bg-gradient-soft text-center px-6 relative overflow-hidden">
+                        {/* Background Element */}
+                        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-cuidarte-mint/20 rounded-full blur-[100px] pointer-events-none animate-float"></div>
+
+                        <Reveal>
+                            <div className="inline-flex items-center gap-2 bg-white text-cuidarte-green-deep px-4 py-1.5 rounded-full text-xs font-bold tracking-widest uppercase mb-8 border border-cuidarte-mint shadow-sm">
+                                <Microscope className="w-4 h-4" /> Evidencia Científica
+                            </div>
+                            <h1 className="text-4xl lg:text-6xl font-heading font-bold text-cuidarte-dark-deep mb-6 leading-tight">
+                                No es magia, es <br /><span className="text-transparent bg-clip-text bg-gradient-to-r from-cuidarte-green to-cuidarte-green-deep">Biología Pura</span>
+                            </h1>
+                            <p className="max-w-2xl mx-auto text-lg text-slate-600 font-light leading-relaxed">
+                                Nuestro método se basa en crear un &quot;terreno&quot; hostil para la enfermedad.
+                                Entendemos el cuerpo como un sistema interconectado donde cada hábito cuenta a nivel celular.
+                            </p>
+                        </Reveal>
+                    </header>
+
+                    {/* PILAR 1: NUTRICIÓN */}
+                    <section className="py-24 bg-white">
+                        <div className="container mx-auto px-6">
+                            <div className="flex flex-col md:flex-row items-center gap-16">
+                                <div className="md:w-1/2">
+                                    <Reveal>
+                                        <div className="w-16 h-16 bg-cuidarte-green/10 rounded-2xl flex items-center justify-center text-cuidarte-green mb-6">
+                                            <Leaf className="w-8 h-8" />
+                                        </div>
+                                        <h2 className="text-3xl font-heading font-bold text-cuidarte-dark-deep mb-3">1. Nutrición Oncológica</h2>
+                                        <h3 className="text-cuidarte-green font-bold text-sm uppercase tracking-widest mb-6 border-b border-slate-100 pb-2 inline-block">La Estrategia del Arcoíris</h3>
+                                        <p className="text-slate-600 leading-relaxed mb-6 font-medium">
+                                            No se trata solo de "comer sano", sino de comer con intención clínica. Utilizamos alimentos con alto potencial antiinflamatorio y antioxidante para modular el <strong>microambiente tumoral</strong>.
+                                        </p>
+                                        <ul className="space-y-4 text-sm text-slate-600">
+                                            <li className="flex gap-3 items-center bg-slate-50 p-3 rounded-lg"><span className="text-cuidarte-green font-bold text-lg">✓</span> Control de picos de glucosa e insulina.</li>
+                                            <li className="flex gap-3 items-center bg-slate-50 p-3 rounded-lg"><span className="text-cuidarte-green font-bold text-lg">✓</span> Fitoquímicos específicos (cúrcuma, crucíferas, frutos rojos).</li>
+                                            <li className="flex gap-3 items-center bg-slate-50 p-3 rounded-lg"><span className="text-cuidarte-green font-bold text-lg">✓</span> Adaptación a efectos secundarios (náuseas, mucositis).</li>
+                                        </ul>
+                                    </Reveal>
+                                </div>
+                                <div className="md:w-1/2">
+                                    <Reveal delay="delay-200">
+                                        <div className="rounded-[2.5rem] overflow-hidden shadow-2xl transform rotate-2 hover:rotate-0 transition-all duration-700 h-[450px] w-full relative group border-4 border-white">
+                                            <img
+                                                src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=800"
+                                                alt="Nutrición Saludable"
+                                                loading="lazy"
+                                                className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-110"
+                                            />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-cuidarte-green-deep/90 via-transparent to-transparent flex items-end p-8 opacity-90">
+                                                <p className="font-heading text-xl font-medium text-white italic tracking-wide">"Tu despensa es tu primera farmacia."</p>
+                                            </div>
+                                        </div>
+                                    </Reveal>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* PILAR 2: EJERCICIO */}
+                    <section className="py-24 bg-slate-50">
+                        <div className="container mx-auto px-6">
+                            <div className="flex flex-col md:flex-row-reverse items-center gap-16">
+                                <div className="md:w-1/2">
+                                    <Reveal>
+                                        <div className="w-16 h-16 bg-cuidarte-dark/10 rounded-2xl flex items-center justify-center text-cuidarte-dark mb-6">
+                                            <Activity className="w-8 h-8" />
+                                        </div>
+                                        <h2 className="text-3xl font-heading font-bold text-cuidarte-dark-deep mb-3">2. Ejercicio como Medicina</h2>
+                                        <h3 className="text-cuidarte-dark font-bold text-sm uppercase tracking-widest mb-6 border-b border-slate-200 pb-2 inline-block">El Músculo Endocrino</h3>
+                                        <p className="text-slate-600 leading-relaxed mb-6 font-medium">
+                                            Combatimos el mito del reposo absoluto. El ejercicio de fuerza estimula la liberación de <strong>mioquinas</strong>, sustancias que ayudan a regular la inflamación sistémica y a mejorar la respuesta inmune natural.
+                                        </p>
+                                        <ul className="space-y-4 text-sm text-slate-600">
+                                            <li className="flex gap-3 items-center bg-white p-3 rounded-lg shadow-sm"><span className="text-cuidarte-dark font-bold text-lg">✓</span> Prevención de la sarcopenia (pérdida muscular).</li>
+                                            <li className="flex gap-3 items-center bg-white p-3 rounded-lg shadow-sm"><span className="text-cuidarte-dark font-bold text-lg">✓</span> Gestión de la fatiga crónica oncológica.</li>
+                                            <li className="flex gap-3 items-center bg-white p-3 rounded-lg shadow-sm"><span className="text-cuidarte-dark font-bold text-lg">✓</span> Rutinas adaptadas a tu nivel de energía diario.</li>
+                                        </ul>
+                                    </Reveal>
+                                </div>
+                                <div className="md:w-1/2">
+                                    <Reveal className="h-[450px] relative group rounded-[2.5rem] overflow-hidden shadow-2xl -rotate-2 hover:rotate-0 transition-all duration-700 border-4 border-white">
+                                        <img
+                                            src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=2070&auto=format&fit=crop"
+                                            alt="Ejercicio Físico"
+                                            loading="lazy"
+                                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-110"
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-cuidarte-dark/90 via-transparent to-transparent flex items-end p-8 opacity-90">
+                                            <p className="font-heading text-xl font-medium text-white italic tracking-wide">"Moverse es decirle al cuerpo que quieres vivir."</p>
+                                        </div>
+                                    </Reveal>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* PILAR 3: MENTE */}
+                    <section className="py-24 bg-white">
+                        <div className="container mx-auto px-6">
+                            <div className="flex flex-col md:flex-row items-center gap-16">
+                                <div className="md:w-1/2">
+                                    <Reveal>
+                                        <div className="w-16 h-16 bg-cuidarte-gold/10 rounded-2xl flex items-center justify-center text-cuidarte-gold-deep mb-6">
+                                            <Brain className="w-8 h-8" />
+                                        </div>
+                                        <h2 className="text-3xl font-heading font-bold text-cuidarte-dark-deep mb-3">3. Gestión Emocional</h2>
+                                        <h3 className="text-cuidarte-gold-deep font-bold text-sm uppercase tracking-widest mb-6 border-b border-slate-100 pb-2 inline-block">Psiconeuroinmunología</h3>
+                                        <p className="text-slate-600 leading-relaxed mb-6 font-medium">
+                                            El estrés crónico y el cortisol elevado deprimen el sistema inmune. Te damos herramientas prácticas para transitar el miedo y activar tu "farmacia interior".
+                                        </p>
+                                        <ul className="space-y-4 text-sm text-slate-600">
+                                            <li className="flex gap-3 items-center bg-slate-50 p-3 rounded-lg"><span className="text-cuidarte-gold-deep font-bold text-lg">✓</span> Mindfulness y visualización.</li>
+                                            <li className="flex gap-3 items-center bg-slate-50 p-3 rounded-lg"><span className="text-cuidarte-gold-deep font-bold text-lg">✓</span> Regulación del sueño y ritmos circadianos.</li>
+                                            <li className="flex gap-3 items-center bg-slate-50 p-3 rounded-lg"><span className="text-cuidarte-gold-deep font-bold text-lg">✓</span> Apoyo de la comunidad (La Tribu).</li>
+                                        </ul>
+                                    </Reveal>
+                                </div>
+                                <div className="md:w-1/2">
+                                    <Reveal className="h-[450px] relative group rounded-[2.5rem] overflow-hidden shadow-2xl rotate-2 hover:rotate-0 transition-all duration-700 border-4 border-white">
+                                        <img
+                                            src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?q=80&w=2031&auto=format&fit=crop"
+                                            alt="Bienestar Emocional"
+                                            loading="lazy"
+                                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-110"
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-cuidarte-gold-deep/90 via-transparent to-transparent flex items-end p-8 opacity-90">
+                                            <p className="font-heading text-xl font-medium text-white italic tracking-wide">"Calmar la mente para sanar el cuerpo."</p>
+                                        </div>
+                                    </Reveal>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* PILAR 4: ENTORNO */}
+                    <section className="py-24 bg-slate-50">
+                        <div className="container mx-auto px-6">
+                            <div className="flex flex-col md:flex-row-reverse items-center gap-16">
+                                <div className="md:w-1/2">
+                                    <Reveal>
+                                        <div className="w-16 h-16 bg-cuidarte-dark-deep/10 rounded-2xl flex items-center justify-center text-cuidarte-dark-deep mb-6">
+                                            <ShieldCheck className="w-8 h-8" />
+                                        </div>
+                                        <h2 className="text-3xl font-heading font-bold text-cuidarte-dark-deep mb-3">4. Salud Ambiental</h2>
+                                        <h3 className="text-cuidarte-dark-deep font-bold text-sm uppercase tracking-widest mb-6 border-b border-slate-200 pb-2 inline-block">Tu Hogar, Tu Refugio</h3>
+                                        <p className="text-slate-600 leading-relaxed mb-6 font-medium">
+                                            Vivimos rodeados de disruptores endocrinos que pueden interferir con nuestros tratamientos. Te enseñamos a identificar y eliminar tóxicos de tu cosmética y limpieza de forma sencilla.
+                                        </p>
+                                        <ul className="space-y-4 text-sm text-slate-600">
+                                            <li className="flex gap-3 items-center bg-white p-3 rounded-lg shadow-sm"><span className="text-cuidarte-dark-deep font-bold text-lg">✓</span> Cosmética oncológica segura.</li>
+                                            <li className="flex gap-3 items-center bg-white p-3 rounded-lg shadow-sm"><span className="text-cuidarte-dark-deep font-bold text-lg">✓</span> Utensilios de cocina libres de tóxicos.</li>
+                                            <li className="flex gap-3 items-center bg-white p-3 rounded-lg shadow-sm"><span className="text-cuidarte-dark-deep font-bold text-lg">✓</span> Higiene del hogar sin químicos agresivos.</li>
+                                        </ul>
+                                    </Reveal>
+                                </div>
+                                <div className="md:w-1/2">
+                                    <Reveal className="h-[450px] relative group rounded-[2.5rem] overflow-hidden shadow-2xl -rotate-2 hover:rotate-0 transition-all duration-700 border-4 border-white">
+                                        <img
+                                            src="https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=2070&auto=format&fit=crop"
+                                            alt="Hogar Saludable y Limpio"
+                                            loading="lazy"
+                                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-110"
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-cuidarte-dark-deep/90 via-transparent to-transparent flex items-end p-8 opacity-90">
+                                            <p className="font-heading text-xl font-medium text-white italic tracking-wide">"Menos tóxicos, más salud."</p>
+                                        </div>
+                                    </Reveal>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* CTA FINAL */}
+                    <section className="py-24 bg-cuidarte-dark-deep text-white text-center relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-cuidarte-green rounded-full blur-[150px] opacity-20 pointer-events-none"></div>
+                        <div className="container mx-auto px-6 relative z-10">
+                            <h2 className="text-3xl md:text-5xl font-heading font-bold mb-8">¿Listo para tomar el control?</h2>
+                            <p className="text-cuidarte-mint mb-12 max-w-xl mx-auto text-lg">
+                                Si sientes que este enfoque resuena contigo, hablemos. Queremos conocer tu caso y explicarte cómo podemos caminar juntos.
+                            </p>
+                            <button onClick={() => window.location.href = 'index.html?openAdmission=true'} className="inline-flex items-center gap-3 bg-gradient-to-r from-cuidarte-green to-cuidarte-green-deep text-white px-10 py-5 rounded-full font-bold hover:shadow-soft-green transition-all shadow-xl hover:-translate-y-1 text-lg">
+                                <HeartHandshake className="w-6 h-6" />
+                                Solicitar Valoración Gratuita
+                            </button>
+                        </div>
+                    </section>
+
+                    {/* FOOTER SIMPLE */}
+                    <footer className="bg-white text-slate-400 py-10 text-center text-xs border-t border-slate-100">
+                        <p>&copy; {new Date().getFullYear()} Servicio Cuid-Arte. Ciencia y Corazón.</p>
+                    </footer>
+
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<MethodPage />);
+    </script>
+</body>
+
+</html>
