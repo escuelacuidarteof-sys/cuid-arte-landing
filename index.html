@@ -1213,17 +1213,21 @@
                                                 {/* Edad + Sexo */}
                                                 <div className="grid grid-cols-2 gap-3">
                                                     <div className="space-y-1">
-                                                        <label className="text-[10px] font-bold text-slate-500 uppercase">Edad</label>
-                                                        <input
-                                                            type="number"
+                                                        <label className="text-[10px] font-bold text-slate-500 uppercase">Rango de edad</label>
+                                                        <select
                                                             required
-                                                            min="18"
-                                                            max="110"
-                                                            placeholder="Ej: 45"
                                                             className="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cuidarte-green outline-none text-sm"
                                                             value={admissionForm.age}
                                                             onChange={(e) => setAdmissionForm({ ...admissionForm, age: e.target.value })}
-                                                        />
+                                                        >
+                                                            <option value="" disabled>Selecciona...</option>
+                                                            <option>18-25</option>
+                                                            <option>26-35</option>
+                                                            <option>36-45</option>
+                                                            <option>46-55</option>
+                                                            <option>56-65</option>
+                                                            <option>65+</option>
+                                                        </select>
                                                     </div>
                                                     <div className="space-y-1">
                                                         <label className="text-[10px] font-bold text-slate-500 uppercase">Sexo</label>
@@ -1361,14 +1365,26 @@
                                                     </div>
                                                 </div>
 
-                                                <div className="space-y-1">
-                                                    <label className="text-[10px] font-bold text-slate-500 uppercase">Compromiso con el cambio ({admissionForm.compromiso}/10)</label>
+                                                <div className="bg-slate-50 rounded-2xl p-4 space-y-3">
+                                                    <label className="text-[10px] font-bold text-slate-500 uppercase block">Del 1 al 10, ¿cuánto estás dispuesta a cambiar tus hábitos?</label>
+                                                    <div className="text-center">
+                                                        <span className={`text-4xl font-heading font-bold ${
+                                                            admissionForm.compromiso >= 8 ? 'text-cuidarte-green-deep' :
+                                                            admissionForm.compromiso >= 5 ? 'text-cuidarte-gold-deep' :
+                                                            'text-slate-400'
+                                                        }`}>{admissionForm.compromiso}</span>
+                                                        <span className="text-sm text-slate-400 font-bold">/10</span>
+                                                    </div>
                                                     <input
                                                         type="range" min="1" max="10"
-                                                        className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-cuidarte-green"
+                                                        className="w-full h-2.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-cuidarte-green"
                                                         value={admissionForm.compromiso}
                                                         onChange={(e) => setAdmissionForm({ ...admissionForm, compromiso: e.target.value })}
                                                     />
+                                                    <div className="flex justify-between text-[10px] text-slate-400 font-medium">
+                                                        <span>Poco dispuesta</span>
+                                                        <span>Totalmente comprometida</span>
+                                                    </div>
                                                 </div>
 
                                                 <div className="grid grid-cols-2 gap-4">
