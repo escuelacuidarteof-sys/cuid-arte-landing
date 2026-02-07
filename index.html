@@ -436,18 +436,22 @@
                                 estadio: admissionForm.estadio,
                                 perdida_peso: admissionForm.perdidaPeso,
                                 actividad_fisica: admissionForm.condicionFisica,
-                                nivel_compromiso: parseInt(admissionForm.compromiso),
+                                nivel_compromiso: parseInt(admissionForm.compromiso) || 0,
                                 disponibilidad: admissionForm.disponibilidad,
                                 origen: admissionForm.origen,
-                                preocupacion_principal: admissionForm.preocupacion,
-                                updated_at: new Date().toISOString()
+                                preocupacion_principal: admissionForm.preocupacion
                             }, {
                                 onConflict: 'email'
                             });
 
                         if (error) {
-                            console.error("❌ Error Supabase:", error);
-                            showToast("Error al guardar tus datos. Por favor, inténtalo de nuevo.", "error");
+                            console.error("❌ Error Supabase Detallado:", {
+                                message: error.message,
+                                details: error.details,
+                                hint: error.hint,
+                                code: error.code
+                            });
+                            showToast(`Error: ${error.message || "No se pudieron guardar los datos."}`, "error");
                         } else {
                             console.log("✅ Sincronización exitosa:", data);
                             setFormStep(4);
