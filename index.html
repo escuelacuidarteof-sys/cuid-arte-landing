@@ -420,20 +420,11 @@
                 }
             };
 
-            // URL del Kit de Supervivencia (cambiar por la URL real de la herramienta)
-            const KIT_SUPERVIVENCIA_URL = "#kit-supervivencia";
+            const KIT_SUPERVIVENCIA_URL = "https://kitsupervivenvivneciacuid-arte.netlify.app/";
 
             const handleAdmissionSubmit = async (e) => {
                 e.preventDefault();
-                const isReturning = admissionForm.isPrioritized;
-
-                if (isReturning) {
-                    setIsAdmissionOpen(false);
-                    showToast(`¡Valoración actualizada, ${admissionForm.name.split(' ')[0]}! Tu plaza prioritaria sigue reservada.`);
-                } else {
-                    // New user: show success screen with kit access
-                    setFormStep(4);
-                }
+                setFormStep(4);
 
                 // In production, sync all data back to Supabase here
                 if (supabase) {
@@ -562,8 +553,8 @@
                     icon: <ShieldCheck className="w-8 h-8 text-white relative z-10" />,
                     title: "Entorno Saludable",
                     desc: "Detoxificación del hogar y reducción de disruptores endocrinos.",
-                    /* v2-cache-bust */
-                    img: "https://images.unsplash.com/photo-1510076857177-7470076d4098?auto=format&fit=crop&q=80&w=800&v=2",
+                    /* v3-nature-fix */
+                    img: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&q=80&w=800&v=3",
                     color: "bg-cuidarte-dark-deep"
                 }
             ];
@@ -997,11 +988,10 @@
                         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="admission-title">
                             <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsAdmissionOpen(false)}></div>
                             <div className="bg-white w-full max-w-lg max-h-[90vh] rounded-3xl shadow-2xl relative z-10 overflow-y-auto animate-in zoom-in-95 duration-200">
-                                <div className={`p-6 text-white text-center relative transition-colors duration-500 ${
-                                    formStep === 2 && admissionForm.isPrioritized
+                                <div className={`p-6 text-white text-center relative transition-colors duration-500 ${formStep === 2 && admissionForm.isPrioritized
                                         ? 'bg-gradient-to-r from-cuidarte-gold-deep via-cuidarte-gold to-cuidarte-gold-deep'
                                         : 'bg-cuidarte-green'
-                                }`}>
+                                    }`}>
                                     <button onClick={() => setIsAdmissionOpen(false)} className="absolute top-4 right-4 text-white/80 hover:text-white" aria-label="Cerrar formulario"><X /></button>
                                     {formStep === 2 && admissionForm.isPrioritized ? (
                                         <>
@@ -1012,8 +1002,12 @@
                                     ) : formStep === 4 ? (
                                         <>
                                             <CheckCircle className="w-10 h-10 mx-auto mb-2 opacity-90" />
-                                            <h3 id="admission-title" className="text-2xl font-heading font-bold">¡Bienvenida a la familia!</h3>
-                                            <p className="text-cuidarte-green-light text-sm mt-1 font-medium">Tu solicitud ha sido recibida</p>
+                                            <h3 id="admission-title" className="text-2xl font-heading font-bold">
+                                                {admissionForm.isPrioritized ? '¡Valoración actualizada!' : '¡Bienvenida a la familia!'}
+                                            </h3>
+                                            <p className="text-cuidarte-green-light text-sm mt-1 font-medium">
+                                                {admissionForm.isPrioritized ? 'Tu plaza prioritaria sigue activa' : 'Ya formas parte de nuestra lista'}
+                                            </p>
                                         </>
                                     ) : (
                                         <>
@@ -1299,10 +1293,10 @@
                                         )}
                                     </form>
 
-                                    {/* STEP 4: SUCCESS + KIT ACCESS (NEW USERS ONLY) */}
+                                    {/* STEP 4: SUCCESS SCREEN (ALL USERS) */}
                                     {formStep === 4 && (
-                                        <div className="text-center space-y-6 animate-in fade-in zoom-in-95 duration-500">
-                                            {/* Success animation */}
+                                        <div className="text-center space-y-5 animate-in fade-in zoom-in-95 duration-500">
+                                            {/* Success icon */}
                                             <div className="relative inline-block">
                                                 <div className="w-20 h-20 rounded-full bg-cuidarte-green/10 flex items-center justify-center mx-auto">
                                                     <CheckCircle className="w-12 h-12 text-cuidarte-green badge-pop" />
@@ -1311,52 +1305,68 @@
 
                                             <div className="space-y-2">
                                                 <h4 className="text-xl font-heading font-bold text-cuidarte-dark-deep">
-                                                    ¡Solicitud recibida, {admissionForm.name.split(' ')[0]}!
+                                                    {admissionForm.isPrioritized
+                                                        ? `¡Valoración actualizada, ${admissionForm.name.split(' ')[0]}!`
+                                                        : `¡Solicitud recibida, ${admissionForm.name.split(' ')[0]}!`
+                                                    }
                                                 </h4>
-                                                <p className="text-slate-500 text-sm leading-relaxed">
-                                                    Te llamaremos en las próximas 24h. Mientras tanto, hemos preparado algo para ti:
-                                                </p>
                                             </div>
 
-                                            {/* Kit de Supervivencia Card */}
-                                            <div className="bg-gradient-to-br from-cuidarte-dark-deep to-slate-800 rounded-2xl p-6 text-white text-left space-y-4 shadow-xl">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-xl bg-cuidarte-gold/20 flex items-center justify-center flex-shrink-0">
-                                                        <Gift className="w-5 h-5 text-cuidarte-gold" />
+                                            {/* Kit de Supervivencia - SOLO para nuevos usuarios */}
+                                            {!admissionForm.isPrioritized && (
+                                                <div className="bg-gradient-to-br from-cuidarte-dark-deep to-slate-800 rounded-2xl p-5 text-white text-left space-y-3 shadow-xl">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-10 h-10 rounded-xl bg-cuidarte-gold/20 flex items-center justify-center flex-shrink-0">
+                                                            <Gift className="w-5 h-5 text-cuidarte-gold" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="font-heading font-bold leading-tight">Kit de Supervivencia</p>
+                                                            <p className="text-slate-400 text-xs">Tu regalo de bienvenida</p>
+                                                        </div>
                                                     </div>
-                                                    <div>
-                                                        <p className="font-heading font-bold text-lg leading-tight">Kit de Supervivencia</p>
-                                                        <p className="text-slate-400 text-xs">Tu regalo de bienvenida</p>
-                                                    </div>
+                                                    <ul className="space-y-1.5">
+                                                        {[
+                                                            '3 Recetas Antiinflamatorias SOS',
+                                                            'Audio de Calma Guiado',
+                                                            'Rutina de Movimiento Suave'
+                                                        ].map((item, i) => (
+                                                            <li key={i} className="flex items-center gap-2 text-sm text-slate-300">
+                                                                <Check className="w-3.5 h-3.5 text-cuidarte-green flex-shrink-0" />
+                                                                {item}
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                    <a
+                                                        href={KIT_SUPERVIVENCIA_URL}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="block w-full bg-cuidarte-gold text-cuidarte-dark-deep font-bold py-3 rounded-xl hover:bg-yellow-400 transition-all shadow-lg text-center text-sm"
+                                                    >
+                                                        Acceder a Mi Kit Gratuito
+                                                    </a>
                                                 </div>
-                                                <ul className="space-y-2">
-                                                    {[
-                                                        '3 Recetas Antiinflamatorias SOS',
-                                                        'Audio de Calma Guiado',
-                                                        'Rutina de Movimiento Suave'
-                                                    ].map((item, i) => (
-                                                        <li key={i} className="flex items-center gap-2 text-sm text-slate-300">
-                                                            <Check className="w-3.5 h-3.5 text-cuidarte-green flex-shrink-0" />
-                                                            {item}
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                                <a
-                                                    href={KIT_SUPERVIVENCIA_URL}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="block w-full bg-cuidarte-gold text-cuidarte-dark-deep font-bold py-3.5 rounded-xl hover:bg-yellow-400 transition-all shadow-lg text-center text-sm"
-                                                >
-                                                    Acceder a Mi Kit Gratuito
-                                                </a>
+                                            )}
+
+                                            {/* Beta notice - PARA TODOS */}
+                                            <div className="bg-cuidarte-mint/30 border border-cuidarte-green/20 rounded-2xl p-5 text-left space-y-3">
+                                                <div className="flex items-center gap-2">
+                                                    <Sparkles className="w-4 h-4 text-cuidarte-gold" />
+                                                    <p className="text-xs font-bold text-cuidarte-dark-deep uppercase tracking-wider">Fase Beta Exclusiva</p>
+                                                </div>
+                                                <p className="text-sm text-slate-600 leading-relaxed">
+                                                    Esta primera apertura de plazas es para una <strong className="text-cuidarte-dark-deep">prueba beta del programa</strong> a la que solo accederá un grupo reducido de personas.
+                                                </p>
+                                                <p className="text-sm text-slate-600 leading-relaxed">
+                                                    Si no eres seleccionada en esta fase, <strong className="text-cuidarte-dark-deep">estate atenta</strong>: próximamente abriremos de forma general y serás de las primeras personas a las que contactaremos por estar en nuestra lista prioritaria.
+                                                </p>
                                             </div>
 
                                             <button
                                                 type="button"
                                                 onClick={() => setIsAdmissionOpen(false)}
-                                                className="text-slate-400 text-sm hover:text-slate-600 transition-colors"
+                                                className="w-full bg-cuidarte-dark-deep text-white font-bold py-3.5 rounded-xl hover:bg-slate-800 transition-all shadow-lg text-sm"
                                             >
-                                                Cerrar ventana
+                                                Entendido
                                             </button>
                                         </div>
                                     )}
