@@ -68,6 +68,17 @@ BEGIN
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='leads_escuela_cuidarte' AND column_name='updated_at') THEN
         ALTER TABLE public.leads_escuela_cuidarte ADD COLUMN updated_at TIMESTAMPTZ DEFAULT now();
     END IF;
+
+    -- Asegurar restricción UNIQUE en email para upsert
+    IF NOT EXISTS (
+        SELECT 1 
+        FROM pg_constraint 
+        WHERE conrelid = 'public.leads_escuela_cuidarte'::regclass 
+        AND contype = 'u' 
+        AND pg_get_constraintdef(oid) LIKE '%(email)%'
+    ) THEN
+        ALTER TABLE public.leads_escuela_cuidarte ADD CONSTRAINT leads_escuela_cuidarte_email_key UNIQUE (email);
+    END IF;
 END $$;
 
 -- 3. Habilitar RLS
