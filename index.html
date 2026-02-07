@@ -939,7 +939,9 @@
                                     <p className="text-cuidarte-green-light text-sm mt-1 font-medium">
                                         {formStep === 1 && "Ingresa tu email para comenzar"}
                                         {formStep === 2 && "Cuéntanos quién eres"}
-                                        {formStep === 3 && (admissionForm.isPrioritized ? `Casi listo, ${admissionForm.name.split(' ')[0]}` : "Paso final: Tu situación")}
+                                        {formStep === 3 && (admissionForm.isPrioritized ?
+                                            `¡Hola de nuevo, ${admissionForm.name.split(' ')[0].charAt(0).toUpperCase() + admissionForm.name.split(' ')[0].slice(1).toLowerCase()}!` :
+                                            "Paso final: Tu situación")}
                                     </p>
                                 </div>
                                 <div className="p-8">
