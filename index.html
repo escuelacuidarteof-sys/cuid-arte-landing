@@ -320,9 +320,6 @@
             const [selectedState, setSelectedState] = useState(0);
             const [toast, setToast] = useState({ message: '', visible: false, type: 'success' });
 
-            // Lead Magnet State
-            const [lmForm, setLmForm] = useState({ name: "", surname: "", phone: "", email: "", privacy: false });
-            const [downloadStatus, setDownloadStatus] = useState("idle");
             const [formSubject, setFormSubject] = useState("Recién diagnosticado/a");
 
             // Admission Form Advanced State
@@ -475,25 +472,6 @@
                 setTimeout(() => setToast(prev => ({ ...prev, visible: false })), 4000);
             };
 
-            const handleDownload = async () => {
-                if (!lmForm.email || !lmForm.name) {
-                    showToast("Por favor, introduce al menos tu nombre y tu email.", "error");
-                    return;
-                }
-                if (!lmForm.privacy) {
-                    showToast("Debes aceptar la política de privacidad.", "error");
-                    return;
-                }
-                setDownloadStatus("loading");
-                // Simulando petición de red
-                setTimeout(() => {
-                    setDownloadStatus("success");
-                    setLmForm({ ...lmForm, email: "" });
-                    showToast("¡Guía enviada con éxito!", "success");
-                    setTimeout(() => setDownloadStatus("idle"), 3000);
-                }, 1500);
-            };
-
             const openAdmission = () => setIsAdmissionOpen(true);
             const openAdmissionWithState = (stateName) => {
                 setFormSubject(stateName);
@@ -592,7 +570,7 @@
                                     onClick={openAdmission}
                                     className="bg-cuidarte-dark-deep text-white px-6 py-2.5 rounded-full font-bold hover:bg-slate-800 transition-all shadow-lg hover:shadow-xl active:scale-95 border border-white/10"
                                 >
-                                    Solicitar Valoración
+                                    Únete a la Escuela
                                 </button>
                             </div>
                             <button className="md:hidden text-slate-700" onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Abrir menú de navegación">{isMenuOpen ? <X /> : <Menu />}</button>
@@ -607,7 +585,7 @@
                                     onClick={() => { setIsMenuOpen(false); openAdmission(); }}
                                     className="bg-cuidarte-dark-deep text-white px-6 py-3 rounded-full font-bold hover:bg-slate-800 transition-all shadow-lg text-center mt-2"
                                 >
-                                    Solicitar Valoración
+                                    Únete a la Escuela
                                 </button>
                             </div>
                         )}
@@ -851,16 +829,17 @@
                             <div className="bg-cuidarte-dark-deep rounded-[3rem] p-8 md:p-16 relative overflow-hidden shadow-2xl">
                                 {/* Decorative */}
                                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/5 rounded-full blur-[80px] pointer-events-none"></div>
+                                <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-cuidarte-green/5 rounded-full blur-[60px] pointer-events-none"></div>
 
                                 <div className="flex flex-col lg:flex-row items-center gap-16 relative z-10">
                                     <div className="lg:w-1/2 text-white">
                                         <div className="inline-block bg-cuidarte-gold text-cuidarte-dark-deep font-bold px-3 py-1 rounded text-xs mb-6 uppercase tracking-wider">
-                                            Recurso Gratuito
+                                            Regalo de Bienvenida
                                         </div>
-                                        <h2 className="text-4xl lg:text-5xl font-heading font-bold mb-6">Guía de Claridad Oncológica</h2>
+                                        <h2 className="text-4xl lg:text-5xl font-heading font-bold mb-6">Kit de Supervivencia Oncológica</h2>
                                         <p className="text-slate-300 text-lg mb-8 leading-relaxed">
                                             3 Recetas Antiinflamatorias SOS + Audio de Calma + Rutina de Movimiento Suave.
-                                            <br />Descárgala gratis y empieza a cuidarte hoy mismo.
+                                            <br /><strong className="text-white">Gratis al unirte a la Escuela.</strong>
                                         </p>
                                         <ul className="space-y-3 mb-8">
                                             {['Recetas de 5 minutos', 'Meditación guiada', 'Sin material necesario'].map((item, i) => (
@@ -873,50 +852,22 @@
                                     </div>
 
                                     <div className="lg:w-1/2 w-full">
-                                        <div className="bg-white p-8 rounded-3xl shadow-xl max-w-md mx-auto lg:ml-auto">
-                                            <h3 className="text-2xl font-bold text-cuidarte-dark-deep font-heading mb-6 text-center">¿Dónde te la enviamos?</h3>
-                                            <div className="space-y-4">
-                                                <div>
-                                                    <label htmlFor="lm-nombre" className="sr-only">Tu Nombre</label>
-                                                    <input
-                                                        id="lm-nombre"
-                                                        type="text"
-                                                        placeholder="Tu Nombre"
-                                                        className="w-full px-5 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-cuidarte-green outline-none"
-                                                        value={lmForm.name}
-                                                        onChange={(e) => setLmForm({ ...lmForm, name: e.target.value })}
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <label htmlFor="lm-email" className="sr-only">Tu Email</label>
-                                                    <input
-                                                        id="lm-email"
-                                                        type="email"
-                                                        placeholder="Tu Email"
-                                                        className="w-full px-5 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-cuidarte-green outline-none"
-                                                        value={lmForm.email}
-                                                        onChange={(e) => setLmForm({ ...lmForm, email: e.target.value })}
-                                                    />
-                                                </div>
-                                                <label className="flex items-start gap-3 cursor-pointer">
-                                                    <input type="checkbox" id="lm-privacy" className="mt-1 w-4 h-4 accent-cuidarte-green rounded" onChange={(e) => setLmForm({ ...lmForm, privacy: e.target.checked })} />
-                                                    <span className="text-xs text-slate-500 leading-relaxed">
-                                                        Acepto la <a href="privacidad.html" target="_blank" className="text-cuidarte-green-deep underline hover:text-cuidarte-green">Política de Privacidad</a>.
-                                                    </span>
-                                                </label>
-                                                <button
-                                                    onClick={handleDownload}
-                                                    disabled={downloadStatus !== 'idle'}
-                                                    className="w-full bg-cuidarte-green text-white font-bold py-4 rounded-xl hover:bg-cuidarte-green-deep transition-all shadow-lg active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
-                                                >
-                                                    {downloadStatus === 'idle' ? 'Enviar Guía Gratuita' : (downloadStatus === 'loading' ? 'Enviando...' : '¡Enviado!')}
-                                                </button>
-                                                <div className="text-center pt-2">
-                                                    <button onClick={openAdmission} className="text-[10px] text-slate-400 font-bold hover:text-cuidarte-green-deep transition-colors uppercase tracking-wider">
-                                                        O prefiero solicitar mi valoración directa
-                                                    </button>
-                                                </div>
+                                        <div className="bg-white p-8 rounded-3xl shadow-xl max-w-md mx-auto lg:ml-auto text-center space-y-6">
+                                            <div className="w-16 h-16 rounded-2xl bg-cuidarte-gold/10 flex items-center justify-center mx-auto">
+                                                <Gift className="w-8 h-8 text-cuidarte-gold" />
                                             </div>
+                                            <h3 className="text-2xl font-bold text-cuidarte-dark-deep font-heading">Únete y recíbelo gratis</h3>
+                                            <p className="text-slate-500 text-sm leading-relaxed">
+                                                Al registrarte en la Escuela Cuid-Arte accederás de forma inmediata y gratuita a tu Kit de Supervivencia. Sin letra pequeña.
+                                            </p>
+                                            <button
+                                                onClick={openAdmission}
+                                                className="w-full bg-cuidarte-green text-white font-bold py-4 rounded-xl hover:bg-cuidarte-green-deep transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2 text-lg"
+                                            >
+                                                Únete a la Escuela
+                                                <ArrowRight className="w-5 h-5" />
+                                            </button>
+                                            <p className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Plazas limitadas &middot; Fase Beta</p>
                                         </div>
                                     </div>
                                 </div>
@@ -940,7 +891,7 @@
                                         onClick={openAdmission}
                                         className="w-full sm:w-auto bg-cuidarte-green text-white px-10 py-5 rounded-full font-bold text-xl shadow-2xl shadow-cuidarte-green/30 hover:shadow-cuidarte-green/50 hover:-translate-y-1 transition-all flex items-center justify-center gap-3 group"
                                     >
-                                        Solicitar Valoración Gratuita
+                                        Únete a la Escuela
                                         <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                     </button>
                                     <a href="#faq" className="text-slate-500 font-bold hover:text-cuidarte-dark-deep transition-colors border-b-2 border-transparent hover:border-cuidarte-gold py-1">
@@ -1012,7 +963,7 @@
                                     ) : (
                                         <>
                                             <HeartHandshake className="w-10 h-10 mx-auto mb-2 opacity-90" />
-                                            <h3 id="admission-title" className="text-2xl font-heading font-bold">Solicitud de Valoración</h3>
+                                            <h3 id="admission-title" className="text-2xl font-heading font-bold">Únete a la Escuela</h3>
                                             <p className="text-cuidarte-green-light text-sm mt-1 font-medium">
                                                 {formStep === 1 && "Ingresa tu email para comenzar"}
                                                 {formStep === 2 && !admissionForm.isPrioritized && "Cuéntanos quién eres"}
@@ -1287,7 +1238,7 @@
                                                     </span>
                                                 </label>
                                                 <button type="submit" className="w-full bg-cuidarte-green text-white font-bold py-3.5 rounded-xl hover:bg-cuidarte-green-deep transition-all shadow-lg text-sm">
-                                                    Enviar Solicitud
+                                                    Completar Registro
                                                 </button>
                                             </div>
                                         )}
