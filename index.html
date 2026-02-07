@@ -326,7 +326,13 @@
             const [admissionForm, setAdmissionForm] = useState({
                 email: "",
                 name: "",
+                phonePrefix: "+34",
                 phone: "",
+                age: "",
+                sex: "Mujer",
+                country: "España",
+                situation: "",
+                interest: "",
                 situacion: "Recién diagnosticado/a",
                 tipoCancer: "",
                 estadio: "Desconocido",
@@ -425,22 +431,39 @@
 
                 if (supabase) {
                     try {
+                        const fullPhone = admissionForm.isPrioritized
+                            ? admissionForm.phone
+                            : `${admissionForm.phonePrefix} ${admissionForm.phone}`.trim();
+
+                        const upsertData = {
+                            email: admissionForm.email.toLowerCase().trim(),
+                            name: admissionForm.name,
+                            phone: fullPhone,
+                            situacion: admissionForm.situacion,
+                            tipo_cancer: admissionForm.tipoCancer,
+                            estadio: admissionForm.estadio,
+                            perdida_peso: admissionForm.perdidaPeso,
+                            actividad_fisica: admissionForm.condicionFisica,
+                            nivel_compromiso: parseInt(admissionForm.compromiso) || 0,
+                            disponibilidad: admissionForm.disponibilidad,
+                            origen: admissionForm.origen,
+                            preocupacion_principal: admissionForm.preocupacion,
+                            consent: true
+                        };
+
+                        // Only set these for new users (returning users already have them)
+                        if (!admissionForm.isPrioritized) {
+                            upsertData.age = admissionForm.age;
+                            upsertData.sex = admissionForm.sex;
+                            upsertData.country = admissionForm.country;
+                            upsertData.situation = admissionForm.situation;
+                            upsertData.interest = admissionForm.interest;
+                            upsertData.downloaded_kit = true;
+                        }
+
                         const { data, error } = await supabase
                             .from('leads_escuela_cuidarte')
-                            .upsert({
-                                email: admissionForm.email.toLowerCase().trim(),
-                                name: admissionForm.name,
-                                phone: admissionForm.phone,
-                                situacion: admissionForm.situacion,
-                                tipo_cancer: admissionForm.tipoCancer,
-                                estadio: admissionForm.estadio,
-                                perdida_peso: admissionForm.perdidaPeso,
-                                actividad_fisica: admissionForm.condicionFisica,
-                                nivel_compromiso: parseInt(admissionForm.compromiso) || 0,
-                                disponibilidad: admissionForm.disponibilidad,
-                                origen: admissionForm.origen,
-                                preocupacion_principal: admissionForm.preocupacion
-                            }, {
+                            .upsert(upsertData, {
                                 onConflict: 'email'
                             });
 
@@ -1121,31 +1144,141 @@
                                         )}
 
                                         {formStep === 2 && !admissionForm.isPrioritized && (
-                                            <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
-                                                <div className="grid grid-cols-2 gap-4">
-                                                    <div className="space-y-1">
-                                                        <label htmlFor="adm-nombre" className="text-xs font-bold text-slate-500 uppercase">Nombre</label>
-                                                        <input
-                                                            id="adm-nombre"
-                                                            type="text"
-                                                            required
-                                                            className="w-full px-4 py-3 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cuidarte-green outline-none"
-                                                            value={admissionForm.name}
-                                                            onChange={(e) => setAdmissionForm({ ...admissionForm, name: e.target.value })}
-                                                        />
-                                                    </div>
-                                                    <div className="space-y-1">
-                                                        <label htmlFor="adm-telefono" className="text-xs font-bold text-slate-500 uppercase">Teléfono</label>
+                                            <div className="space-y-3 animate-in fade-in slide-in-from-right-4 duration-300">
+                                                {/* Nombre */}
+                                                <div className="space-y-1">
+                                                    <label htmlFor="adm-nombre" className="text-[10px] font-bold text-slate-500 uppercase">Nombre completo</label>
+                                                    <input
+                                                        id="adm-nombre"
+                                                        type="text"
+                                                        required
+                                                        className="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cuidarte-green outline-none text-sm"
+                                                        value={admissionForm.name}
+                                                        onChange={(e) => setAdmissionForm({ ...admissionForm, name: e.target.value })}
+                                                    />
+                                                </div>
+
+                                                {/* Teléfono: Prefijo + Número */}
+                                                <div className="space-y-1">
+                                                    <label className="text-[10px] font-bold text-slate-500 uppercase">Teléfono</label>
+                                                    <div className="flex gap-2">
+                                                        <select
+                                                            className="w-24 px-2 py-2.5 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cuidarte-green outline-none text-sm"
+                                                            value={admissionForm.phonePrefix}
+                                                            onChange={(e) => setAdmissionForm({ ...admissionForm, phonePrefix: e.target.value })}
+                                                        >
+                                                            <option value="+34">+34</option>
+                                                            <option value="+1">+1</option>
+                                                            <option value="+44">+44</option>
+                                                            <option value="+49">+49</option>
+                                                            <option value="+33">+33</option>
+                                                            <option value="+39">+39</option>
+                                                            <option value="+351">+351</option>
+                                                            <option value="+52">+52</option>
+                                                            <option value="+54">+54</option>
+                                                            <option value="+56">+56</option>
+                                                            <option value="+57">+57</option>
+                                                            <option value="+593">+593</option>
+                                                            <option value="+51">+51</option>
+                                                        </select>
                                                         <input
                                                             id="adm-telefono"
                                                             type="tel"
                                                             required
-                                                            className="w-full px-4 py-3 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cuidarte-green outline-none"
+                                                            placeholder="612 345 678"
+                                                            className="flex-1 px-4 py-2.5 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cuidarte-green outline-none text-sm"
                                                             value={admissionForm.phone}
                                                             onChange={(e) => setAdmissionForm({ ...admissionForm, phone: e.target.value })}
                                                         />
                                                     </div>
                                                 </div>
+
+                                                {/* Edad + Sexo */}
+                                                <div className="grid grid-cols-2 gap-3">
+                                                    <div className="space-y-1">
+                                                        <label className="text-[10px] font-bold text-slate-500 uppercase">Edad</label>
+                                                        <input
+                                                            type="number"
+                                                            required
+                                                            min="18"
+                                                            max="110"
+                                                            placeholder="Ej: 45"
+                                                            className="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cuidarte-green outline-none text-sm"
+                                                            value={admissionForm.age}
+                                                            onChange={(e) => setAdmissionForm({ ...admissionForm, age: e.target.value })}
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <label className="text-[10px] font-bold text-slate-500 uppercase">Sexo</label>
+                                                        <select
+                                                            className="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cuidarte-green outline-none text-sm"
+                                                            value={admissionForm.sex}
+                                                            onChange={(e) => setAdmissionForm({ ...admissionForm, sex: e.target.value })}
+                                                        >
+                                                            <option>Mujer</option>
+                                                            <option>Hombre</option>
+                                                            <option>Prefiero no decirlo</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                {/* País */}
+                                                <div className="space-y-1">
+                                                    <label className="text-[10px] font-bold text-slate-500 uppercase">País</label>
+                                                    <select
+                                                        className="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cuidarte-green outline-none text-sm"
+                                                        value={admissionForm.country}
+                                                        onChange={(e) => setAdmissionForm({ ...admissionForm, country: e.target.value })}
+                                                    >
+                                                        <option>España</option>
+                                                        <option>México</option>
+                                                        <option>Argentina</option>
+                                                        <option>Colombia</option>
+                                                        <option>Chile</option>
+                                                        <option>Ecuador</option>
+                                                        <option>Perú</option>
+                                                        <option>Estados Unidos</option>
+                                                        <option>Reino Unido</option>
+                                                        <option>Otro</option>
+                                                    </select>
+                                                </div>
+
+                                                {/* Situación + Interés */}
+                                                <div className="grid grid-cols-2 gap-3">
+                                                    <div className="space-y-1">
+                                                        <label className="text-[10px] font-bold text-slate-500 uppercase">Tu situación</label>
+                                                        <select
+                                                            required
+                                                            className="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cuidarte-green outline-none text-sm"
+                                                            value={admissionForm.situation}
+                                                            onChange={(e) => setAdmissionForm({ ...admissionForm, situation: e.target.value })}
+                                                        >
+                                                            <option value="" disabled>Selecciona...</option>
+                                                            <option>Paciente diagnosticada</option>
+                                                            <option>En tratamiento</option>
+                                                            <option>Post-tratamiento</option>
+                                                            <option>Familiar / Cuidador</option>
+                                                            <option>Profesional sanitario</option>
+                                                        </select>
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <label className="text-[10px] font-bold text-slate-500 uppercase">Interés principal</label>
+                                                        <select
+                                                            required
+                                                            className="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cuidarte-green outline-none text-sm"
+                                                            value={admissionForm.interest}
+                                                            onChange={(e) => setAdmissionForm({ ...admissionForm, interest: e.target.value })}
+                                                        >
+                                                            <option value="" disabled>Selecciona...</option>
+                                                            <option>Nutrición</option>
+                                                            <option>Ejercicio físico</option>
+                                                            <option>Bienestar emocional</option>
+                                                            <option>Entorno saludable</option>
+                                                            <option>Todo el programa</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
                                                 <button
                                                     type="button"
                                                     onClick={() => setFormStep(3)}
