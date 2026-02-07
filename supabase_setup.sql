@@ -63,7 +63,7 @@ BEGIN
 
     -- Nuevas columnas de perfil expandido
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='leads_escuela_cuidarte' AND column_name='age') THEN
-        ALTER TABLE public.leads_escuela_cuidarte ADD COLUMN age INTEGER;
+        ALTER TABLE public.leads_escuela_cuidarte ADD COLUMN age TEXT;
     END IF;
 
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='leads_escuela_cuidarte' AND column_name='sex') THEN
