@@ -69,7 +69,22 @@ BEGIN
         ALTER TABLE public.leads_escuela_cuidarte ADD COLUMN updated_at TIMESTAMPTZ DEFAULT now();
     END IF;
 
-    -- Asegurar restricción UNIQUE en email para upsert
+    -- 1. Limpiar duplicados de email si existen (mantenemos el más reciente)
+    DELETE FROM public.leads_escuela_cuidarte
+    WHERE id IN (
+        SELECT id
+        FROM (
+            SELECT id,
+                   ROW_NUMBER() OVER (
+                       PARTITION BY email 
+                       ORDER BY updated_at DESC, id ASC
+                   ) as row_num
+            FROM public.leads_escuela_cuidarte
+        ) t
+        WHERE t.row_num > 1
+    );
+
+    -- 2. Asegurar restricción UNIQUE en email para upsert
     IF NOT EXISTS (
         SELECT 1 
         FROM pg_constraint 
