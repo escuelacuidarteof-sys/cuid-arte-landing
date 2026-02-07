@@ -421,28 +421,44 @@
 
             const handleAdmissionSubmit = async (e) => {
                 e.preventDefault();
-                setFormStep(4);
+                console.log("🚀 Iniciando sincronización con Supabase...", admissionForm);
 
-                // In production, sync all data back to Supabase here
                 if (supabase) {
-                    const { error } = await supabase
-                        .from('leads_escuela_cuidarte')
-                        .upsert({
-                            email: admissionForm.email.toLowerCase().trim(),
-                            name: admissionForm.name,
-                            phone: admissionForm.phone,
-                            situacion: admissionForm.situacion,
-                            tipo_cancer: admissionForm.tipoCancer,
-                            estadio: admissionForm.estadio,
-                            perdida_peso: admissionForm.perdidaPeso,
-                            actividad_fisica: admissionForm.condicionFisica,
-                            nivel_compromiso: parseInt(admissionForm.compromiso),
-                            disponibilidad: admissionForm.disponibilidad,
-                            origen: admissionForm.origen,
-                            preocupacion_principal: admissionForm.preocupacion,
-                            updated_at: new Date()
-                        });
-                    if (error) console.error("Error saving to Supabase:", error);
+                    try {
+                        const { data, error } = await supabase
+                            .from('leads_escuela_cuidarte')
+                            .upsert({
+                                email: admissionForm.email.toLowerCase().trim(),
+                                name: admissionForm.name,
+                                phone: admissionForm.phone,
+                                situacion: admissionForm.situacion,
+                                tipo_cancer: admissionForm.tipoCancer,
+                                estadio: admissionForm.estadio,
+                                perdida_peso: admissionForm.perdidaPeso,
+                                actividad_fisica: admissionForm.condicionFisica,
+                                nivel_compromiso: parseInt(admissionForm.compromiso),
+                                disponibilidad: admissionForm.disponibilidad,
+                                origen: admissionForm.origen,
+                                preocupacion_principal: admissionForm.preocupacion,
+                                updated_at: new Date().toISOString()
+                            }, {
+                                onConflict: 'email'
+                            });
+
+                        if (error) {
+                            console.error("❌ Error Supabase:", error);
+                            showToast("Error al guardar tus datos. Por favor, inténtalo de nuevo.", "error");
+                        } else {
+                            console.log("✅ Sincronización exitosa:", data);
+                            setFormStep(4);
+                        }
+                    } catch (err) {
+                        console.error("❌ Error crítico en envío:", err);
+                        showToast("Ha ocurrido un error inesperado.", "error");
+                    }
+                } else {
+                    console.warn("⚠️ Supabase no configurado. Solo avance visual.");
+                    setFormStep(4);
                 }
             };
 
@@ -940,8 +956,8 @@
                             <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsAdmissionOpen(false)}></div>
                             <div className="bg-white w-full max-w-lg max-h-[90vh] rounded-3xl shadow-2xl relative z-10 overflow-y-auto animate-in zoom-in-95 duration-200">
                                 <div className={`p-6 text-white text-center relative transition-colors duration-500 ${formStep === 2 && admissionForm.isPrioritized
-                                        ? 'bg-gradient-to-r from-cuidarte-gold-deep via-cuidarte-gold to-cuidarte-gold-deep'
-                                        : 'bg-cuidarte-green'
+                                    ? 'bg-gradient-to-r from-cuidarte-gold-deep via-cuidarte-gold to-cuidarte-gold-deep'
+                                    : 'bg-cuidarte-green'
                                     }`}>
                                     <button onClick={() => setIsAdmissionOpen(false)} className="absolute top-4 right-4 text-white/80 hover:text-white" aria-label="Cerrar formulario"><X /></button>
                                     {formStep === 2 && admissionForm.isPrioritized ? (

@@ -73,12 +73,19 @@ FOR INSERT
 TO anon 
 WITH CHECK (true);
 
-DROP POLICY IF EXISTS "Permitir consulta por email" ON public.leads_escuela_cuidarte;
 CREATE POLICY "Permitir consulta por email" 
 ON public.leads_escuela_cuidarte 
 FOR SELECT 
 TO anon 
 USING (true);
+
+DROP POLICY IF EXISTS "Permitir actualización por email" ON public.leads_escuela_cuidarte;
+CREATE POLICY "Permitir actualización por email" 
+ON public.leads_escuela_cuidarte 
+FOR UPDATE 
+TO anon 
+USING (true)
+WITH CHECK (true);
 
 -- 5. Trigger updated_at
 CREATE OR REPLACE FUNCTION update_updated_at_column()
