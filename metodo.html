@@ -5,21 +5,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>El Método Cuid-Arte | Ciencia y Salud Integrativa</title>
-    <meta name="description" content="Conoce los 4 pilares del Método Cuid-Arte: nutrición oncológica, ejercicio como medicina, gestión emocional y salud ambiental. Basado en evidencia científica.">
+    <meta name="description"
+        content="Conoce los 4 pilares del Método Cuid-Arte: nutrición oncológica, ejercicio como medicina, gestión emocional y salud ambiental. Basado en evidencia científica.">
 
     <!-- Open Graph -->
     <meta property="og:title" content="El Método Cuid-Arte | Los 4 Pilares de la Salud Integrativa">
-    <meta property="og:description" content="Nutrición oncológica, ejercicio como medicina, gestión emocional y salud ambiental. Abordaje 360º basado en biología pura.">
+    <meta property="og:description"
+        content="Nutrición oncológica, ejercicio como medicina, gestión emocional y salud ambiental. Abordaje 360º basado en biología pura.">
     <meta property="og:type" content="website">
     <meta property="og:locale" content="es_ES">
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="El Método Cuid-Arte | Ciencia y Salud Integrativa">
-    <meta name="twitter:description" content="Conoce los 4 pilares del Método Cuid-Arte. Abordaje 360º basado en evidencia científica.">
+    <meta name="twitter:description"
+        content="Conoce los 4 pilares del Método Cuid-Arte. Abordaje 360º basado en evidencia científica.">
 
     <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23D4AF37'/><text x='50' y='68' font-size='55' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='bold'>C</text></svg>">
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23D4AF37'/><text x='50' y='68' font-size='55' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='bold'>C</text></svg>">
 
     <!-- Preconnect -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -152,6 +156,16 @@
         // --- PÁGINA DEL MÉTODO ---
         const MethodPage = () => {
             const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+            // Body Scroll Lock
+            useEffect(() => {
+                if (isMenuOpen) {
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    document.body.style.overflow = 'auto';
+                }
+                return () => { document.body.style.overflow = 'auto'; };
+            }, [isMenuOpen]);
 
             return (
                 <div className="font-sans text-slate-600 antialiased">
