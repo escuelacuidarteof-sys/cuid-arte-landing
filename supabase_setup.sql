@@ -60,6 +60,14 @@ BEGIN
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='leads_escuela_cuidarte' AND column_name='preocupacion_principal') THEN
         ALTER TABLE public.leads_escuela_cuidarte ADD COLUMN preocupacion_principal TEXT;
     END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='leads_escuela_cuidarte' AND column_name='created_at') THEN
+        ALTER TABLE public.leads_escuela_cuidarte ADD COLUMN created_at TIMESTAMPTZ DEFAULT now();
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='leads_escuela_cuidarte' AND column_name='updated_at') THEN
+        ALTER TABLE public.leads_escuela_cuidarte ADD COLUMN updated_at TIMESTAMPTZ DEFAULT now();
+    END IF;
 END $$;
 
 -- 3. Habilitar RLS
@@ -108,3 +116,6 @@ COMMENT ON TABLE public.leads_escuela_cuidarte IS 'Leads cualificados de la Escu
 COMMENT ON COLUMN public.leads_escuela_cuidarte.perdida_peso IS 'Indicador clave de urgencia';
 COMMENT ON COLUMN public.leads_escuela_cuidarte.nivel_compromiso IS 'Puntuación de intención de 1 a 10';
 COMMENT ON COLUMN public.leads_escuela_cuidarte.origen IS 'Atribución de Marketing ROI';
+
+-- 7. Forzar recarga del caché de PostgREST
+NOTIFY pgrst, 'reload schema';
