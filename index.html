@@ -1,0 +1,1307 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuid-Arte | Ciencia y Calidez para tu Recuperación</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        // Paleta Base (Intacta)
+                        'cuidarte-green': '#6BA06B',     
+                        'cuidarte-mint': '#CDE8CD',      
+                        'cuidarte-gold': '#D4AF37',      
+                        'cuidarte-dark': '#2C3E50',      
+
+
+                        // Micro-variaciones para Contraste (Depth & Contrast)
+                        'cuidarte-green-deep': '#558055', // Para textos sobre blanco y hovers
+                        'cuidarte-green-light': '#E3F0E3', // Para fondos con más presencia que el blanco
+                        'cuidarte-gold-deep': '#B08D26',  // Para textos dorados legibles
+                        'cuidarte-dark-deep': '#1A2530',  // Para H1/H2 con máxima autoridad
+                    },
+                    fontFamily: {
+                        sans: ['Open Sans', 'sans-serif'],
+                        heading: ['Montserrat', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft-gold': '0 10px 40px -10px rgba(212, 175, 55, 0.3)',
+                        'soft-green': '0 10px 40px -10px rgba(107, 160, 107, 0.3)',
+                        'card-hover': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+
+    <!-- Google Fonts: Montserrat & Open Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+
+
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            color: #34495E; /* Base de texto ligeramente más contrastada */
+            scroll-behavior: smooth;
+        }
+        h1, h2, h3, h4, .font-heading {
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        /* Animaciones Sutiles */
+        .animate-float { animation: float 8s ease-in-out infinite; }
+        .animate-pulse-slow { animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        
+        @keyframes float {
+            0% { transform: translate(0px, 0px); }
+            50% { transform: translate(0px, -10px); }
+            100% { transform: translate(0px, 0px); }
+        }
+
+
+        .reveal-hidden {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .reveal-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .delay-100 { transition-delay: 100ms; }
+        .delay-200 { transition-delay: 200ms; }
+        .delay-300 { transition-delay: 300ms; }
+        
+        /* Fondos Sutiles pero con más cuerpo */
+        .bg-gradient-soft {
+            background: linear-gradient(180deg, #FFFFFF 0%, #F0F9F0 100%); 
+        }
+        
+        /* Utiliad para textos destacados */
+        .text-balance {
+            text-wrap: balance;
+        }
+    </style>
+</head>
+<body class="bg-white overflow-x-hidden antialiased">
+    <div id="root"></div>
+
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+
+        // --- HOOKS ---
+        const useOnScreen = (options) => {
+            const ref = useRef(null);
+            const [isVisible, setIsVisible] = useState(false);
+            useEffect(() => {
+                const observer = new IntersectionObserver(([entry]) => {
+                    if (entry.isIntersecting) { setIsVisible(true); observer.disconnect(); }
+                }, options);
+                if (ref.current) observer.observe(ref.current);
+                return () => { if (ref.current) observer.unobserve(ref.current); };
+            }, [ref, options]);
+            return [ref, isVisible];
+        };
+
+
+        const Reveal = ({ children, delay = "", className = "" }) => {
+            const [ref, isVisible] = useOnScreen({ threshold: 0.1 });
+            return <div ref={ref} className={`reveal-hidden ${isVisible ? 'reveal-visible' : ''} ${delay} ${className}`}>{children}</div>;
+        };
+
+
+        // --- ICONOS (Stroke ligeramente más grueso para visibilidad: 1.75) ---
+        const IconBase = ({ children, className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className={className}>{children}</svg>;
+        
+        const Leaf = (props) => <IconBase {...props}><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.5 2 4.5c0 3-1 5.5-2.5 7.5c-1.5 2-4 3.5-7.5 6" /><path d="M11 20v-9" /></IconBase>;
+        const Activity = (props) => <IconBase {...props}><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></IconBase>;
+        const Brain = (props) => <IconBase {...props}><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></IconBase>;
+        const ShieldCheck = (props) => <IconBase {...props}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" /><path d="m9 12 2 2 4-4" /></IconBase>;
+        const Users = (props) => <IconBase {...props}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></IconBase>;
+        const Play = (props) => <IconBase {...props}><polygon points="5 3 19 12 5 21 5 3" /></IconBase>;
+        const Menu = (props) => <IconBase {...props}><line x1="4" x2="20" y1="12" y2="12" /><line x1="4" x2="20" y1="6" y2="6" /><line x1="4" x2="20" y1="18" y2="18" /></IconBase>;
+        const X = (props) => <IconBase {...props}><path d="M18 6 6 18" /><path d="m6 6 12 12" /></IconBase>;
+        const ArrowRight = (props) => <IconBase {...props}><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></IconBase>;
+        const AlertTriangle = (props) => <IconBase {...props}><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></IconBase>;
+        const ChevronDown = (props) => <IconBase {...props}><path d="m6 9 6 6 6-6"/></IconBase>;
+        const HeartHandshake = (props) => <IconBase {...props}><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M12 5 9.04 7.96a2.17 2.17 0 0 0 0 3.08v0c.82.82 2.13.85 3 .07l2.07-1.9a2.82 2.82 0 0 1 3.15-4.9"/></IconBase>;
+        const Sun = (props) => <IconBase {...props}><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></IconBase>;
+        const Quote = (props) => <IconBase {...props}><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/></IconBase>;
+        const CheckCircle = (props) => <IconBase {...props}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><path d="M22 4 12 14.01l-3-3" /></IconBase>;
+        const Dumbbell = (props) => <IconBase {...props}><path d="m6.5 6.5 11 11" /><path d="m21 21-1-1" /><path d="m3 3 1 1" /><path d="m18 22 4-4" /><path d="m2 6 4-4" /><path d="m3 10 7-7" /><path d="m14 21 7-7" /></IconBase>;
+        const Calendar = (props) => <IconBase {...props}><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></IconBase>;
+        const Video = (props) => <IconBase {...props}><path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/></IconBase>;
+        const Check = (props) => <IconBase {...props}><polyline points="20 6 9 17 4 12"/></IconBase>;
+        const Phone = (props) => <IconBase {...props}><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></IconBase>;
+        const Gift = (props) => <IconBase {...props}><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/></IconBase>;
+        const Utensils = (props) => <IconBase {...props}><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></IconBase>;
+        const Headphones = (props) => <IconBase {...props}><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></IconBase>;
+        const FileText = (props) => <IconBase {...props}><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></IconBase>;
+        const Microscope = (props) => <IconBase {...props}><path d="M6 18h8"/><path d="M3 22h18"/><path d="M14 22a7 7 0 1 0 0-14h-1"/><path d="M9 14h2"/><path d="M12 6a2 2 0 0 0 2 2h0a2 2 0 0 0 2-2 2 2 0 0 0-2-2h0a2 2 0 0 0-2 2z"/></IconBase>;
+
+
+        // --- COMPONENTS ---
+        const FaqItem = ({ question, answer }) => {
+            const [isOpen, setIsOpen] = useState(false);
+            return (
+                <div className="border-b border-cuidarte-mint/50 last:border-0">
+                    <button 
+                        className="w-full py-6 flex justify-between items-center text-left font-medium text-slate-700 hover:text-cuidarte-green-deep transition-colors group"
+                        onClick={() => setIsOpen(!isOpen)}
+                    >
+                        <span className="text-lg font-heading font-semibold pr-8 text-cuidarte-dark group-hover:text-cuidarte-green-deep transition-colors">{question}</span>
+                        <div className={`w-8 h-8 rounded-full bg-white border border-cuidarte-mint flex items-center justify-center transition-all duration-300 flex-shrink-0 ${isOpen ? 'rotate-180 bg-cuidarte-mint text-cuidarte-green-deep border-cuidarte-green' : 'text-slate-400 group-hover:border-cuidarte-green'}`}>
+                            <ChevronDown className="w-5 h-5" />
+                        </div>
+                    </button>
+                    <div className={`overflow-hidden transition-all duration-500 ${isOpen ? 'max-h-[500px] pb-8 opacity-100' : 'max-h-0 opacity-0'}`}>
+                        <p className="text-slate-700 text-base leading-relaxed pl-6 border-l-4 border-cuidarte-gold">{answer}</p>
+                    </div>
+                </div>
+            );
+        };
+
+
+        const AdmissionProcess = ({ onAction }) => (
+            <section id="admision" className="py-24 bg-gradient-to-b from-white to-cuidarte-mint/30 relative overflow-hidden">
+                <div className="container mx-auto px-6">
+                    <Reveal className="text-center mb-16">
+                        <span className="text-cuidarte-gold-deep font-bold tracking-widest uppercase text-xs">Exclusividad y Cercanía</span>
+                        <h2 className="text-3xl lg:text-4xl font-heading font-bold text-cuidarte-dark-deep mt-3">Proceso de Admisión Personalizado</h2>
+                        <p className="text-slate-600 mt-4 max-w-2xl mx-auto leading-relaxed text-lg">
+                            No somos una tienda online. Somos un servicio clínico. Para garantizar que podemos ayudarte de verdad, 
+                            necesitamos conocer tu historia antes de proponerte nada.
+                        </p>
+                    </Reveal>
+
+
+                    <div className="relative max-w-5xl mx-auto">
+                        <div className="hidden md:block absolute top-12 left-0 w-full h-0.5 border-t-2 border-dashed border-cuidarte-gold/40 -z-10"></div>
+
+
+                        <div className="grid md:grid-cols-3 gap-8">
+                            <Reveal delay="delay-100" className="relative bg-white p-8 rounded-2xl shadow-lg shadow-slate-200/50 border border-cuidarte-mint text-center group hover:-translate-y-2 transition-transform duration-300">
+                                <div className="w-16 h-16 mx-auto bg-white border-2 border-cuidarte-mint rounded-full flex items-center justify-center mb-6 text-cuidarte-green-deep shadow-sm relative z-10 group-hover:bg-cuidarte-green group-hover:text-white group-hover:border-cuidarte-green transition-all">
+                                    <span className="font-heading font-bold text-2xl">1</span>
+                                </div>
+                                <h3 className="font-heading font-bold text-xl text-cuidarte-dark mb-3">Solicitud</h3>
+                                <p className="text-slate-600 text-sm leading-relaxed font-medium">Rellenas un breve formulario. No te compromete a nada, solo nos ayuda a saber quién eres.</p>
+                            </Reveal>
+
+
+                            <Reveal delay="delay-200" className="relative bg-white p-8 rounded-2xl shadow-xl shadow-cuidarte-gold/10 border-2 border-cuidarte-gold text-center transform scale-105 z-10">
+                                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-cuidarte-gold text-white px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest shadow-md">Paso Clave</div>
+                                <div className="w-16 h-16 mx-auto bg-gradient-to-br from-cuidarte-gold to-cuidarte-gold-deep border-4 border-white rounded-full flex items-center justify-center mb-6 text-white shadow-lg relative z-10">
+                                    <Phone className="w-8 h-8" />
+                                </div>
+                                <h3 className="font-heading font-bold text-xl text-cuidarte-dark mb-3">Entrevista de Valoración</h3>
+                                <p className="text-slate-700 text-sm leading-relaxed font-medium">Hablamos contigo (o un familiar). Escuchamos tu situación, tus miedos y tus necesidades reales.</p>
+                            </Reveal>
+
+
+                            <Reveal delay="delay-300" className="relative bg-white p-8 rounded-2xl shadow-lg shadow-slate-200/50 border border-cuidarte-mint text-center group hover:-translate-y-2 transition-transform duration-300">
+                                <div className="w-16 h-16 mx-auto bg-white border-2 border-cuidarte-mint rounded-full flex items-center justify-center mb-6 text-cuidarte-green-deep shadow-sm relative z-10 group-hover:bg-cuidarte-green group-hover:text-white group-hover:border-cuidarte-green transition-all">
+                                    <span className="font-heading font-bold text-2xl">3</span>
+                                </div>
+                                <h3 className="font-heading font-bold text-xl text-cuidarte-dark mb-3">Propuesta a Medida</h3>
+                                <p className="text-slate-600 text-sm leading-relaxed font-medium">Si vemos que podemos ayudarte, diseñamos un plan de acompañamiento adaptado a ti.</p>
+                            </Reveal>
+                        </div>
+
+
+                        <div className="mt-14 text-center">
+                            <button 
+                                onClick={onAction}
+                                className="bg-gradient-to-r from-cuidarte-green to-cuidarte-green-deep text-white px-10 py-5 rounded-full font-heading font-bold text-lg shadow-lg hover:shadow-soft-green transition-all transform hover:-translate-y-1 flex items-center justify-center gap-3 mx-auto"
+                            >
+                                <HeartHandshake className="w-6 h-6" />
+                                Solicitar mi Entrevista
+                            </button>
+                            <p className="mt-4 text-xs text-slate-500 uppercase tracking-widest font-semibold">Plazas limitadas para garantizar la calidad asistencial</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        );
+
+
+        // --- FORMULARIO DE ADMISIÓN CON WEBHOOK ---
+        const AdmissionForm = ({ formSubject, setFormSubject, showToast, onClose }) => {
+            const [name, setName] = useState("");
+            const [email, setEmail] = useState("");
+            const [phone, setPhone] = useState("");
+            const [source, setSource] = useState("");
+            const [message, setMessage] = useState("");
+            const [status, setStatus] = useState("idle"); // idle | loading | success | error
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                setStatus("loading");
+
+                try {
+                    await fetch("https://services.leadconnectorhq.com/hooks/i2nawUlzlu9GmdtyWjX5/webhook-trigger/963abaa9-50b7-454b-bbf7-cc8522acdcd5", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            name,
+                            email,
+                            phone,
+                            subject: formSubject,
+                            source,
+                            message,
+                            formType: "Entrevista de Valoración",
+                        }),
+                    });
+                    setStatus("success");
+                    setTimeout(() => {
+                        onClose();
+                        window.location.href = "gracias.html";
+                    }, 800);
+                } catch (err) {
+                    setStatus("error");
+                    showToast("Hubo un problema al enviar. Por favor, inténtalo de nuevo.", "error");
+                    setStatus("idle");
+                }
+            };
+
+            const inputClass = "w-full px-4 py-3.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-cuidarte-green focus:ring-1 focus:ring-cuidarte-green outline-none transition-all font-medium text-slate-800 placeholder-slate-400 text-sm";
+
+            return (
+                <form className="space-y-4" onSubmit={handleSubmit}>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-xs font-bold text-slate-700 uppercase mb-1.5 ml-1">Nombre *</label>
+                            <input type="text" required placeholder="Tu nombre" value={name} onChange={e => setName(e.target.value)} className={inputClass} />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-slate-700 uppercase mb-1.5 ml-1">Teléfono *</label>
+                            <input type="tel" required placeholder="Para llamarte" value={phone} onChange={e => setPhone(e.target.value)} className={inputClass} />
+                        </div>
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1.5 ml-1">Email *</label>
+                        <input type="email" required placeholder="tu@email.com" value={email} onChange={e => setEmail(e.target.value)} className={inputClass} />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1.5 ml-1">¿En qué punto estás? *</label>
+                        <div className="relative">
+                            <select required className={`${inputClass} appearance-none`} value={formSubject} onChange={e => setFormSubject(e.target.value)}>
+                                <option value="">Selecciona tu situación</option>
+                                <option>Recién diagnosticado/a</option>
+                                <option>En tratamiento activo</option>
+                                <option>Terminé el tratamiento / Superviviente</option>
+                                <option>Soy familiar / cuidador/a</option>
+                            </select>
+                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
+                                <ChevronDown className="w-4 h-4" />
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1.5 ml-1">¿Cómo nos conociste?</label>
+                        <div className="relative">
+                            <select className={`${inputClass} appearance-none`} value={source} onChange={e => setSource(e.target.value)}>
+                                <option value="">Selecciona una opción</option>
+                                <option>Redes sociales</option>
+                                <option>Google</option>
+                                <option>Recomendación de médico</option>
+                                <option>Recomendación de familiar o amigo</option>
+                                <option>Otro</option>
+                            </select>
+                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
+                                <ChevronDown className="w-4 h-4" />
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1.5 ml-1">Cuéntanos brevemente tu situación <span className="text-slate-400 normal-case font-normal">(opcional)</span></label>
+                        <textarea
+                            placeholder="¿Qué tipo de cáncer? ¿En qué fase del proceso estás? ¿Qué necesitas?"
+                            value={message}
+                            onChange={e => setMessage(e.target.value)}
+                            rows={3}
+                            className={`${inputClass} resize-none`}
+                        />
+                    </div>
+                    <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                        <input type="checkbox" required className="mt-1 w-4 h-4 accent-cuidarte-green flex-shrink-0 cursor-pointer" />
+                        <label className="text-xs text-slate-500 font-medium leading-relaxed">
+                            Entiendo que este es un servicio de acompañamiento clínico y requiere compromiso. Acepto la <a href="privacidad.html" className="text-cuidarte-green-deep underline" target="_blank">política de privacidad</a>.
+                        </label>
+                    </div>
+                    <button
+                        type="submit"
+                        disabled={status === "loading" || status === "success"}
+                        className={`w-full font-bold py-4 rounded-xl transition-all shadow-lg mt-2 text-lg flex items-center justify-center gap-3 font-heading
+                            ${status === "success" ? "bg-cuidarte-green text-white" : "bg-gradient-to-r from-cuidarte-green to-cuidarte-green-deep text-white hover:shadow-soft-green hover:-translate-y-0.5 active:scale-95"}
+                            ${status === "loading" ? "opacity-80 cursor-not-allowed" : ""}
+                        `}
+                    >
+                        {status === "idle" && <><HeartHandshake className="w-5 h-5" /> Enviar Solicitud de Valoración</>}
+                        {status === "loading" && (
+                            <>
+                                <svg className="animate-spin w-5 h-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                                </svg>
+                                Enviando...
+                            </>
+                        )}
+                        {status === "success" && "¡Enviado! Redirigiendo..."}
+                    </button>
+                    <p className="text-[11px] text-slate-400 text-center font-medium">Plazas limitadas · Respuesta en menos de 24h</p>
+                </form>
+            );
+        };
+
+        // --- LANDING PAGE ---
+        const LandingPage = () => {
+            const [isMenuOpen, setIsMenuOpen] = useState(false);
+            const [scrolled, setScrolled] = useState(false);
+            const [isVideoOpen, setIsVideoOpen] = useState(false);
+            const [isAdmissionOpen, setIsAdmissionOpen] = useState(false);
+            const [selectedState, setSelectedState] = useState(0);
+            
+            // Notification State (Toast)
+            const [toast, setToast] = useState({ message: '', visible: false, type: 'success' });
+            
+            // --- ESTADOS DEL LEAD MAGNET ---
+            const [lmName, setLmName] = useState("");
+            const [lmSurname, setLmSurname] = useState("");
+            const [lmPhone, setLmPhone] = useState("");
+            const [lmEmail, setLmEmail] = useState("");
+            
+            const [downloadStatus, setDownloadStatus] = useState("idle");
+            
+            // Form state
+            const [formSubject, setFormSubject] = useState("Recién diagnosticado/a");
+
+
+            useEffect(() => {
+                const handleScroll = () => setScrolled(window.scrollY > 50);
+                window.addEventListener('scroll', handleScroll);
+                return () => window.removeEventListener('scroll', handleScroll);
+            }, []);
+
+
+            const showToast = (message, type = 'success') => {
+                setToast({ message, visible: true, type });
+                setTimeout(() => setToast(prev => ({ ...prev, visible: false })), 4000);
+            };
+
+
+            const handleDownload = async () => {
+                if(!lmEmail || !lmName) {
+                    showToast("Por favor, introduce al menos tu nombre y tu email.", "error");
+                    return;
+                }
+                
+                setDownloadStatus("loading");
+                
+                try {
+                    const webhookUrl = "https://services.leadconnectorhq.com/hooks/i2nawUlzlu9GmdtyWjX5/webhook-trigger/963abaa9-50b7-454b-bbf7-cc8522acdcd5";
+                    
+                    await fetch(webhookUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ 
+                            name: lmName,
+                            surname: lmSurname,
+                            phone: lmPhone,
+                            email: lmEmail,
+                            source: "Guía Claridad Cuid-Arte - Landing Page"
+                        })
+                    });
+
+
+                    setDownloadStatus("success");
+                    setLmEmail("");
+                    
+                    setTimeout(() => { setDownloadStatus("idle"); }, 3000);
+
+
+                } catch (error) {
+                    console.error("Error al enviar al webhook:", error);
+                    setDownloadStatus("success"); 
+                    setTimeout(() => { setDownloadStatus("idle"); setLmEmail(""); }, 3000);
+                }
+            };
+
+
+            const openAdmission = () => setIsAdmissionOpen(true);
+            const openAdmissionWithState = (stateName) => {
+                setFormSubject(stateName);
+                setIsAdmissionOpen(true);
+            };
+
+
+            const patientStates = [
+                {
+                    icon: <AlertTriangle className="w-6 h-6" />,
+                    title: "Acabo de recibir la noticia",
+                    subtitle: "SIENTO MIEDO Y CONFUSIÓN",
+                    desc: "Es normal. Respira. Estás en shock, pero no estás solo/a. Vamos a poner orden en el caos y a preparar tu cuerpo para lo que viene.",
+                    action: "Solicitar Orientación Inicial",
+                    formValue: "Recién diagnosticado/a"
+                },
+                {
+                    icon: <Activity className="w-6 h-6" />,
+                    title: "Estoy en pleno tratamiento",
+                    subtitle: "ME SIENTO AGOTADO/A",
+                    desc: "Sé lo que es esa fatiga. Adaptaremos tu alimentación y movimiento para que toleres mejor la quimio y protejas tus células sanas.",
+                    action: "Pedir Soporte Terapéutico",
+                    formValue: "En tratamiento activo"
+                },
+                {
+                    icon: <Sun className="w-6 h-6" />,
+                    title: "He terminado el tratamiento",
+                    subtitle: "QUIERO RECUPERAR MI VIDA",
+                    desc: "Ahora empieza tu renacer. Vamos a equilibrar tu organismo y a crear un estilo de vida que te blinde y te devuelva la alegría.",
+                    action: "Consultar Plan de Recuperación",
+                    formValue: "Terminé el tratamiento / Superviviente"
+                }
+            ];
+
+
+            const pillars = [
+                {
+                    icon: <Leaf className="w-8 h-8 text-cuidarte-green" />,
+                    title: "Nutrición Antiinflamatoria",
+                    desc: "Aprende a usar la alimentación para reducir la inflamación y crear un entorno biológico que favorezca tu recuperación.",
+                    img: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&q=80&w=800", // Comida saludable, luz natural
+                    gradientColor: "from-[#3A5A3A]/90 to-[#6BA06B]/60" // Más contraste en gradiente
+                },
+                {
+                    icon: <Dumbbell className="w-8 h-8 text-cuidarte-green" />,
+                    title: "Ejercicio Oncológico",
+                    desc: "El músculo libera medicinas naturales. Entrenamos fuerza suave para combatir la fatiga y proteger tu masa muscular.",
+                    img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&q=80&w=800", // Ejercicio suave mujer
+                    gradientColor: "from-[#3A5A3A]/90 to-[#6BA06B]/60"
+                },
+                {
+                    icon: <Brain className="w-8 h-8 text-cuidarte-gold" />,
+                    title: "Bienestar Emocional",
+                    desc: "Del miedo a la calma. Herramientas prácticas para gestionar el estrés, el miedo a la recaída y regular tu sistema nervioso.",
+                    img: "https://images.unsplash.com/photo-1545205597-3d9d02c29597?auto=format&fit=crop&q=80&w=800", // Yoga/Calma
+                    gradientColor: "from-[#8B6E1F]/90 to-[#D4AF37]/60"
+                },
+                {
+                    icon: <ShieldCheck className="w-8 h-8 text-cuidarte-dark" />,
+                    title: "Entorno Saludable",
+                    desc: "Identificamos y reducimos los tóxicos en tu hogar para cuidar tu salud hormonal y crear un espacio seguro.",
+                    img: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=800&auto=format&fit=crop", // Hogar limpio
+                    gradientColor: "from-[#0F161D]/90 to-[#2C3E50]/60"
+                }
+            ];
+
+
+            const faqs = [
+                { q: "¿Puedo hacer este programa si estoy en tratamiento oncológico?", a: "Sí. Cuid-Arte está diseñado para adaptarse a cada fase del proceso oncológico: cirugía, quimioterapia, radioterapia, inmunoterapia y hormonoterapia. Todas las recomendaciones se ajustan a tu situación clínica." },
+                { q: "¿Necesito permiso de mi oncólogo?", a: "No es obligatorio, pero sí recomendable. Nuestro enfoque se basa en evidencia y es completamente compatible con los tratamientos médicos; aun así, mantener informada a tu oncóloga/o siempre suma." },
+                { q: "¿Este programa sustituye a mi tratamiento médico?", a: "No. Cuid-Arte no sustituye cirugías, quimioterapia, radioterapia ni ningún tratamiento oncológico. Es un apoyo complementario para mejorar tu calidad de vida y aliviar síntomas." },
+                { q: "¿El acompañamiento incluye apoyo psicológico?", a: "No realizamos psicoterapia ni intervención psicológica especializada. Sí te proporcionamos herramientas prácticas de autocuidado emocional, pero no sustituimos al trabajo de un profesional de la salud mental." },
+                { q: "¿Qué tipo de ejercicio voy a realizar?", a: "Recibirás un programa de entrenamiento personalizado, adaptado a tu nivel de energía, posibles limitaciones, tipo de tratamiento y objetivos (fuerza, movilidad, fatiga, masa muscular…)." },
+                { q: "¿Voy a recibir un plan de alimentación?", a: "Sí. Tendrás intervención nutricional basada en evidencia, con recomendaciones adaptadas a tus síntomas, fase de tratamiento y necesidades específicas." },
+                { q: "¿Qué pasa si tengo efectos secundarios como fatiga, anemia, mucositis o náuseas?", a: "Todas las recomendaciones del programa están diseñadas para ayudarte a manejar síntomas frecuentes y mantener tu bienestar en cada etapa." },
+                { q: "¿Puedo hacer este programa si ya he terminado los tratamientos?", a: "Sí. La etapa de supervivencia también requiere apoyo nutricional y físico. Cuid-Arte te ayuda a recuperar energía, masa muscular, ritmo digestivo y equilibrio metabólico." },
+                { q: "¿Necesito tener conocimientos previos de nutrición o ejercicio?", a: "No. Todo está explicado de forma clara y práctica para que puedas seguirlo fácilmente, estés en el punto que estés." },
+                { q: "¿Cuánto tiempo necesitaré cada semana?", a: "Entre 2 y 4 horas semanales, dependiendo de tu disponibilidad y nivel de energía. El programa es flexible y se adapta a ti, no al revés." }
+            ];
+
+
+            return (
+                <div className="font-sans text-cuidarte-dark-deep antialiased selection:bg-cuidarte-mint selection:text-cuidarte-dark-deep">
+                
+                {/* TOAST NOTIFICATION */}
+                <div className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-[80] transition-all duration-300 ${toast.visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'}`}>
+                    <div className={`px-6 py-3 rounded-full shadow-xl flex items-center gap-3 font-bold text-sm ${toast.type === 'error' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-white text-cuidarte-green-deep border-2 border-cuidarte-green'}`}>
+                        {toast.type === 'error' ? <AlertTriangle className="w-5 h-5"/> : <Check className="w-5 h-5"/>}
+                        {toast.message}
+                    </div>
+                </div>
+
+
+                {/* TOP BAR */}
+                <div className="bg-cuidarte-dark-deep text-slate-200 text-[11px] md:text-xs py-2.5 px-4 text-center tracking-wide relative z-50">
+                    <div className="container mx-auto flex items-center justify-center gap-2">
+                        <Microscope className="w-4 h-4 text-cuidarte-mint animate-pulse" />
+                        <span>
+                            <strong className="text-white tracking-wider">ENFOQUE INTEGRATIVO:</strong> Ciencia y Calidez unidas para tu recuperación. <strong className="text-cuidarte-mint">NO sustituye</strong> tu tratamiento médico.
+                        </span>
+                    </div>
+                </div>
+
+
+                {/* NAVBAR */}
+                <nav className={`fixed w-full z-40 transition-all duration-500 top-[34px] ${scrolled ? 'bg-white/95 backdrop-blur-md shadow-md py-3' : 'bg-transparent py-6'}`}>
+                    <div className="container mx-auto px-6 flex justify-between items-center">
+                        <div className="flex items-center gap-3 group cursor-pointer">
+                            {/* Logo Icon SVG */}
+                            <div className="relative w-12 h-12 flex-shrink-0">
+                                <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-sm transition-transform duration-500 group-hover:rotate-12">
+                                    <circle cx="50" cy="50" r="45" fill="none" stroke="#D4AF37" strokeWidth="3.5" />
+                                    <path d="M50 95 V5" stroke="#D4AF37" strokeWidth="3.5" strokeLinecap="round" />
+                                    <path d="M50 30 L80 15" stroke="#D4AF37" strokeWidth="3.5" strokeLinecap="round" />
+                                    <path d="M50 30 L20 15" stroke="#D4AF37" strokeWidth="3.5" strokeLinecap="round" />
+                                    <path d="M50 50 L80 35" stroke="#D4AF37" strokeWidth="3.5" strokeLinecap="round" />
+                                    <path d="M50 50 L20 35" stroke="#D4AF37" strokeWidth="3.5" strokeLinecap="round" />
+                                    <path d="M50 70 L80 55" stroke="#D4AF37" strokeWidth="3.5" strokeLinecap="round" />
+                                    <path d="M50 70 L20 55" stroke="#D4AF37" strokeWidth="3.5" strokeLinecap="round" />
+                                </svg>
+                            </div>
+                            
+                            {/* Logo Text */}
+                            <div className="hidden lg:flex flex-col leading-none justify-center">
+                                <div className="font-heading font-extrabold text-cuidarte-dark-deep text-2xl tracking-tight flex items-center">
+                                    Cuid<span className="text-cuidarte-gold mx-0.5">-</span>Arte
+                                </div>
+                                <span className="text-[9px] uppercase tracking-wider text-cuidarte-green-deep font-bold mt-1">
+                                    Método Dra. Odile Fernández
+                                </span>
+                            </div>
+                             {/* Mobile Logo Text (Ahora completo) */}
+                             <div className="lg:hidden flex flex-col leading-none justify-center">
+                                <div className="font-heading font-bold text-cuidarte-dark-deep text-xl tracking-tight">
+                                    Cuid-Arte
+                                </div>
+                                <span className="text-[8px] uppercase tracking-wider text-cuidarte-green-deep font-bold mt-0.5">
+                                    Método Dra. Odile Fernández
+                                </span>
+                            </div>
+                        </div>
+
+
+                        <div className="hidden md:flex items-center gap-8 font-semibold text-sm tracking-wide text-slate-600">
+                            <a href="#camino" className="hover:text-cuidarte-green-deep transition-colors">El Camino</a>
+                            <a href="metodo.html" className="hover:text-cuidarte-green-deep transition-colors">El Método</a>
+                            <a href="#admision" className="hover:text-cuidarte-green-deep transition-colors">Admisión</a>
+                            <button 
+                                onClick={openAdmission}
+                                className="bg-white border-2 border-cuidarte-gold text-cuidarte-gold-deep px-6 py-2.5 rounded-full font-bold hover:bg-cuidarte-gold hover:text-white transition-all flex items-center gap-2 shadow-sm active:scale-95"
+                            >
+                                <Phone className="w-4 h-4" /> Solicitar Entrevista
+                            </button>
+                        </div>
+                        <button className="md:hidden text-slate-700 p-2" onClick={() => setIsMenuOpen(!isMenuOpen)}>{isMenuOpen ? <X /> : <Menu />}</button>
+                    </div>
+                    {isMenuOpen && (
+                        <div className="md:hidden bg-white absolute w-full border-t border-slate-100 py-6 px-6 flex flex-col gap-4 shadow-xl animate-in fade-in slide-in-from-top-2">
+                            <a href="#camino" onClick={() => setIsMenuOpen(false)} className="text-lg font-heading font-bold text-slate-700">El Camino</a>
+                            <a href="metodo.html" className="text-lg font-heading font-bold text-slate-700">El Método</a>
+                            <a href="#admision" onClick={() => setIsMenuOpen(false)} className="text-lg font-heading font-bold text-slate-700">Admisión</a>
+                            <button onClick={openAdmission} className="bg-cuidarte-green text-white w-full py-3.5 rounded-full font-bold mt-2 shadow-lg">Solicitar Entrevista</button>
+                        </div>
+                    )}
+                </nav>
+
+
+                {/* HERO */}
+                <header className="relative pt-44 pb-20 lg:pt-60 lg:pb-40 overflow-hidden bg-gradient-soft">
+                    {/* Forma de fondo sutil (Círculo mint muy suave) */}
+                    <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-cuidarte-mint/30 blur-[120px] -z-10 mix-blend-multiply"></div>
+                    <div className="absolute bottom-[10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-cuidarte-gold/15 blur-[100px] -z-10 mix-blend-multiply"></div>
+                    
+                    <div className="container mx-auto px-6 lg:px-12 grid lg:grid-cols-2 gap-16 items-center">
+                        <Reveal className="space-y-8 text-center lg:text-left">
+                            <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-md text-cuidarte-dark-deep px-5 py-2.5 rounded-full text-xs font-bold tracking-widest uppercase border border-cuidarte-mint shadow-sm mx-auto lg:mx-0">
+                                <Leaf className="w-4 h-4 text-cuidarte-green" />
+                                Bienestar basado en evidencia
+                            </div>
+                            
+                            <h1 className="text-balance text-5xl lg:text-7xl font-bold text-cuidarte-dark-deep leading-tight font-heading drop-shadow-sm">
+                                Recupera tu equilibrio con <br/>
+                                <span className="text-cuidarte-green italic font-medium">ciencia y amor propio</span>
+                            </h1>
+                            
+                            <p className="text-lg lg:text-2xl text-slate-600 max-w-lg mx-auto lg:mx-0 leading-relaxed font-normal">
+                                Un programa integral de <strong>acompañamiento oncológico</strong>. Unimos rigor médico y humanidad para que sientas seguridad, apoyo y protagonismo en tu proceso.
+                            </p>
+                            
+                            
+                            <div className="flex flex-col sm:flex-row gap-4 pt-6 justify-center lg:justify-start">
+                                <button 
+                                    onClick={openAdmission}
+                                    className="bg-gradient-to-r from-cuidarte-green to-cuidarte-green-deep text-white px-9 py-4.5 rounded-full font-bold text-lg shadow-lg shadow-soft-green hover:shadow-xl transition-all flex items-center justify-center gap-2 transform hover:-translate-y-1 active:scale-95 border-b-4 border-cuidarte-green-deep/20"
+                                >
+                                    <HeartHandshake className="w-6 h-6" />
+                                    Quiero que me acompañes
+                                </button>
+                                <button onClick={() => setIsVideoOpen(true)} className="bg-white text-slate-700 border-2 border-slate-200 px-9 py-4.5 rounded-full font-bold text-lg hover:bg-slate-50 hover:border-cuidarte-green hover:text-cuidarte-green-deep transition-all flex items-center justify-center gap-2 transform hover:-translate-y-1 group active:scale-95 shadow-sm">
+                                    <div className="w-8 h-8 bg-cuidarte-mint/40 rounded-full flex items-center justify-center group-hover:bg-cuidarte-mint transition-colors"><Play className="w-3.5 h-3.5 fill-cuidarte-green-deep text-cuidarte-green-deep" /></div>
+                                    Mensaje de Odile
+                                </button>
+                            </div>
+                        </Reveal>
+                        
+                        {/* IMAGEN DE ODILE - Estética más limpia */}
+                        <Reveal delay="delay-200" className="relative mx-auto lg:mr-0 w-full max-w-sm lg:max-w-sm">
+                            <div className="relative rounded-[2.5rem] overflow-hidden shadow-2xl aspect-[4/5] border-[10px] border-white group">
+                                {/* Usamos una imagen que evoque más calma/luz natural si es posible, o la misma con contexto visual limpio */}
+                                <img 
+                                    src="https://www.bekia.es/images/articulos/portada/128000/128442.jpg" 
+                                    alt="Dra. Odile Fernández" 
+                                    className="w-full h-full object-cover object-top transform transition-transform duration-[2s] group-hover:scale-105" 
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-cuidarte-dark/70 via-transparent to-transparent"></div>
+                                <div className="absolute bottom-10 left-6 right-6 text-white text-center">
+                                    <p className="font-heading italic font-medium text-xl opacity-95 drop-shadow-md">"Yo encontré la salida. Tú también puedes."</p>
+                                </div>
+                            </div>
+                            
+                            <div className="relative mt-6 lg:mt-0 lg:absolute lg:-bottom-10 lg:-left-12 bg-white/90 backdrop-blur-md p-5 lg:p-6 rounded-3xl shadow-xl shadow-slate-200 border border-cuidarte-mint flex items-center gap-5 lg:animate-float z-20 max-w-xs mx-auto lg:mx-0">
+                                <div className="bg-cuidarte-mint/40 p-3.5 rounded-full text-cuidarte-green-deep"><Users className="w-7 h-7" /></div>
+                                <div>
+                                    <p className="font-extrabold text-cuidarte-dark-deep text-2xl font-heading leading-none">+15.000</p>
+                                    <p className="text-xs text-slate-500 font-semibold uppercase tracking-wide mt-1">Personas acompañadas</p>
+                                </div>
+                            </div>
+                        </Reveal>
+                    </div>
+                </header>
+
+
+                {/* MEDIA STRIP */}
+                <section className="bg-white border-y border-slate-100 py-10 overflow-hidden">
+                    <div className="container mx-auto px-6">
+                        <p className="text-center text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-8">Divulgando ciencia y esperanza en:</p>
+                        <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-40 grayscale hover:grayscale-0 transition-all duration-700 hover:opacity-100">
+                            <span className="font-heading text-2xl font-black text-slate-800 tracking-tighter">EL MUNDO</span>
+                            <span className="font-heading text-2xl font-black text-slate-800 tracking-tighter">RTVE</span>
+                            <span className="font-heading text-2xl font-black text-slate-800 tracking-tighter">SABER VIVIR</span>
+                            <span className="font-heading text-2xl font-black text-slate-800 tracking-tighter">ELLE</span>
+                            <span className="font-heading text-2xl font-black text-slate-800 tracking-tighter">CADENA SER</span>
+                        </div>
+                    </div>
+                </section>
+
+
+                {/* SECCIÓN: SENTIMIENTOS (Validación Emocional) */}
+                <section id="camino" className="py-24 bg-white relative z-10 mx-4 lg:mx-12">
+                    <div className="container mx-auto">
+                        <div className="bg-white rounded-[3rem] shadow-2xl shadow-cuidarte-mint/20 border border-slate-100 p-8 lg:p-20 relative overflow-hidden">
+                            {/* Forma decorativa mint */}
+                            <div className="absolute top-0 right-0 w-80 h-80 bg-cuidarte-mint/30 rounded-full blur-3xl -z-10 transform translate-x-1/2 -translate-y-1/2"></div>
+
+
+                            <div className="text-center mb-16">
+                                <span className="text-cuidarte-gold-deep font-bold tracking-widest uppercase text-xs bg-cuidarte-gold/10 px-4 py-1.5 rounded-full">Tu momento vital</span>
+                                <h2 className="text-4xl font-bold text-cuidarte-dark-deep font-heading mt-6">Dime, ¿cómo te sientes ahora mismo?</h2>
+                                <p className="text-slate-600 mt-4 max-w-2xl mx-auto font-normal text-lg">No importa en qué punto estés, aquí encontrarás validación y herramientas.</p>
+                            </div>
+
+
+                            <div className="grid md:grid-cols-3 gap-8">
+                                {patientStates.map((state, idx) => (
+                                    <div 
+                                        key={idx}
+                                        onClick={() => openAdmissionWithState(state.formValue)}
+                                        className={`p-10 rounded-[2rem] border-2 cursor-pointer transition-all duration-500 group relative overflow-hidden ${selectedState === idx ? 'border-cuidarte-green bg-cuidarte-mint/20 shadow-xl scale-105 z-10' : 'border-slate-100 hover:border-cuidarte-mint hover:bg-slate-50'}`}
+                                        onMouseEnter={() => setSelectedState(idx)}
+                                    >
+                                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-8 transition-colors shadow-sm ${selectedState === idx ? 'bg-cuidarte-green text-white shadow-soft-green' : 'bg-slate-50 text-slate-400 group-hover:bg-white group-hover:text-cuidarte-green-deep group-hover:shadow-md'}`}>
+                                            {state.icon}
+                                        </div>
+                                        <h3 className="font-bold text-2xl text-cuidarte-dark-deep mb-2 font-heading">{state.title}</h3>
+                                        <p className={`text-xs font-bold mb-5 uppercase tracking-wide ${selectedState === idx ? 'text-cuidarte-green-deep' : 'text-slate-400'}`}>{state.subtitle}</p>
+                                        <p className="text-slate-600 text-base leading-relaxed mb-8 font-normal">{state.desc}</p>
+                                        <span className={`inline-flex items-center gap-2 text-sm font-bold border-b-2 pb-0.5 transition-colors ${selectedState === idx ? 'text-cuidarte-green-deep border-cuidarte-green' : 'text-slate-400 border-transparent group-hover:text-cuidarte-green-deep group-hover:border-cuidarte-mint'}`}>
+                                            {state.action} <ArrowRight className="w-4 h-4" />
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+
+                {/* LOS 4 PILARES */}
+                <section id="pilares" className="py-28 bg-gradient-soft relative">
+                    <div className="container mx-auto px-6">
+                        <Reveal className="text-center mb-20">
+                            <span className="text-cuidarte-green-deep font-bold tracking-widest uppercase text-xs bg-cuidarte-mint/40 px-4 py-2 rounded-full border border-cuidarte-mint/50">Nuestra Metodología</span>
+                            <h2 className="text-4xl lg:text-5xl font-bold text-cuidarte-dark-deep mt-6 font-heading">Los 4 Pilares de tu Recuperación</h2>
+                            <p className="max-w-2xl mx-auto mt-6 text-slate-600 font-normal text-lg">El Método Odile integra un enfoque basado en la evidencia para mejorar tu calidad de vida.</p>
+                        </Reveal>
+
+
+                        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            {pillars.map((pillar, index) => (
+                                <Reveal key={index} delay={`delay-${(index + 1) * 100}`}>
+                                    <div className="relative h-[480px] rounded-[2rem] overflow-hidden cursor-default group shadow-lg hover:shadow-2xl transition-all duration-500 border border-white/20">
+                                        <img 
+                                            src={pillar.img} 
+                                            alt={pillar.title} 
+                                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                        />
+                                        <div className={`absolute inset-0 bg-gradient-to-t ${pillar.gradientColor} opacity-95 group-hover:opacity-90 transition-opacity duration-500`}></div>
+                                        
+                                        <div className="relative h-full p-8 flex flex-col justify-end text-white">
+                                            <div className="mb-auto pt-4 opacity-0 group-hover:opacity-100 transition-all duration-500 transform -translate-y-4 group-hover:translate-y-0">
+                                                <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 text-white shadow-inner">
+                                                    {pillar.icon}
+                                                </div>
+                                            </div>
+                                            
+                                            <h3 className="text-2xl font-bold font-heading mb-4 leading-tight group-hover:mb-5 transition-all drop-shadow-md">{pillar.title}</h3>
+                                            <p className="text-white text-sm leading-relaxed font-normal opacity-90 group-hover:opacity-100 border-l-2 border-white/30 pl-4">
+                                                {pillar.desc}
+                                            </p>
+                                            <div className="w-10 h-1.5 bg-white/40 rounded-full mt-8 group-hover:w-20 group-hover:bg-white transition-all duration-500"></div>
+                                        </div>
+                                    </div>
+                                </Reveal>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
+
+                {/* --- SECCIÓN: DENTRO DEL SERVICIO --- */}
+                <section className="py-28 bg-white overflow-hidden">
+                    <div className="container mx-auto px-6">
+                        <div className="flex flex-col lg:flex-row items-center gap-20">
+                            <div className="lg:w-1/2">
+                                <Reveal>
+                                    <span className="text-cuidarte-gold-deep font-bold tracking-widest uppercase text-xs">Orden y Calma</span>
+                                    <h2 className="text-4xl lg:text-5xl font-bold text-cuidarte-dark-deep mt-4 font-heading leading-tight">Tu guía diaria hacia el bienestar</h2>
+                                    <p className="text-xl text-slate-600 mt-8 leading-relaxed font-normal">
+                                        Olvídate de la incertidumbre de no saber qué comer o cuánto moverte. Hemos diseñado este espacio para que no tengas que pensar: <span className="text-cuidarte-green-deep font-semibold">solo entra, respira y déjate cuidar.</span>
+                                    </p>
+                                    
+                                    <div className="mt-12 space-y-8">
+                                        <div className="flex gap-6 items-start group">
+                                            <div className="w-12 h-12 rounded-2xl bg-cuidarte-mint/30 flex items-center justify-center text-cuidarte-green-deep flex-shrink-0 group-hover:bg-cuidarte-green group-hover:text-white transition-colors duration-300"><Play className="w-6 h-6" /></div>
+                                            <div>
+                                                <h4 className="font-bold text-lg text-cuidarte-dark-deep font-heading group-hover:text-cuidarte-green-deep transition-colors">Vídeos Cortos y Directos</h4>
+                                                <p className="text-base text-slate-600 mt-1">Formación en micro-dosis para días con poca energía.</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-6 items-start group">
+                                            <div className="w-12 h-12 rounded-2xl bg-cuidarte-gold/10 flex items-center justify-center text-cuidarte-gold-deep flex-shrink-0 group-hover:bg-cuidarte-gold group-hover:text-white transition-colors duration-300"><Calendar className="w-6 h-6" /></div>
+                                            <div>
+                                                <h4 className="font-bold text-lg text-cuidarte-dark-deep font-heading group-hover:text-cuidarte-gold-deep transition-colors">Tu Agenda de Salud</h4>
+                                                <p className="text-base text-slate-600 mt-1">Planificador semanal de comidas y ejercicios adaptados.</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-6 items-start group">
+                                            <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-600 flex-shrink-0 group-hover:bg-slate-700 group-hover:text-white transition-colors duration-300"><Video className="w-6 h-6" /></div>
+                                            <div>
+                                                <h4 className="font-bold text-lg text-cuidarte-dark-deep font-heading group-hover:text-slate-800 transition-colors">Sesiones en Directo</h4>
+                                                <p className="text-base text-slate-600 mt-1">Encuentros mensuales cercanos con la Dra. Odile y expertos.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Reveal>
+                            </div>
+                            
+                            <div className="lg:w-1/2 relative">
+                                <Reveal delay="delay-200">
+                                    <div className="relative bg-white rounded-[3rem] p-5 shadow-2xl shadow-cuidarte-mint/30 border-2 border-slate-100 max-w-sm mx-auto transform rotate-[-2deg] hover:rotate-0 transition-transform duration-500">
+                                        <div className="bg-slate-50 rounded-[2.5rem] overflow-hidden h-[550px] relative">
+                                            <div className="bg-white p-8 border-b border-slate-100 flex justify-between items-center sticky top-0 z-10 shadow-sm">
+                                                <div>
+                                                    <p className="text-xs text-slate-400 uppercase font-bold tracking-wide">Hola, Álex</p>
+                                                    <p className="font-bold text-cuidarte-dark-deep font-heading text-lg">Tu plan de hoy</p>
+                                                </div>
+                                                <div className="w-10 h-10 bg-cuidarte-mint/50 rounded-full text-cuidarte-green-deep border border-cuidarte-mint flex items-center justify-center text-sm font-bold">A</div>
+                                            </div>
+                                            
+                                            <div className="p-6 space-y-5">
+                                                <div className="bg-white p-5 rounded-2xl shadow-sm border border-cuidarte-mint/40 flex gap-4 items-center hover:shadow-md transition-shadow">
+                                                    <div className="w-12 h-12 bg-cuidarte-mint/20 rounded-xl flex items-center justify-center text-cuidarte-green-deep"><Leaf /></div>
+                                                    <div>
+                                                        <p className="text-[10px] text-cuidarte-green-deep font-bold uppercase tracking-wide">Nutrición</p>
+                                                        <p className="font-bold text-slate-700 text-sm">Desayuno Antiinflamatorio</p>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex gap-4 items-center relative overflow-hidden hover:shadow-md transition-shadow">
+                                                    <div className="absolute left-0 top-0 h-full w-1.5 bg-cuidarte-gold"></div>
+                                                    <div className="w-12 h-12 bg-cuidarte-gold/10 rounded-xl flex items-center justify-center text-cuidarte-gold-deep"><Dumbbell /></div>
+                                                    <div>
+                                                        <p className="text-[10px] text-cuidarte-gold-deep font-bold uppercase tracking-wide">Ejercicio</p>
+                                                        <p className="font-bold text-slate-700 text-sm">Fuerza Suave (15 min)</p>
+                                                    </div>
+                                                    <div className="ml-auto bg-slate-100 px-3 py-1 rounded-full text-[10px] font-bold text-slate-500 uppercase">Hacer</div>
+                                                </div>
+                                                
+                                                <div className="bg-gradient-to-br from-cuidarte-mint/20 to-white p-6 rounded-2xl border border-cuidarte-mint/30">
+                                                    <p className="font-heading text-cuidarte-dark-deep text-sm italic font-medium mb-3 leading-relaxed">"Hoy, trátate con la misma amabilidad que tratarías a un ser querido."</p>
+                                                    <p className="text-xs text-cuidarte-green-deep font-bold text-right">- Mensaje del día</p>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="absolute bottom-0 w-full bg-white border-t border-slate-100 p-4 flex justify-around text-slate-300">
+                                                <div className="text-cuidarte-green-deep flex flex-col items-center"><Leaf className="w-6 h-6"/><span className="text-[10px] font-bold mt-1">Hoy</span></div>
+                                                <div className="flex flex-col items-center hover:text-slate-400 transition-colors"><Play className="w-6 h-6"/><span className="text-[10px] font-bold mt-1">Clases</span></div>
+                                                <div className="flex flex-col items-center hover:text-slate-400 transition-colors"><Users className="w-6 h-6"/><span className="text-[10px] font-bold mt-1">Tribu</span></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="absolute top-1/2 left-1/2 w-full h-full bg-cuidarte-mint/20 rounded-full blur-3xl -z-10 transform -translate-x-1/2 -translate-y-1/2"></div>
+                                </Reveal>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+
+                {/* SECCIÓN: EL EQUIPO */}
+                <section className="py-28 bg-white relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-96 h-96 bg-cuidarte-mint/20 rounded-full blur-3xl -z-10 -translate-x-1/2 -translate-y-1/2"></div>
+                    <div className="container mx-auto px-6">
+                        <Reveal className="text-center mb-16">
+                            <span className="text-cuidarte-green-deep font-bold tracking-widest uppercase text-xs bg-cuidarte-mint/40 px-4 py-2 rounded-full border border-cuidarte-mint/50">El Equipo</span>
+                            <h2 className="text-4xl lg:text-5xl font-heading font-bold text-cuidarte-dark-deep mt-6">No estás solo/a.<br/><span className="text-cuidarte-green font-medium italic">Tienes un equipo detrás.</span></h2>
+                            <p className="max-w-2xl mx-auto mt-5 text-slate-600 text-lg leading-relaxed">Un equipo multidisciplinar de profesionales sanitarios que trabajan juntos para acompañarte en cada fase de tu proceso.</p>
+                        </Reveal>
+
+                        {/* Odile destacada */}
+                        <Reveal className="max-w-3xl mx-auto mb-12">
+                            <div className="bg-gradient-to-r from-cuidarte-dark-deep to-cuidarte-dark rounded-[2rem] p-8 lg:p-10 flex flex-col md:flex-row items-center gap-8 shadow-2xl border-2 border-cuidarte-gold/30">
+                                <div className="w-32 h-32 lg:w-40 lg:h-40 rounded-full overflow-hidden border-4 border-cuidarte-gold shadow-xl flex-shrink-0">
+                                    <img src="https://i.postimg.cc/vTr73LCx/Odile-transformacion-web.jpg" alt="Dra. Odile Fernández" className="w-full h-full object-cover object-top" onError={(e) => { e.target.onerror = null; e.target.src = "https://i.postimg.cc/mrFw7fFR/OIP.jpg" }} />
+                                </div>
+                                <div className="text-center md:text-left">
+                                    <div className="inline-flex items-center gap-2 bg-cuidarte-gold/20 text-cuidarte-gold px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest mb-3">Fundadora</div>
+                                    <h3 className="text-2xl font-heading font-bold text-white">Dra. Odile Fernández</h3>
+                                    <p className="text-cuidarte-mint text-sm font-semibold mt-1">Médico de Familia · Superviviente de Cáncer · Escritora</p>
+                                    <p className="text-slate-300 text-sm mt-3 leading-relaxed italic">"Pasé del miedo al propósito. Hoy acompaño a otros a encontrar el suyo."</p>
+                                    <div className="flex flex-wrap gap-2 mt-4 justify-center md:justify-start">
+                                        {["Oncología Integrativa", "+15.000 pacientes", "Autora de 8 libros"].map((badge, i) => (
+                                            <span key={i} className="bg-white/10 text-slate-200 px-3 py-1 rounded-full text-[10px] font-semibold border border-white/20">{badge}</span>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </Reveal>
+
+                        {/* Grid del equipo */}
+                        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
+                            {[
+                                {
+                                    name: "Nutricionista Oncológica",
+                                    specialty: "Nutrición Clínica",
+                                    desc: "Diseña planes alimentarios personalizados adaptados a cada fase del tratamiento.",
+                                    color: "cuidarte-green",
+                                    bg: "bg-cuidarte-mint/30",
+                                    emoji: "🥦"
+                                },
+                                {
+                                    name: "Fisioterapeuta Oncológica",
+                                    specialty: "Ejercicio Terapéutico",
+                                    desc: "Adapta el movimiento a tu energía real para que cada sesión sea posible y beneficiosa.",
+                                    color: "cuidarte-gold",
+                                    bg: "bg-cuidarte-gold/10",
+                                    emoji: "🏃‍♀️"
+                                },
+                                {
+                                    name: "Psico-oncóloga",
+                                    specialty: "Bienestar Emocional",
+                                    desc: "Te acompaña en la gestión del miedo, la ansiedad y el impacto emocional del diagnóstico.",
+                                    color: "cuidarte-green",
+                                    bg: "bg-cuidarte-mint/30",
+                                    emoji: "🧠"
+                                },
+                                {
+                                    name: "Coach de Bienestar",
+                                    specialty: "Salud Ambiental",
+                                    desc: "Te guía para transformar tu entorno doméstico en un espacio seguro y libre de tóxicos.",
+                                    color: "cuidarte-gold",
+                                    bg: "bg-cuidarte-gold/10",
+                                    emoji: "🏡"
+                                }
+                            ].map((member, i) => (
+                                <Reveal key={i} delay={`delay-${(i + 1) * 100}`}>
+                                    <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 text-center h-full flex flex-col">
+                                        <div className={`w-16 h-16 ${member.bg} rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl`}>
+                                            {member.emoji}
+                                        </div>
+                                        <h4 className="font-heading font-bold text-cuidarte-dark-deep text-base mb-1">{member.name}</h4>
+                                        <span className={`text-xs font-bold text-${member.color}-deep uppercase tracking-wide mb-3 block`}>{member.specialty}</span>
+                                        <p className="text-slate-500 text-sm leading-relaxed flex-grow">{member.desc}</p>
+                                    </div>
+                                </Reveal>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
+                {/* CARTA DE ODILE */}
+                <section id="odile" className="py-28 bg-[#F9FCF9] relative overflow-hidden">
+                    <div className="container mx-auto px-6">
+                        <div className="max-w-6xl mx-auto bg-white rounded-[3rem] shadow-xl p-8 lg:p-20 relative border border-cuidarte-mint/30">
+                            <div className="absolute -top-6 left-12 text-cuidarte-gold opacity-30 transform -scale-x-100">
+                                <Quote className="w-32 h-32" />
+                            </div>
+                            
+                            <Reveal>
+                                <div className="flex flex-col lg:flex-row gap-16 items-center">
+                                    <div className="w-full lg:w-5/12 flex-shrink-0 relative">
+                                        <div className="relative rounded-[2rem] overflow-hidden shadow-2xl transform rotate-[-3deg] hover:rotate-0 transition-transform duration-700 border-8 border-white">
+                                            <img 
+                                                src="https://i.postimg.cc/vTr73LCx/Odile-transformacion-web.jpg" 
+                                                alt="Transformación de Odile" 
+                                                className="w-full h-auto"
+                                                onError={(e) => { e.target.onerror = null; e.target.src = "https://i.postimg.cc/mrFw7fFR/OIP.jpg" }}
+                                            />
+                                            <div className="absolute bottom-0 w-full bg-gradient-to-t from-black/80 to-transparent p-6">
+                                                <p className="text-white text-sm text-center font-bold tracking-wide">"Mi transformación: De paciente a vida plena"</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="w-full lg:w-7/12">
+                                        <h2 className="text-4xl lg:text-5xl font-heading font-bold text-cuidarte-dark-deep mb-8 leading-tight">Querido/a paciente, <br/><span className="text-cuidarte-green">compañero/a de viaje:</span></h2>
+                                        <div className="space-y-6 text-lg text-slate-600 font-normal leading-relaxed">
+                                            <p>
+                                                Si estás leyendo esto, probablemente sientas que el suelo se ha abierto bajo tus pies. <strong className="font-bold text-cuidarte-dark-deep">Lo sé. Yo he estado exactamente ahí.</strong>
+                                            </p>
+                                            <p>
+                                                En 2010, con un niño de 3 años, me diagnosticaron cáncer de ovario estadio IV con metástasis. Me dieron un 5% de posibilidades. Sentí un terror frío y paralizante.
+                                            </p>
+                                            <p>
+                                                Pero un día, decidí secarme las lágrimas. Como médico, busqué qué más podía hacer. Descubrí que <strong className="font-bold text-cuidarte-green-deep">tenemos un poder inmenso en nuestras manos:</strong> lo que comemos, cómo nos movemos y cómo amamos cambia nuestra biología.
+                                            </p>
+                                            <p className="border-l-4 border-cuidarte-gold pl-6 italic text-slate-700 bg-amber-50/50 p-4 rounded-r-xl shadow-sm">
+                                                Hoy soy madre de tres hijos (dos nacidos tras el cáncer). Sigo aquí para contarlo y para ayudarte.
+                                            </p>
+                                            <p>
+                                                No te prometo milagros, pero te prometo luz y claridad. Te prometo que, si me das la mano, te enseñaré a vivir este proceso con fuerza y esperanza. <strong>Te damos la bienvenida a tu refugio.</strong>
+                                            </p>
+                                            <div className="pt-8 flex items-center gap-5 border-t border-slate-100 mt-6">
+                                                <div>
+                                                    <p className="font-heading font-bold text-xl text-cuidarte-dark-deep">Dra. Odile Fernández</p>
+                                                    <p className="text-xs text-slate-500 uppercase tracking-widest font-bold">Médico de Familia & Superviviente</p>
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <CheckCircle className="w-6 h-6 text-cuidarte-green-deep" />
+                                                    <CheckCircle className="w-6 h-6 text-cuidarte-green-deep" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </Reveal>
+                        </div>
+                    </div>
+                </section>
+
+
+                {/* --- SECCIÓN: PROCESO DE ADMISIÓN --- */}
+                <AdmissionProcess onAction={openAdmission} />
+
+
+                {/* SECCIÓN: TESTIMONIOS */}
+                <section className="py-28 bg-gradient-to-b from-white to-cuidarte-mint/20 relative overflow-hidden">
+                    <div className="absolute bottom-0 right-0 w-96 h-96 bg-cuidarte-gold/10 rounded-full blur-3xl -z-10 translate-x-1/3 translate-y-1/3"></div>
+                    <div className="container mx-auto px-6">
+                        <Reveal className="text-center mb-16">
+                            <span className="text-cuidarte-gold-deep font-bold tracking-widest uppercase text-xs bg-cuidarte-gold/10 px-4 py-2 rounded-full border border-cuidarte-gold/20">Voces Reales</span>
+                            <h2 className="text-4xl lg:text-5xl font-heading font-bold text-cuidarte-dark-deep mt-6">Ellas lo vivieron.<br/><span className="text-cuidarte-green font-medium italic">Tú puedes escucharlas.</span></h2>
+                            <p className="max-w-2xl mx-auto mt-5 text-slate-600 text-lg">Pacientes reales que encontraron su camino a través del Método Cuid-Arte.</p>
+                        </Reveal>
+
+                        {/* Testimonios en grid */}
+                        <div className="grid md:grid-cols-3 gap-6 mb-8">
+                            {[
+                                {
+                                    name: "María José R.",
+                                    situation: "Superviviente de cáncer de mama · 3 años",
+                                    quote: "Llegué completamente perdida tras el diagnóstico. Odile y su equipo me dieron un plan claro, pero sobre todo me devolvieron la esperanza. Hoy soy una persona diferente.",
+                                    phase: "Superviviente",
+                                    phaseColor: "bg-cuidarte-green text-white",
+                                    img: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=200"
+                                },
+                                {
+                                    name: "Carmen L.",
+                                    situation: "En tratamiento de quimioterapia",
+                                    quote: "Pensaba que con la quimio no podría hacer ejercicio ni comer bien. El programa me enseñó que sí se puede y que cada pequeño hábito suma. Mi oncólogo está sorprendido por cómo estoy tolerando el tratamiento.",
+                                    phase: "En tratamiento",
+                                    phaseColor: "bg-cuidarte-gold text-white",
+                                    img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200"
+                                },
+                                {
+                                    name: "Ana G.",
+                                    situation: "Recién diagnosticada · Cáncer de ovario",
+                                    quote: "En el momento del shock, tener a alguien que te explica qué comer y cómo moverte es un regalo. No me sentí sola ni un solo día del proceso.",
+                                    phase: "Recién diagnosticada",
+                                    phaseColor: "bg-cuidarte-dark text-white",
+                                    img: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&q=80&w=200"
+                                }
+                            ].map((t, i) => (
+                                <Reveal key={i} delay={`delay-${(i + 1) * 100}`}>
+                                    <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 h-full flex flex-col relative overflow-hidden">
+                                        <div className="absolute top-4 right-6 text-cuidarte-gold/15 text-8xl font-heading font-bold leading-none select-none">"</div>
+                                        <div className="flex items-center gap-4 mb-6">
+                                            <img src={t.img} alt={t.name} className="w-14 h-14 rounded-full object-cover border-2 border-cuidarte-mint" />
+                                            <div>
+                                                <p className="font-heading font-bold text-cuidarte-dark-deep">{t.name}</p>
+                                                <p className="text-xs text-slate-500 mt-0.5">{t.situation}</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-0.5 mb-4">
+                                            {[...Array(5)].map((_, s) => <span key={s} className="text-cuidarte-gold text-lg">★</span>)}
+                                        </div>
+                                        <p className="text-slate-600 text-sm leading-relaxed italic flex-grow border-l-4 border-cuidarte-mint pl-4">"{t.quote}"</p>
+                                        <div className="mt-6">
+                                            <span className={`text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full ${t.phaseColor}`}>{t.phase}</span>
+                                        </div>
+                                    </div>
+                                </Reveal>
+                            ))}
+                        </div>
+
+                        {/* Testimonio destacado */}
+                        <Reveal>
+                            <div className="bg-white rounded-[2rem] p-8 lg:p-12 shadow-lg border border-cuidarte-mint/60 flex flex-col lg:flex-row items-center gap-10 relative overflow-hidden">
+                                <div className="absolute top-0 left-0 text-cuidarte-gold/10 text-[200px] font-heading font-bold leading-none select-none -translate-x-4 -translate-y-8">"</div>
+                                <div className="lg:w-1/4 flex-shrink-0 relative z-10 text-center">
+                                    <img
+                                        src="https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&q=80&w=300"
+                                        alt="Lucía M."
+                                        className="w-28 h-28 lg:w-36 lg:h-36 rounded-full object-cover border-4 border-cuidarte-gold shadow-xl mx-auto"
+                                    />
+                                    <p className="font-heading font-bold text-cuidarte-dark-deep mt-4 text-lg">Lucía M.</p>
+                                    <p className="text-xs text-slate-500 mt-1">Superviviente · Cáncer de tiroides</p>
+                                    <div className="flex gap-0.5 justify-center mt-2">
+                                        {[...Array(5)].map((_, s) => <span key={s} className="text-cuidarte-gold">★</span>)}
+                                    </div>
+                                </div>
+                                <div className="lg:w-3/4 relative z-10">
+                                    <span className="inline-flex items-center gap-2 bg-cuidarte-green text-white px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest mb-6">Superviviente · 5 años</span>
+                                    <p className="text-slate-700 text-lg lg:text-xl leading-relaxed italic">
+                                        "Terminé el tratamiento y pensé que lo más difícil había pasado. Pero la etapa de supervivencia tiene sus propios miedos: el miedo a la recaída, el cuerpo cambiado, la identidad perdida. El equipo de Cuid-Arte fue el único lugar donde sentí que entendían exactamente lo que me pasaba. Me dieron herramientas para reconstruirme, no solo físicamente sino en todos los niveles. Cinco años después, vivo más plena que antes del diagnóstico."
+                                    </p>
+                                    <p className="text-cuidarte-green-deep font-bold text-sm mt-6 uppercase tracking-widest">— Lucía M., Madrid</p>
+                                </div>
+                            </div>
+                        </Reveal>
+
+                        <Reveal className="text-center mt-12">
+                            <button onClick={openAdmission} className="inline-flex items-center gap-3 bg-gradient-to-r from-cuidarte-green to-cuidarte-green-deep text-white px-10 py-4 rounded-full font-heading font-bold text-lg shadow-lg hover:shadow-soft-green hover:-translate-y-1 transition-all">
+                                <HeartHandshake className="w-6 h-6" />
+                                Quiero vivir mi propia historia
+                            </button>
+                        </Reveal>
+                    </div>
+                </section>
+
+                {/* FAQ */}
+                <section className="py-24 bg-white">
+                    <div className="container mx-auto px-6 max-w-4xl">
+                        <div className="text-center mb-16">
+                            <h2 className="text-3xl font-bold text-cuidarte-dark-deep font-heading">Dudas frecuentes antes de empezar</h2>
+                        </div>
+                        <div className="space-y-4">
+                            {faqs.map((faq, idx) => (
+                                <FaqItem key={idx} question={faq.q} answer={faq.a} />
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
+
+                {/* LEAD MAGNET REFINADO: GUIA DE CLARIDAD */}
+                <section className="py-28 bg-gradient-to-b from-cuidarte-mint/20 to-white relative overflow-hidden">
+                    <div className="container mx-auto px-6 relative">
+                         <Reveal className="max-w-7xl mx-auto">
+                            <div className="bg-white rounded-[3rem] p-10 lg:p-16 shadow-2xl border border-cuidarte-mint/60 flex flex-col lg:flex-row items-center gap-20 relative overflow-hidden">
+                                
+                                <div className="absolute top-0 right-0 w-96 h-96 bg-cuidarte-gold/10 rounded-full blur-3xl opacity-60 -z-0 transform translate-x-1/2 -translate-y-1/2"></div>
+                                
+                                <div className="lg:w-1/2 relative z-10">
+                                    <div className="inline-flex items-center gap-2 bg-cuidarte-mint/40 text-cuidarte-green-deep px-4 py-1.5 rounded-full text-[11px] font-bold tracking-widest uppercase mb-6 border border-cuidarte-mint">
+                                        <Gift className="w-3.5 h-3.5" /> Regalo de Bienvenida
+                                    </div>
+                                    <h2 className="text-4xl lg:text-5xl font-bold text-cuidarte-dark-deep mb-6 font-heading leading-tight">
+                                        Pon orden en el caos: <br/><span className="text-cuidarte-green">Tu Guía de Claridad</span>
+                                    </h2>
+                                    <p className="text-slate-600 text-xl mb-10 font-normal leading-relaxed">
+                                        Sabemos que los primeros días son abrumadores. Por eso, hemos creado este recurso gratuito para darte soluciones concretas, rápidas y fáciles de aplicar hoy mismo.
+                                    </p>
+                                    
+                                    <div className="bg-[#F0F7F0] rounded-3xl p-8 mb-8 border border-cuidarte-mint/50">
+                                        <p className="font-bold text-cuidarte-dark-deep mb-5 text-sm uppercase tracking-wide font-heading">¿Qué incluye tu Guía?</p>
+                                        <ul className="space-y-6">
+                                            <li className="flex items-start gap-4">
+                                                <div className="bg-white text-cuidarte-green-deep p-2 rounded-full mt-0.5 border border-cuidarte-mint shadow-sm"><Utensils className="w-4 h-4" /></div>
+                                                <div>
+                                                    <strong className="text-cuidarte-dark-deep block font-heading text-lg">3 Recetas Antiinflamatorias SOS</strong>
+                                                    <span className="text-sm text-slate-600">Platos ultra rápidos (5–7 min) y fáciles de digerir para días sin energía.</span>
+                                                </div>
+                                            </li>
+                                            <li className="flex items-start gap-4">
+                                                <div className="bg-white text-cuidarte-green-deep p-2 rounded-full mt-0.5 border border-cuidarte-mint shadow-sm"><Dumbbell className="w-4 h-4" /></div>
+                                                <div>
+                                                    <strong className="text-cuidarte-dark-deep block font-heading text-lg">Rutina “Sillón Activo”</strong>
+                                                    <span className="text-sm text-slate-600">4 ejercicios de movilidad que puedes hacer sin levantarte.</span>
+                                                </div>
+                                            </li>
+                                            <li className="flex items-start gap-4">
+                                                <div className="bg-white text-cuidarte-green-deep p-2 rounded-full mt-0.5 border border-cuidarte-mint shadow-sm"><Headphones className="w-4 h-4" /></div>
+                                                <div>
+                                                    <strong className="text-cuidarte-dark-deep block font-heading text-lg">Audio SOS: Calma en 5 minutos</strong>
+                                                    <span className="text-sm text-slate-600">Meditación guiada para momentos de inquietud y miedo.</span>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                
+                                <div className="lg:w-1/2 w-full relative z-10">
+                                    <div className="bg-white p-10 rounded-[2.5rem] border-2 border-slate-100 shadow-2xl relative">
+                                        <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 bg-cuidarte-dark-deep text-white px-6 py-2 rounded-full text-xs font-bold shadow-xl whitespace-nowrap tracking-wide">
+                                            Acceso Inmediato al Correo
+                                        </div>
+                                        <h3 className="text-center font-bold text-2xl text-cuidarte-dark-deep mb-8 font-heading">¿A dónde te enviamos la Guía?</h3>
+                                        
+                                        <div className="space-y-4">
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <input 
+                                                    type="text" 
+                                                    placeholder="Tu Nombre" 
+                                                    className="w-full px-5 py-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-cuidarte-green focus:border-transparent transition-all text-sm font-medium text-slate-800 placeholder-slate-400" 
+                                                    value={lmName} 
+                                                    onChange={(e) => setLmName(e.target.value)} 
+                                                />
+                                                <input 
+                                                    type="text" 
+                                                    placeholder="Apellidos" 
+                                                    className="w-full px-5 py-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-cuidarte-green focus:border-transparent transition-all text-sm font-medium text-slate-800 placeholder-slate-400" 
+                                                    value={lmSurname} 
+                                                    onChange={(e) => setLmSurname(e.target.value)} 
+                                                />
+                                            </div>
+                                            <input 
+                                                type="tel" 
+                                                placeholder="Teléfono (Opcional)" 
+                                                className="w-full px-5 py-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-cuidarte-green focus:border-transparent transition-all text-sm font-medium text-slate-800 placeholder-slate-400" 
+                                                value={lmPhone} 
+                                                onChange={(e) => setLmPhone(e.target.value)} 
+                                            />
+                                            <input 
+                                                type="email" 
+                                                placeholder="Tu mejor email" 
+                                                className="w-full px-5 py-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-cuidarte-green focus:border-transparent transition-all text-sm font-medium text-slate-800 placeholder-slate-400" 
+                                                value={lmEmail} 
+                                                onChange={(e) => setLmEmail(e.target.value)} 
+                                            />
+                                            
+                                            <button 
+                                                onClick={handleDownload} 
+                                                className={`w-full bg-gradient-to-r from-cuidarte-gold to-cuidarte-gold-deep text-white px-6 py-5 rounded-xl font-bold hover:shadow-lg hover:shadow-cuidarte-gold/30 transition-all flex items-center justify-center gap-3 active:scale-95 mt-6 text-lg ${downloadStatus === 'success' ? 'from-cuidarte-green to-cuidarte-green-deep' : ''}`}
+                                            >
+                                                {downloadStatus === 'idle' && <><Gift className="w-6 h-6" /> ¡Quiero mi Guía Gratuita!</>}
+                                                {downloadStatus === 'loading' && <span>Preparando envío...</span>}
+                                                {downloadStatus === 'success' && <span>¡Enviado! Revisa tu bandeja de entrada.</span>}
+                                            </button>
+                                            <p className="text-[11px] text-slate-400 text-center mt-4 font-medium">Tus datos están protegidos. Cero spam, solo salud.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </Reveal>
+                    </div>
+                </section>
+
+
+                {/* FOOTER */}
+                <footer className="bg-slate-50 text-slate-500 py-16 border-t border-slate-200 text-sm">
+                    <div className="container mx-auto px-6">
+                        <div className="flex flex-col md:flex-row justify-between items-center gap-8 mb-10">
+                            <div>
+                                <span className="font-heading text-2xl text-cuidarte-dark-deep font-extrabold block tracking-tight">Cuid<span className="text-cuidarte-gold mx-0.5">-</span>Arte</span>
+                                <p className="text-xs mt-2 font-bold text-cuidarte-green-deep tracking-wide uppercase">Método Dra. Odile Fernández</p>
+                            </div>
+                            <div className="flex gap-8 font-semibold">
+                                <a href="legal.html" className="hover:text-cuidarte-green-deep transition-colors">Aviso Legal</a>
+                                <a href="privacidad.html" className="hover:text-cuidarte-green-deep transition-colors">Privacidad</a>
+                                <a href="#" className="hover:text-cuidarte-green-deep transition-colors">Contacto</a>
+                            </div>
+                        </div>
+                        <div className="border-t border-slate-200 pt-10 text-xs text-center leading-relaxed max-w-4xl mx-auto text-slate-400">
+                            <p>
+                                <strong className="text-slate-600">IMPORTANTE:</strong> La información proporcionada en el Servicio Integral Cuid-Arte tiene fines educativos y de soporte. 
+                                No pretende diagnosticar, tratar, curar ni prevenir ninguna enfermedad. 
+                                Siempre consulta con tu oncólogo/a antes de realizar cambios significativos en tu estilo de vida.
+                            </p>
+                            <p className="mt-6 font-semibold">&copy; {new Date().getFullYear()} Cuid-Arte.</p>
+                        </div>
+                    </div>
+                </footer>
+
+
+                {/* MODAL DE ADMISIÓN */}
+                {isAdmissionOpen && (
+                    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-[#1A2530]/95 backdrop-blur-md animate-in fade-in duration-300">
+                        <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 relative border border-slate-200 max-h-[90vh] overflow-y-auto">
+                            <button onClick={() => setIsAdmissionOpen(false)} className="absolute top-4 right-4 text-slate-400 hover:text-cuidarte-dark-deep transition-colors z-10"><X className="w-6 h-6" /></button>
+                            <div className="p-8">
+                                <div className="text-center mb-8">
+                                    <div className="w-16 h-16 bg-cuidarte-mint/30 rounded-full flex items-center justify-center mx-auto mb-4 text-cuidarte-green-deep">
+                                        <HeartHandshake className="w-8 h-8" />
+                                    </div>
+                                    <h3 className="text-2xl font-heading font-bold text-cuidarte-dark-deep">Hablemos</h3>
+                                    <p className="text-slate-600 text-sm mt-3 leading-relaxed">Queremos conocer tu situación clínica. Nuestro equipo médico revisará tu solicitud para confirmar si podemos ayudarte.</p>
+                                </div>
+                                <AdmissionForm
+                                    formSubject={formSubject}
+                                    setFormSubject={setFormSubject}
+                                    showToast={showToast}
+                                    onClose={() => setIsAdmissionOpen(false)}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+
+                {/* VIDEO MODAL */}
+                {isVideoOpen && (
+                    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-[#1A2530]/95 backdrop-blur-md animate-in fade-in duration-500">
+                        <div className="relative w-full max-w-5xl aspect-video bg-black rounded-3xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-500 border border-slate-700">
+                            <button onClick={() => setIsVideoOpen(false)} className="absolute top-6 right-6 text-white bg-black/40 hover:bg-cuidarte-green rounded-full p-2.5 transition-colors z-10 backdrop-blur-md"><X className="w-6 h-6" /></button>
+                            <iframe className="w-full h-full" src="https://www.youtube.com/embed/BtHuYhC0AXI?autoplay=1" title="Mensaje Odile" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
+                        </div>
+                        <div className="absolute inset-0 -z-10" onClick={() => setIsVideoOpen(false)}></div>
+                    </div>
+                )}
+                
+                <div className="fixed bottom-6 right-6 lg:hidden z-40">
+                    <button 
+                        onClick={openAdmission}
+                        className="bg-gradient-to-r from-cuidarte-green to-cuidarte-green-deep text-white p-4 rounded-full shadow-2xl animate-pulse-slow active:scale-95 border-2 border-white/20"
+                    >
+                        <Phone className="w-7 h-7" />
+                    </button>
+                </div>
+                </div>
+            );
+        };
+
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<LandingPage />);
+    </script>
+</body>
+</html>
