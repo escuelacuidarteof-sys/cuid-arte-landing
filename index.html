@@ -39,6 +39,9 @@
         }
     </script>
     
+    <!-- Supabase JS -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
     <!-- React & ReactDOM -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
@@ -95,6 +98,26 @@
         .text-balance {
             text-wrap: balance;
         }
+
+        /* Animaciones formulario */
+        @keyframes sparkle-fall {
+            0%   { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-60px) scale(0) rotate(180deg); opacity: 0; }
+        }
+        .sparkle-particle { animation: sparkle-fall 1.2s ease-out forwards; }
+
+        @keyframes golden-glow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(212,175,55,0.4); }
+            50%       { box-shadow: 0 0 0 12px rgba(212,175,55,0); }
+        }
+        .golden-glow-ring { animation: golden-glow 2s ease-in-out infinite; }
+
+        @keyframes badge-pop {
+            0%   { transform: scale(0) rotate(-12deg); opacity: 0; }
+            60%  { transform: scale(1.15) rotate(2deg); }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+        .badge-pop { animation: badge-pop 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.3s both; }
     </style>
 </head>
 <body class="bg-white overflow-x-hidden antialiased">
@@ -154,6 +177,8 @@
         const Headphones = (props) => <IconBase {...props}><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></IconBase>;
         const FileText = (props) => <IconBase {...props}><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></IconBase>;
         const Microscope = (props) => <IconBase {...props}><path d="M6 18h8"/><path d="M3 22h18"/><path d="M14 22a7 7 0 1 0 0-14h-1"/><path d="M9 14h2"/><path d="M12 6a2 2 0 0 0 2 2h0a2 2 0 0 0 2-2 2 2 0 0 0-2-2h0a2 2 0 0 0-2 2z"/></IconBase>;
+        const Crown = (props) => <IconBase {...props}><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"/></IconBase>;
+        const Sparkles = (props) => <IconBase {...props}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></IconBase>;
 
 
         // --- COMPONENTS ---
@@ -231,7 +256,7 @@
                                 className="bg-gradient-to-r from-cuidarte-green to-cuidarte-green-deep text-white px-10 py-5 rounded-full font-heading font-bold text-lg shadow-lg hover:shadow-soft-green transition-all transform hover:-translate-y-1 flex items-center justify-center gap-3 mx-auto"
                             >
                                 <HeartHandshake className="w-6 h-6" />
-                                Solicitar mi Entrevista
+                                Me gustaría unirme al programa
                             </button>
                             <p className="mt-4 text-xs text-slate-500 uppercase tracking-widest font-semibold">Plazas limitadas para garantizar la calidad asistencial</p>
                         </div>
@@ -241,135 +266,6 @@
         );
 
 
-        // --- FORMULARIO DE ADMISIÓN CON WEBHOOK ---
-        const AdmissionForm = ({ formSubject, setFormSubject, showToast, onClose }) => {
-            const [name, setName] = useState("");
-            const [email, setEmail] = useState("");
-            const [phone, setPhone] = useState("");
-            const [source, setSource] = useState("");
-            const [message, setMessage] = useState("");
-            const [status, setStatus] = useState("idle"); // idle | loading | success | error
-
-            const handleSubmit = async (e) => {
-                e.preventDefault();
-                setStatus("loading");
-
-                try {
-                    await fetch("https://services.leadconnectorhq.com/hooks/i2nawUlzlu9GmdtyWjX5/webhook-trigger/963abaa9-50b7-454b-bbf7-cc8522acdcd5", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            name,
-                            email,
-                            phone,
-                            subject: formSubject,
-                            source,
-                            message,
-                            formType: "Entrevista de Valoración",
-                        }),
-                    });
-                    setStatus("success");
-                    setTimeout(() => {
-                        onClose();
-                        window.location.href = "gracias.html";
-                    }, 800);
-                } catch (err) {
-                    setStatus("error");
-                    showToast("Hubo un problema al enviar. Por favor, inténtalo de nuevo.", "error");
-                    setStatus("idle");
-                }
-            };
-
-            const inputClass = "w-full px-4 py-3.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-cuidarte-green focus:ring-1 focus:ring-cuidarte-green outline-none transition-all font-medium text-slate-800 placeholder-slate-400 text-sm";
-
-            return (
-                <form className="space-y-4" onSubmit={handleSubmit}>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-xs font-bold text-slate-700 uppercase mb-1.5 ml-1">Nombre *</label>
-                            <input type="text" required placeholder="Tu nombre" value={name} onChange={e => setName(e.target.value)} className={inputClass} />
-                        </div>
-                        <div>
-                            <label className="block text-xs font-bold text-slate-700 uppercase mb-1.5 ml-1">Teléfono *</label>
-                            <input type="tel" required placeholder="Para llamarte" value={phone} onChange={e => setPhone(e.target.value)} className={inputClass} />
-                        </div>
-                    </div>
-                    <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1.5 ml-1">Email *</label>
-                        <input type="email" required placeholder="tu@email.com" value={email} onChange={e => setEmail(e.target.value)} className={inputClass} />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1.5 ml-1">¿En qué punto estás? *</label>
-                        <div className="relative">
-                            <select required className={`${inputClass} appearance-none`} value={formSubject} onChange={e => setFormSubject(e.target.value)}>
-                                <option value="">Selecciona tu situación</option>
-                                <option>Recién diagnosticado/a</option>
-                                <option>En tratamiento activo</option>
-                                <option>Terminé el tratamiento / Superviviente</option>
-                                <option>Soy familiar / cuidador/a</option>
-                            </select>
-                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
-                                <ChevronDown className="w-4 h-4" />
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1.5 ml-1">¿Cómo nos conociste?</label>
-                        <div className="relative">
-                            <select className={`${inputClass} appearance-none`} value={source} onChange={e => setSource(e.target.value)}>
-                                <option value="">Selecciona una opción</option>
-                                <option>Redes sociales</option>
-                                <option>Google</option>
-                                <option>Recomendación de médico</option>
-                                <option>Recomendación de familiar o amigo</option>
-                                <option>Otro</option>
-                            </select>
-                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
-                                <ChevronDown className="w-4 h-4" />
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1.5 ml-1">Cuéntanos brevemente tu situación <span className="text-slate-400 normal-case font-normal">(opcional)</span></label>
-                        <textarea
-                            placeholder="¿Qué tipo de cáncer? ¿En qué fase del proceso estás? ¿Qué necesitas?"
-                            value={message}
-                            onChange={e => setMessage(e.target.value)}
-                            rows={3}
-                            className={`${inputClass} resize-none`}
-                        />
-                    </div>
-                    <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
-                        <input type="checkbox" required className="mt-1 w-4 h-4 accent-cuidarte-green flex-shrink-0 cursor-pointer" />
-                        <label className="text-xs text-slate-500 font-medium leading-relaxed">
-                            Entiendo que este es un servicio de acompañamiento clínico y requiere compromiso. Acepto la <a href="privacidad.html" className="text-cuidarte-green-deep underline" target="_blank">política de privacidad</a>.
-                        </label>
-                    </div>
-                    <button
-                        type="submit"
-                        disabled={status === "loading" || status === "success"}
-                        className={`w-full font-bold py-4 rounded-xl transition-all shadow-lg mt-2 text-lg flex items-center justify-center gap-3 font-heading
-                            ${status === "success" ? "bg-cuidarte-green text-white" : "bg-gradient-to-r from-cuidarte-green to-cuidarte-green-deep text-white hover:shadow-soft-green hover:-translate-y-0.5 active:scale-95"}
-                            ${status === "loading" ? "opacity-80 cursor-not-allowed" : ""}
-                        `}
-                    >
-                        {status === "idle" && <><HeartHandshake className="w-5 h-5" /> Enviar Solicitud de Valoración</>}
-                        {status === "loading" && (
-                            <>
-                                <svg className="animate-spin w-5 h-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
-                                </svg>
-                                Enviando...
-                            </>
-                        )}
-                        {status === "success" && "¡Enviado! Redirigiendo..."}
-                    </button>
-                    <p className="text-[11px] text-slate-400 text-center font-medium">Plazas limitadas · Respuesta en menos de 24h</p>
-                </form>
-            );
-        };
-
         // --- LANDING PAGE ---
         const LandingPage = () => {
             const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -377,32 +273,129 @@
             const [isVideoOpen, setIsVideoOpen] = useState(false);
             const [isAdmissionOpen, setIsAdmissionOpen] = useState(false);
             const [selectedState, setSelectedState] = useState(0);
-            
-            // Notification State (Toast)
             const [toast, setToast] = useState({ message: '', visible: false, type: 'success' });
-            
-            // --- ESTADOS DEL LEAD MAGNET ---
+
+            // Lead Magnet
             const [lmName, setLmName] = useState("");
             const [lmSurname, setLmSurname] = useState("");
             const [lmPhone, setLmPhone] = useState("");
             const [lmEmail, setLmEmail] = useState("");
-            
             const [downloadStatus, setDownloadStatus] = useState("idle");
-            
-            // Form state
-            const [formSubject, setFormSubject] = useState("Recién diagnosticado/a");
 
+            // Admission Form — estado completo
+            const [formSubject, setFormSubject] = useState("Recién diagnosticado/a");
+            const [admissionForm, setAdmissionForm] = useState({
+                email: "", name: "", phonePrefix: "+34", phone: "",
+                age: "", sex: "Mujer", country: "España",
+                situation: "", interest: "",
+                tipoCancer: "", estadio: "Desconocido",
+                perdidaPeso: "No", condicionFisica: "Sedentario",
+                compromiso: "5", disponibilidad: "Lo antes posible",
+                origen: "Instagram", preocupacion: "",
+                isPrioritized: false, isFullyRegistered: false
+            });
+            const [formStep, setFormStep] = useState(1);
+            const [isValidatingEmail, setIsValidatingEmail] = useState(false);
+            const [isSubmitting, setIsSubmitting] = useState(false);
+            const [fieldErrors, setFieldErrors] = useState({});
+
+            // Supabase (placeholders reemplazados por EasyPanel inject-env.js)
+            const SB_URL = "__SUPABASE_URL__";
+            const SB_KEY = "__SUPABASE_ANON_KEY__";
+            const isConfigured = SB_URL.startsWith('http');
+            const supabase = isConfigured ? window.supabase.createClient(SB_URL, SB_KEY) : null;
+
+            const KIT_SUPERVIVENCIA_URL = "https://kitsupervivenvivneciacuid-arte.netlify.app/";
 
             useEffect(() => {
-                const handleScroll = () => setScrolled(window.scrollY > 50);
+                const handleScroll = () => setScrolled(window.scrollY > 20);
                 window.addEventListener('scroll', handleScroll);
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('openAdmission') === 'true') {
+                    setIsAdmissionOpen(true);
+                    window.history.replaceState({}, document.title, window.location.pathname + window.location.hash);
+                }
                 return () => window.removeEventListener('scroll', handleScroll);
             }, []);
 
+            useEffect(() => {
+                document.body.style.overflow = (isAdmissionOpen || isVideoOpen || isMenuOpen) ? 'hidden' : 'auto';
+                return () => { document.body.style.overflow = 'auto'; };
+            }, [isAdmissionOpen, isVideoOpen, isMenuOpen]);
+
+            useEffect(() => {
+                const handleEsc = (e) => { if (e.key === 'Escape') { setIsVideoOpen(false); setIsAdmissionOpen(false); } };
+                window.addEventListener('keydown', handleEsc);
+                return () => window.removeEventListener('keydown', handleEsc);
+            }, []);
 
             const showToast = (message, type = 'success') => {
                 setToast({ message, visible: true, type });
                 setTimeout(() => setToast(prev => ({ ...prev, visible: false })), 4000);
+            };
+
+            const checkEmailExists = async () => {
+                if (!admissionForm.email || !admissionForm.email.includes('@')) return;
+                setIsValidatingEmail(true);
+                try {
+                    if (!supabase) { setFormStep(2); return; }
+                    const { data, error } = await supabase
+                        .from('leads_escuela_cuidarte')
+                        .select('*')
+                        .eq('email', admissionForm.email.toLowerCase().trim())
+                        .maybeSingle();
+                    if (error) { setFormStep(2); return; }
+                    if (data) {
+                        const registrationComplete = !!(data.tipo_cancer || data.situacion);
+                        let parsedPrefix = "+34", parsedPhone = data.phone || "";
+                        const knownPrefixes = ["+593","+351","+34","+44","+49","+33","+39","+52","+54","+56","+57","+51","+1"];
+                        for (const prefix of knownPrefixes) {
+                            if (parsedPhone.startsWith(prefix)) { parsedPrefix = prefix; parsedPhone = parsedPhone.slice(prefix.length).trim(); break; }
+                        }
+                        setAdmissionForm(prev => ({ ...prev, name: data.name||"", phonePrefix: parsedPrefix, phone: parsedPhone, age: data.age||"", sex: data.sex||"Mujer", country: data.country||"España", situation: data.situation||"", interest: data.interest||"", isPrioritized: true, isFullyRegistered: registrationComplete }));
+                        setFormStep(2);
+                    } else {
+                        setFormStep(2);
+                    }
+                } catch(err) { setFormStep(2); }
+                finally { setIsValidatingEmail(false); }
+            };
+
+            const handleAdmissionSubmit = async (e) => {
+                e.preventDefault();
+                setIsSubmitting(true);
+                if (supabase) {
+                    try {
+                        const fullPhone = admissionForm.phone ? `${admissionForm.phonePrefix} ${admissionForm.phone}`.trim() : null;
+                        const upsertData = {
+                            email: admissionForm.email.toLowerCase().trim(),
+                            name: admissionForm.name || "Sin nombre",
+                            phone: fullPhone || null,
+                            age: admissionForm.age || "No indicado",
+                            sex: admissionForm.sex || "No indicado",
+                            country: admissionForm.country || "España",
+                            situation: admissionForm.situation || "No indicado",
+                            interest: admissionForm.interest || "No indicado",
+                            consent: true,
+                            tipo_cancer: admissionForm.tipoCancer || null,
+                            estadio: admissionForm.estadio || null,
+                            perdida_peso: admissionForm.perdidaPeso || null,
+                            actividad_fisica: admissionForm.condicionFisica || null,
+                            nivel_compromiso: parseInt(admissionForm.compromiso) || 0,
+                            disponibilidad: admissionForm.disponibilidad || null,
+                            origen: admissionForm.origen || null,
+                            preocupacion_principal: admissionForm.preocupacion || null
+                        };
+                        if (!admissionForm.isPrioritized) upsertData.downloaded_kit = true;
+                        const { data, error } = await supabase.from('leads_escuela_cuidarte').upsert(upsertData, { onConflict: 'email' });
+                        if (error) { showToast(`Error: ${error.message || "No se pudieron guardar los datos."}`, "error"); }
+                        else { setFormStep(4); }
+                    } catch(err) { showToast("Ha ocurrido un error inesperado.", "error"); }
+                    finally { setIsSubmitting(false); }
+                } else {
+                    setFormStep(4);
+                    setIsSubmitting(false);
+                }
             };
 
 
@@ -597,7 +590,7 @@
                                 onClick={openAdmission}
                                 className="bg-white border-2 border-cuidarte-gold text-cuidarte-gold-deep px-6 py-2.5 rounded-full font-bold hover:bg-cuidarte-gold hover:text-white transition-all flex items-center gap-2 shadow-sm active:scale-95"
                             >
-                                <Phone className="w-4 h-4" /> Solicitar Entrevista
+                                <Phone className="w-4 h-4" /> Me gustaría unirme
                             </button>
                         </div>
                         <button className="md:hidden text-slate-700 p-2" onClick={() => setIsMenuOpen(!isMenuOpen)}>{isMenuOpen ? <X /> : <Menu />}</button>
@@ -607,7 +600,7 @@
                             <a href="#camino" onClick={() => setIsMenuOpen(false)} className="text-lg font-heading font-bold text-slate-700">El Camino</a>
                             <a href="metodo.html" className="text-lg font-heading font-bold text-slate-700">El Método</a>
                             <a href="#admision" onClick={() => setIsMenuOpen(false)} className="text-lg font-heading font-bold text-slate-700">Admisión</a>
-                            <button onClick={openAdmission} className="bg-cuidarte-green text-white w-full py-3.5 rounded-full font-bold mt-2 shadow-lg">Solicitar Entrevista</button>
+                            <button onClick={openAdmission} className="bg-cuidarte-green text-white w-full py-3.5 rounded-full font-bold mt-2 shadow-lg">Me gustaría unirme</button>
                         </div>
                     )}
                 </nav>
@@ -1251,25 +1244,221 @@
                 </footer>
 
 
-                {/* MODAL DE ADMISIÓN */}
+                {/* MODAL DE ADMISIÓN — MULTI-STEP CON SUPABASE */}
                 {isAdmissionOpen && (
-                    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-[#1A2530]/95 backdrop-blur-md animate-in fade-in duration-300">
-                        <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 relative border border-slate-200 max-h-[90vh] overflow-y-auto">
-                            <button onClick={() => setIsAdmissionOpen(false)} className="absolute top-4 right-4 text-slate-400 hover:text-cuidarte-dark-deep transition-colors z-10"><X className="w-6 h-6" /></button>
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" role="dialog" aria-modal="true">
+                        <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsAdmissionOpen(false)}></div>
+                        <div className="bg-white w-full max-w-lg max-h-[90vh] rounded-3xl shadow-2xl relative z-10 overflow-y-auto animate-in zoom-in-95 duration-200">
+                            {/* Header del modal */}
+                            <div className={`p-6 text-white text-center relative transition-colors duration-500 ${formStep === 2 && admissionForm.isPrioritized ? 'bg-gradient-to-r from-cuidarte-gold-deep via-cuidarte-gold to-cuidarte-gold-deep' : 'bg-cuidarte-green'}`}>
+                                <button onClick={() => setIsAdmissionOpen(false)} className="absolute top-4 right-4 text-white/80 hover:text-white"><X /></button>
+                                {formStep === 2 && admissionForm.isPrioritized ? (
+                                    <><Crown className="w-10 h-10 mx-auto mb-2 opacity-90" /><h3 className="text-2xl font-heading font-bold">Miembro Prioritario</h3><p className="text-yellow-100 text-sm mt-1 font-medium">Te estábamos esperando</p></>
+                                ) : formStep === 4 ? (
+                                    <><CheckCircle className="w-10 h-10 mx-auto mb-2 opacity-90" /><h3 className="text-2xl font-heading font-bold">{admissionForm.isPrioritized ? '¡Valoración actualizada!' : '¡Bienvenida a la familia!'}</h3><p className="text-cuidarte-green-light text-sm mt-1 font-medium">{admissionForm.isPrioritized ? 'Tu plaza prioritaria sigue activa' : 'Ya formas parte de nuestra lista'}</p></>
+                                ) : (
+                                    <><HeartHandshake className="w-10 h-10 mx-auto mb-2 opacity-90" /><h3 className="text-2xl font-heading font-bold">Me gustaría unirme al programa</h3><p className="text-cuidarte-green-light text-sm mt-1 font-medium">{formStep === 1 && "Ingresa tu email para comenzar"}{formStep === 2 && !admissionForm.isPrioritized && "Cuéntanos quién eres"}{formStep === 3 && "Paso final: Tu situación"}</p></>
+                                )}
+                            </div>
+
                             <div className="p-8">
-                                <div className="text-center mb-8">
-                                    <div className="w-16 h-16 bg-cuidarte-mint/30 rounded-full flex items-center justify-center mx-auto mb-4 text-cuidarte-green-deep">
-                                        <HeartHandshake className="w-8 h-8" />
+                                <form className="space-y-4" onSubmit={(e) => { if (formStep === 3) { handleAdmissionSubmit(e); } else { e.preventDefault(); if (formStep === 1) checkEmailExists(); else setFormStep(3); } }}>
+
+                                    {/* STEP 1: EMAIL */}
+                                    {formStep === 1 && (
+                                        <div className="space-y-3">
+                                            <div className="space-y-1">
+                                                <label className="text-xs font-bold text-slate-500 uppercase">Tu Email</label>
+                                                <input type="email" required placeholder="ejemplo@correo.com" className="w-full px-4 py-3 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cuidarte-green outline-none" value={admissionForm.email} onChange={(e) => setAdmissionForm({...admissionForm, email: e.target.value})} />
+                                            </div>
+                                            <button type="button" onClick={checkEmailExists} disabled={isValidatingEmail || !admissionForm.email.includes('@')} className="w-full bg-cuidarte-dark-deep text-white font-bold py-4 rounded-xl hover:bg-slate-800 transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-50">
+                                                {isValidatingEmail ? "Verificando..." : <>"Continuar" <ArrowRight className="w-4 h-4" /></>}
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    {/* STEP 2A: USUARIO EXISTENTE — CELEBRACIÓN */}
+                                    {formStep === 2 && admissionForm.isPrioritized && (
+                                        <div className="text-center space-y-5 animate-in fade-in zoom-in-95 duration-500">
+                                            <div className="relative h-0">{[...Array(6)].map((_,i) => <div key={i} className="sparkle-particle absolute text-cuidarte-gold" style={{left:`${15+i*14}%`,top:'40px',animationDelay:`${i*0.2}s`,fontSize:['14px','10px','16px','12px','14px','10px'][i]}}>&#10022;</div>)}</div>
+                                            <div className="relative inline-block pt-2">
+                                                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-cuidarte-gold via-yellow-400 to-cuidarte-gold-deep flex items-center justify-center mx-auto golden-glow-ring">
+                                                    <span className="text-4xl font-heading font-bold text-white">{admissionForm.name ? admissionForm.name.charAt(0).toUpperCase() : '?'}</span>
+                                                </div>
+                                                <div className="absolute -bottom-1 -right-1 w-9 h-9 rounded-full bg-cuidarte-green flex items-center justify-center border-2 border-white shadow-md badge-pop"><Check className="w-5 h-5 text-white" /></div>
+                                            </div>
+                                            <div className="space-y-3">
+                                                <h4 className="text-2xl font-heading font-bold text-cuidarte-dark-deep">¡{admissionForm.name.split(' ')[0]}! <br/><span className="text-cuidarte-gold-deep">{admissionForm.isFullyRegistered ? "Tu valoración ya está registrada" : "Ya formas parte de nuestra familia"}</span></h4>
+                                                <div className="badge-pop inline-flex items-center gap-2 bg-cuidarte-gold/10 border border-cuidarte-gold/30 rounded-full px-5 py-2.5">
+                                                    <Sparkles className="w-4 h-4 text-cuidarte-gold" /><span className="text-cuidarte-gold-deep font-bold text-sm">Lista Prioritaria Confirmada</span>
+                                                </div>
+                                                <p className="text-slate-500 text-sm leading-relaxed max-w-xs mx-auto">{admissionForm.isFullyRegistered ? "Tu equipo está revisando tu caso. Te contactaremos pronto." : "Nos encanta verte de nuevo. Para completar tu inscripción necesitamos unos datos más."}</p>
+                                            </div>
+                                            <button type="button" onClick={() => admissionForm.isFullyRegistered ? window.location.href = KIT_SUPERVIVENCIA_URL : setFormStep(3)} className="w-full bg-gradient-to-r from-cuidarte-gold-deep to-cuidarte-gold text-white font-bold py-4 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2">
+                                                {admissionForm.isFullyRegistered ? "Acceder a mi Kit de Supervivencia" : "Completar Mi Registro"} <ArrowRight className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    {/* STEP 2B: NUEVO USUARIO — DATOS BÁSICOS */}
+                                    {formStep === 2 && !admissionForm.isPrioritized && (
+                                        <div className="space-y-3 animate-in fade-in slide-in-from-right-4 duration-300">
+                                            <div className="space-y-1">
+                                                <label className="text-[10px] font-bold text-slate-500 uppercase">Nombre completo</label>
+                                                <input type="text" required className={`w-full px-4 py-2.5 rounded-lg border bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cuidarte-green outline-none text-sm ${fieldErrors.name?'border-red-400':'border-slate-200'}`} value={admissionForm.name} onChange={(e) => { setAdmissionForm({...admissionForm,name:e.target.value}); setFieldErrors(p=>({...p,name:false})); }} />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <label className="text-[10px] font-bold text-slate-500 uppercase">Teléfono</label>
+                                                <div className="flex gap-2">
+                                                    <select className="w-24 px-2 py-2.5 rounded-lg border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-cuidarte-green outline-none text-sm" value={admissionForm.phonePrefix} onChange={(e) => setAdmissionForm({...admissionForm,phonePrefix:e.target.value})}>
+                                                        {["+34","+1","+44","+49","+33","+39","+351","+52","+54","+56","+57","+593","+51"].map(p=><option key={p}>{p}</option>)}
+                                                    </select>
+                                                    <input type="tel" required placeholder="612 345 678" className={`flex-1 px-4 py-2.5 rounded-lg border bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cuidarte-green outline-none text-sm ${fieldErrors.phone?'border-red-400':'border-slate-200'}`} value={admissionForm.phone} onChange={(e) => { setAdmissionForm({...admissionForm,phone:e.target.value}); setFieldErrors(p=>({...p,phone:false})); }} />
+                                                </div>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div className="space-y-1">
+                                                    <label className="text-[10px] font-bold text-slate-500 uppercase">Rango de edad</label>
+                                                    <select required className={`w-full px-4 py-2.5 rounded-lg border bg-slate-50 focus:ring-2 focus:ring-cuidarte-green outline-none text-sm ${fieldErrors.age?'border-red-400':'border-slate-200'}`} value={admissionForm.age} onChange={(e) => { setAdmissionForm({...admissionForm,age:e.target.value}); setFieldErrors(p=>({...p,age:false})); }}>
+                                                        <option value="" disabled>Selecciona...</option>
+                                                        {["18-25","26-35","36-45","46-55","56-65","65+"].map(a=><option key={a}>{a}</option>)}
+                                                    </select>
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <label className="text-[10px] font-bold text-slate-500 uppercase">Sexo</label>
+                                                    <select className="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-cuidarte-green outline-none text-sm" value={admissionForm.sex} onChange={(e) => setAdmissionForm({...admissionForm,sex:e.target.value})}>
+                                                        {["Mujer","Hombre","Prefiero no decirlo"].map(s=><option key={s}>{s}</option>)}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div className="space-y-1">
+                                                <label className="text-[10px] font-bold text-slate-500 uppercase">País</label>
+                                                <select className="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-cuidarte-green outline-none text-sm" value={admissionForm.country} onChange={(e) => setAdmissionForm({...admissionForm,country:e.target.value})}>
+                                                    {["España","México","Argentina","Colombia","Chile","Ecuador","Perú","Estados Unidos","Reino Unido","Otro"].map(c=><option key={c}>{c}</option>)}
+                                                </select>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div className="space-y-1">
+                                                    <label className="text-[10px] font-bold text-slate-500 uppercase">Tu situación</label>
+                                                    <select required className={`w-full px-4 py-2.5 rounded-lg border bg-slate-50 focus:ring-2 focus:ring-cuidarte-green outline-none text-sm ${fieldErrors.situation?'border-red-400':'border-slate-200'}`} value={admissionForm.situation} onChange={(e) => { setAdmissionForm({...admissionForm,situation:e.target.value}); setFieldErrors(p=>({...p,situation:false})); }}>
+                                                        <option value="" disabled>Selecciona...</option>
+                                                        {["Paciente diagnosticada","En tratamiento","Post-tratamiento","Familiar / Cuidador","Profesional sanitario"].map(s=><option key={s}>{s}</option>)}
+                                                    </select>
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <label className="text-[10px] font-bold text-slate-500 uppercase">Interés principal</label>
+                                                    <input type="text" required placeholder="Ej: Mejorar mi alimentación..." className={`w-full px-4 py-2.5 rounded-lg border bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cuidarte-green outline-none text-sm ${fieldErrors.interest?'border-red-400':'border-slate-200'}`} value={admissionForm.interest} onChange={(e) => { setAdmissionForm({...admissionForm,interest:e.target.value}); setFieldErrors(p=>({...p,interest:false})); }} />
+                                                </div>
+                                            </div>
+                                            <button type="button" onClick={() => {
+                                                const errors = {};
+                                                if (!admissionForm.name) errors.name = true;
+                                                if (!admissionForm.phone) errors.phone = true;
+                                                if (!admissionForm.age) errors.age = true;
+                                                if (!admissionForm.situation) errors.situation = true;
+                                                if (!admissionForm.interest) errors.interest = true;
+                                                setFieldErrors(errors);
+                                                if (Object.keys(errors).length > 0) { showToast(`Faltan campos: ${Object.keys(errors).join(", ")}`, "error"); return; }
+                                                setFormStep(3);
+                                            }} className="w-full bg-cuidarte-dark-deep text-white font-bold py-4 rounded-xl hover:bg-slate-800 transition-all shadow-lg flex items-center justify-center gap-2">
+                                                Paso Final <ArrowRight className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    {/* STEP 3: DATOS CLÍNICOS */}
+                                    {formStep === 3 && (
+                                        <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="space-y-1">
+                                                    <label className="text-[10px] font-bold text-slate-500 uppercase">Tipo de Cáncer</label>
+                                                    <input type="text" required placeholder="Ej: Mama..." className="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cuidarte-green outline-none text-sm" value={admissionForm.tipoCancer} onChange={(e) => setAdmissionForm({...admissionForm,tipoCancer:e.target.value})} />
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <label className="text-[10px] font-bold text-slate-500 uppercase">Estadío</label>
+                                                    <select className="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-cuidarte-green outline-none text-sm" value={admissionForm.estadio} onChange={(e) => setAdmissionForm({...admissionForm,estadio:e.target.value})}>
+                                                        {["Desconocido","In Situ (0)","I","II","III","IV (Metastásico)"].map(e=><option key={e}>{e}</option>)}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="space-y-1">
+                                                    <label className="text-[10px] font-bold text-slate-500 uppercase">¿Has perdido peso?</label>
+                                                    <select className="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-cuidarte-green outline-none text-sm" value={admissionForm.perdidaPeso} onChange={(e) => setAdmissionForm({...admissionForm,perdidaPeso:e.target.value})}>
+                                                        <option>No</option><option>Sí, un poco</option><option>Sí, bastante</option>
+                                                    </select>
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <label className="text-[10px] font-bold text-slate-500 uppercase">Actividad Física</label>
+                                                    <select className="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-cuidarte-green outline-none text-sm" value={admissionForm.condicionFisica} onChange={(e) => setAdmissionForm({...admissionForm,condicionFisica:e.target.value})}>
+                                                        <option>Sedentario</option><option>Ligera (Camino)</option><option>Activo (Gimnasio/Deporte)</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div className="bg-slate-50 rounded-2xl p-4 space-y-3">
+                                                <label className="text-[10px] font-bold text-slate-500 uppercase block">Del 1 al 10, ¿cuánto estás dispuesta/o a cambiar tus hábitos?</label>
+                                                <div className="text-center">
+                                                    <span className={`text-4xl font-heading font-bold ${admissionForm.compromiso>=8?'text-cuidarte-green-deep':admissionForm.compromiso>=5?'text-cuidarte-gold-deep':'text-slate-400'}`}>{admissionForm.compromiso}</span>
+                                                    <span className="text-sm text-slate-400 font-bold">/10</span>
+                                                </div>
+                                                <input type="range" min="1" max="10" className="w-full h-2.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-cuidarte-green" value={admissionForm.compromiso} onChange={(e) => setAdmissionForm({...admissionForm,compromiso:e.target.value})} />
+                                                <div className="flex justify-between text-[10px] text-slate-400 font-medium"><span>Poco dispuesta</span><span>Totalmente comprometida</span></div>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="space-y-1">
+                                                    <label className="text-[10px] font-bold text-slate-500 uppercase">Disponibilidad</label>
+                                                    <select className="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-cuidarte-green outline-none text-sm" value={admissionForm.disponibilidad} onChange={(e) => setAdmissionForm({...admissionForm,disponibilidad:e.target.value})}>
+                                                        <option>Lo antes posible</option><option>En 15 días</option><option>Solo información</option>
+                                                    </select>
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <label className="text-[10px] font-bold text-slate-500 uppercase">¿Cómo nos conociste?</label>
+                                                    <select className="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-cuidarte-green outline-none text-sm" value={admissionForm.origen} onChange={(e) => setAdmissionForm({...admissionForm,origen:e.target.value})}>
+                                                        <option>Instagram</option><option>Libros Odile</option><option>Recomendación</option><option>Publicidad</option><option>Otros</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div className="space-y-1">
+                                                <label className="text-[10px] font-bold text-slate-500 uppercase">¿Qué es lo que más te preocupa hoy?</label>
+                                                <textarea rows="2" className="w-full px-4 py-2 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cuidarte-green outline-none text-sm resize-none" placeholder="Háblanos un poco de ti..." value={admissionForm.preocupacion} onChange={(e) => setAdmissionForm({...admissionForm,preocupacion:e.target.value})}></textarea>
+                                            </div>
+                                            <label className="flex items-start gap-3 cursor-pointer">
+                                                <input type="checkbox" required className="mt-1 w-4 h-4 accent-cuidarte-green rounded" />
+                                                <span className="text-[10px] text-slate-500 leading-tight">Acepto la <a href="privacidad.html" target="_blank" className="text-cuidarte-green-deep underline">Política de Privacidad</a>. Tus datos se tratarán para gestionar tu solicitud.</span>
+                                            </label>
+                                            <button type="submit" disabled={isSubmitting} className="w-full bg-cuidarte-green text-white font-bold py-3.5 rounded-xl hover:bg-cuidarte-green-deep transition-all shadow-lg text-sm disabled:opacity-60 flex items-center justify-center gap-2">
+                                                {isSubmitting ? <><svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>Guardando...</> : "Completar Registro"}
+                                            </button>
+                                        </div>
+                                    )}
+                                </form>
+
+                                {/* STEP 4: PANTALLA DE ÉXITO */}
+                                {formStep === 4 && (
+                                    <div className="text-center space-y-5 animate-in fade-in zoom-in-95 duration-500">
+                                        <div className="w-20 h-20 rounded-full bg-cuidarte-green/10 flex items-center justify-center mx-auto">
+                                            <CheckCircle className="w-12 h-12 text-cuidarte-green badge-pop" />
+                                        </div>
+                                        <h4 className="text-xl font-heading font-bold text-cuidarte-dark-deep">
+                                            {admissionForm.isPrioritized ? `¡Valoración actualizada, ${admissionForm.name.split(' ')[0]}!` : `¡Solicitud recibida, ${admissionForm.name.split(' ')[0]}!`}
+                                        </h4>
+                                        {!admissionForm.isPrioritized && (
+                                            <div className="bg-gradient-to-br from-cuidarte-dark-deep to-slate-800 rounded-2xl p-5 text-white text-left space-y-3 shadow-xl">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 rounded-xl bg-cuidarte-gold/20 flex items-center justify-center flex-shrink-0"><Gift className="w-5 h-5 text-cuidarte-gold" /></div>
+                                                    <div><p className="font-heading font-bold leading-tight">Kit de Supervivencia</p><p className="text-slate-400 text-xs">Tu regalo de bienvenida</p></div>
+                                                </div>
+                                                <ul className="space-y-1.5">{['3 Recetas Antiinflamatorias SOS','Audio de Calma Guiado','Rutina de Movimiento Suave'].map((item,i)=><li key={i} className="flex items-center gap-2 text-sm text-slate-300"><Check className="w-3.5 h-3.5 text-cuidarte-green flex-shrink-0"/>{item}</li>)}</ul>
+                                                <a href={KIT_SUPERVIVENCIA_URL} target="_blank" rel="noopener noreferrer" className="block w-full bg-cuidarte-gold text-cuidarte-dark-deep font-bold py-3 rounded-xl hover:bg-yellow-400 transition-all text-center text-sm">Acceder a Mi Kit Gratuito</a>
+                                            </div>
+                                        )}
+                                        <div className="bg-cuidarte-mint/30 border border-cuidarte-green/20 rounded-2xl p-5 text-left space-y-3">
+                                            <div className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-cuidarte-gold"/><p className="text-xs font-bold text-cuidarte-dark-deep uppercase tracking-wider">Fase Beta Exclusiva</p></div>
+                                            <p className="text-sm text-slate-600 leading-relaxed">Esta primera apertura de plazas es para una <strong className="text-cuidarte-dark-deep">prueba beta del programa</strong> a la que solo accederá un grupo reducido de personas.</p>
+                                        </div>
+                                        <button type="button" onClick={() => setIsAdmissionOpen(false)} className="w-full bg-cuidarte-dark-deep text-white font-bold py-3.5 rounded-xl hover:bg-slate-800 transition-all shadow-lg text-sm">Entendido</button>
                                     </div>
-                                    <h3 className="text-2xl font-heading font-bold text-cuidarte-dark-deep">Hablemos</h3>
-                                    <p className="text-slate-600 text-sm mt-3 leading-relaxed">Queremos conocer tu situación clínica. Nuestro equipo médico revisará tu solicitud para confirmar si podemos ayudarte.</p>
-                                </div>
-                                <AdmissionForm
-                                    formSubject={formSubject}
-                                    setFormSubject={setFormSubject}
-                                    showToast={showToast}
-                                    onClose={() => setIsAdmissionOpen(false)}
-                                />
+                                )}
                             </div>
                         </div>
                     </div>
