@@ -582,11 +582,15 @@
                         </div>
 
 
-                        <div className="hidden md:flex items-center gap-8 font-semibold text-sm tracking-wide text-slate-600">
+                        <div className="hidden md:flex items-center gap-6 font-semibold text-sm tracking-wide text-slate-600">
                             <a href="#camino" className="hover:text-cuidarte-green-deep transition-colors">El Camino</a>
                             <a href="metodo.html" className="hover:text-cuidarte-green-deep transition-colors">El Método</a>
                             <a href="#admision" className="hover:text-cuidarte-green-deep transition-colors">Admisión</a>
-                            <button 
+                            <a href="https://escuelacuidarte-gestiondeleads.pqtiji.easypanel.host/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-slate-400 hover:text-cuidarte-green-deep transition-colors text-xs font-bold uppercase tracking-widest border border-slate-200 px-4 py-2 rounded-full hover:border-cuidarte-mint">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                Zona Alumnos
+                            </a>
+                            <button
                                 onClick={openAdmission}
                                 className="bg-white border-2 border-cuidarte-gold text-cuidarte-gold-deep px-6 py-2.5 rounded-full font-bold hover:bg-cuidarte-gold hover:text-white transition-all flex items-center gap-2 shadow-sm active:scale-95"
                             >
@@ -600,6 +604,7 @@
                             <a href="#camino" onClick={() => setIsMenuOpen(false)} className="text-lg font-heading font-bold text-slate-700">El Camino</a>
                             <a href="metodo.html" className="text-lg font-heading font-bold text-slate-700">El Método</a>
                             <a href="#admision" onClick={() => setIsMenuOpen(false)} className="text-lg font-heading font-bold text-slate-700">Admisión</a>
+                            <a href="https://escuelacuidarte-gestiondeleads.pqtiji.easypanel.host/" target="_blank" rel="noopener noreferrer" className="text-slate-500 font-semibold text-sm text-center border border-slate-200 py-3 rounded-full">🔒 Zona Alumnos</a>
                             <button onClick={openAdmission} className="bg-cuidarte-green text-white w-full py-3.5 rounded-full font-bold mt-2 shadow-lg">Me gustaría unirme</button>
                         </div>
                     )}
@@ -1128,6 +1133,10 @@
                                 <a href="legal.html" className="hover:text-cuidarte-green-deep transition-colors">Aviso Legal</a>
                                 <a href="privacidad.html" className="hover:text-cuidarte-green-deep transition-colors">Privacidad</a>
                                 <a href="#" className="hover:text-cuidarte-green-deep transition-colors">Contacto</a>
+                                <a href="https://escuelacuidarte-gestiondeleads.pqtiji.easypanel.host/" target="_blank" rel="noopener noreferrer" className="hover:text-cuidarte-green-deep transition-colors flex items-center gap-1.5">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                    Zona Alumnos
+                                </a>
                             </div>
                         </div>
                         <div className="border-t border-slate-200 pt-10 text-xs text-center leading-relaxed max-w-4xl mx-auto text-slate-400">
