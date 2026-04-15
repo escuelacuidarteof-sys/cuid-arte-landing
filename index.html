@@ -287,13 +287,20 @@
             const [admissionForm, setAdmissionForm] = useState({
                 email: "", name: "", phonePrefix: "+34", phone: "",
                 age: "", sex: "Mujer", country: "España",
-                situation: "", interest: "",
+                situation: "",
                 tipoCancer: "", estadio: "Desconocido",
                 perdidaPeso: "No", condicionFisica: "Sedentario",
-                compromiso: "5", disponibilidad: "Lo antes posible",
+                compromiso: "", // Sin valor inicial — fuerza decisión consciente
+                disponibilidad: "",
+                inversion: "", // Nueva pregunta cualificadora (sin números)
+                timing: "", // Nueva pregunta cualificadora
                 origen: "Instagram", preocupacion: "",
                 isPrioritized: false, isFullyRegistered: false
             });
+            // Mini-modal del Kit Gratuito (separado del flujo principal)
+            const [isKitOpen, setIsKitOpen] = useState(false);
+            const [kitForm, setKitForm] = useState({ name: "", email: "" });
+            const [isKitSubmitting, setIsKitSubmitting] = useState(false);
             const [formStep, setFormStep] = useState(1);
             const [isValidatingEmail, setIsValidatingEmail] = useState(false);
             const [isSubmitting, setIsSubmitting] = useState(false);
@@ -319,12 +326,12 @@
             }, []);
 
             useEffect(() => {
-                document.body.style.overflow = (isAdmissionOpen || isVideoOpen || isMenuOpen) ? 'hidden' : 'auto';
+                document.body.style.overflow = (isAdmissionOpen || isVideoOpen || isMenuOpen || isKitOpen) ? 'hidden' : 'auto';
                 return () => { document.body.style.overflow = 'auto'; };
-            }, [isAdmissionOpen, isVideoOpen, isMenuOpen]);
+            }, [isAdmissionOpen, isVideoOpen, isMenuOpen, isKitOpen]);
 
             useEffect(() => {
-                const handleEsc = (e) => { if (e.key === 'Escape') { setIsVideoOpen(false); setIsAdmissionOpen(false); } };
+                const handleEsc = (e) => { if (e.key === 'Escape') { setIsVideoOpen(false); setIsAdmissionOpen(false); setIsKitOpen(false); } };
                 window.addEventListener('keydown', handleEsc);
                 return () => window.removeEventListener('keydown', handleEsc);
             }, []);
@@ -352,7 +359,7 @@
                         for (const prefix of knownPrefixes) {
                             if (parsedPhone.startsWith(prefix)) { parsedPrefix = prefix; parsedPhone = parsedPhone.slice(prefix.length).trim(); break; }
                         }
-                        setAdmissionForm(prev => ({ ...prev, name: data.name||"", phonePrefix: parsedPrefix, phone: parsedPhone, age: data.age||"", sex: data.sex||"Mujer", country: data.country||"España", situation: data.situation||"", interest: data.interest||"", isPrioritized: true, isFullyRegistered: registrationComplete }));
+                        setAdmissionForm(prev => ({ ...prev, name: data.name||"", phonePrefix: parsedPrefix, phone: parsedPhone, age: data.age||"", sex: data.sex||"Mujer", country: data.country||"España", situation: data.situation||"", isPrioritized: true, isFullyRegistered: registrationComplete }));
                         setFormStep(2);
                     } else {
                         setFormStep(2);
@@ -361,12 +368,47 @@
                 finally { setIsValidatingEmail(false); }
             };
 
+            // Calcula el score y el status automático según las respuestas del formulario.
+            // 30+ = lead cualificado (status=new). <30 = unqualified automático.
+            const calculateLeadScore = (form) => {
+                let score = 0;
+                const compromiso = parseInt(form.compromiso) || 0;
+                if (compromiso >= 8) score += 35;
+                else if (compromiso >= 5) score += 15;
+                else if (compromiso >= 1) score -= 10;
+
+                // Actitud frente a la inversión (sustituye a preguntar precio)
+                if (form.inversion === 'merece_pena') score += 30;
+                else if (form.inversion === 'necesito_conocer') score += 15;
+                else if (form.inversion === 'primero_conocer') score -= 10;
+                else if (form.inversion === 'no_lista') score -= 35;
+
+                // Timing/urgencia
+                if (form.timing === 'esta_semana' || form.timing === 'dos_semanas') score += 20;
+                else if (form.timing === 'un_mes') score += 10;
+                else if (form.timing === 'explorando') score -= 25;
+
+                // Situación oncológica
+                if (form.situation === 'En tratamiento' || form.situation === 'Paciente diagnosticada') score += 15;
+                else if (form.situation === 'Post-tratamiento') score += 10;
+                else if (form.situation === 'Familiar / Cuidador' || form.situation === 'Profesional sanitario') score -= 30;
+
+                // Calidad de respuesta
+                if (form.preocupacion && form.preocupacion.trim().length > 30) score += 10;
+
+                return score;
+            };
+
             const handleAdmissionSubmit = async (e) => {
                 e.preventDefault();
                 setIsSubmitting(true);
                 if (supabase) {
                     try {
                         const fullPhone = admissionForm.phone ? `${admissionForm.phonePrefix} ${admissionForm.phone}`.trim() : null;
+                        const score = calculateLeadScore(admissionForm);
+                        const autoStatus = score >= 30 ? 'new' : 'unqualified';
+                        // Construye un "interest" estructurado a partir de las respuestas (sustituye al campo libre)
+                        const structuredInterest = [admissionForm.timing, admissionForm.inversion].filter(Boolean).join(' · ') || 'No indicado';
                         const upsertData = {
                             email: admissionForm.email.toLowerCase().trim(),
                             name: admissionForm.name || "Sin nombre",
@@ -375,7 +417,7 @@
                             sex: admissionForm.sex || "No indicado",
                             country: admissionForm.country || "España",
                             situation: admissionForm.situation || "No indicado",
-                            interest: admissionForm.interest || "No indicado",
+                            interest: structuredInterest,
                             consent: true,
                             tipo_cancer: admissionForm.tipoCancer || null,
                             estadio: admissionForm.estadio || null,
@@ -384,9 +426,13 @@
                             nivel_compromiso: parseInt(admissionForm.compromiso) || 0,
                             disponibilidad: admissionForm.disponibilidad || null,
                             origen: admissionForm.origen || null,
-                            preocupacion_principal: admissionForm.preocupacion || null
+                            preocupacion_principal: admissionForm.preocupacion || null,
+                            score: score,
+                            status: autoStatus,
                         };
-                        if (!admissionForm.isPrioritized) upsertData.downloaded_kit = true;
+                        // NOTA: se eliminó la asignación automática de downloaded_kit=true
+                        // (era un bug — todos los nuevos leads se marcaban como descargadores del kit).
+                        // El kit ahora tiene su propio mini-modal que pone downloaded_kit=true sólo cuando lo descargan.
                         const { data, error } = await supabase.from('leads_escuela_cuidarte').upsert(upsertData, { onConflict: 'email' });
                         if (error) { showToast(`Error: ${error.message || "No se pudieron guardar los datos."}`, "error"); }
                         else { setFormStep(4); }
@@ -395,6 +441,40 @@
                 } else {
                     setFormStep(4);
                     setIsSubmitting(false);
+                }
+            };
+
+            // Submit del mini-modal Kit Gratuito — escribe al CRM principal antes de enviar al kit
+            const handleKitSubmit = async (e) => {
+                e.preventDefault();
+                if (!kitForm.email || !kitForm.email.includes('@') || !kitForm.name) {
+                    showToast("Completa nombre y email", "error");
+                    return;
+                }
+                setIsKitSubmitting(true);
+                try {
+                    if (supabase) {
+                        const upsertKit = {
+                            email: kitForm.email.toLowerCase().trim(),
+                            name: kitForm.name,
+                            consent: true,
+                            origen: 'Kit Gratuito',
+                            interest: 'kit_gratuito',
+                            downloaded_kit: true,
+                            status: 'unqualified', // No entra al pipeline activo del closer
+                            score: 0,
+                        };
+                        await supabase.from('leads_escuela_cuidarte').upsert(upsertKit, { onConflict: 'email' });
+                    }
+                    // Redirige al kit externo (Netlify) con los datos en query string para autocompletar allí
+                    const params = new URLSearchParams({ name: kitForm.name, email: kitForm.email });
+                    window.location.href = `${KIT_SUPERVIVENCIA_URL}?${params.toString()}`;
+                } catch (err) {
+                    console.error(err);
+                    showToast("Error guardando datos. Te redirigimos igualmente.", "error");
+                    window.location.href = KIT_SUPERVIVENCIA_URL;
+                } finally {
+                    setIsKitSubmitting(false);
                 }
             };
 
@@ -1173,13 +1253,41 @@
 
                                     {/* STEP 1: EMAIL */}
                                     {formStep === 1 && (
-                                        <div className="space-y-3">
-                                            <div className="space-y-1">
+                                        <div className="space-y-4">
+                                            {/* Disclaimer cualificador (versión B) — comunica que es de pago sin mencionar precio */}
+                                            <div className="bg-cuidarte-green/5 border border-cuidarte-green/20 rounded-2xl p-4 space-y-3">
+                                                <div className="flex items-start gap-2">
+                                                    <span className="text-cuidarte-green-deep text-lg leading-none mt-0.5">🌿</span>
+                                                    <div className="space-y-2">
+                                                        <p className="text-sm font-bold text-cuidarte-dark-deep leading-snug">Antes de continuar, hay algo que debes saber:</p>
+                                                        <p className="text-xs text-slate-600 leading-relaxed">
+                                                            Cuid-Arte <strong>NO es un curso ni una consulta gratuita</strong>. Es un acompañamiento profesional de pago, con plazas limitadas y atención personalizada.
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div className="bg-white border border-cuidarte-gold/30 rounded-xl p-3 space-y-2">
+                                                    <p className="text-xs text-slate-600 leading-relaxed">
+                                                        Si lo que necesitas es <strong>información gratuita</strong> para empezar, te regalamos nuestro Kit:
+                                                    </p>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setIsKitOpen(true)}
+                                                        className="w-full bg-cuidarte-gold/15 hover:bg-cuidarte-gold/25 text-cuidarte-gold-deep font-bold py-2.5 rounded-lg text-xs flex items-center justify-center gap-2 transition-colors border border-cuidarte-gold/30"
+                                                    >
+                                                        📩 Quiero el Kit Gratuito
+                                                    </button>
+                                                </div>
+                                                <p className="text-xs text-slate-500 leading-relaxed">
+                                                    Si estás <strong>lista para entrar al programa</strong>, completa esta solicitud (5 min). Te llamaremos para valorar tu caso sin compromiso.
+                                                </p>
+                                            </div>
+
+                                            <div className="space-y-1 pt-1">
                                                 <label className="text-xs font-bold text-slate-500 uppercase">Tu Email</label>
                                                 <input type="email" required placeholder="ejemplo@correo.com" className="w-full px-4 py-3 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cuidarte-green outline-none" value={admissionForm.email} onChange={(e) => setAdmissionForm({...admissionForm, email: e.target.value})} />
                                             </div>
                                             <button type="button" onClick={checkEmailExists} disabled={isValidatingEmail || !admissionForm.email.includes('@')} className="w-full bg-cuidarte-dark-deep text-white font-bold py-4 rounded-xl hover:bg-slate-800 transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-50">
-                                                {isValidatingEmail ? "Verificando..." : <>"Continuar" <ArrowRight className="w-4 h-4" /></>}
+                                                {isValidatingEmail ? "Verificando..." : <>Quiero entrar al programa <ArrowRight className="w-4 h-4" /></>}
                                             </button>
                                         </div>
                                     )}
@@ -1244,18 +1352,12 @@
                                                     {["España","México","Argentina","Colombia","Chile","Ecuador","Perú","Estados Unidos","Reino Unido","Otro"].map(c=><option key={c}>{c}</option>)}
                                                 </select>
                                             </div>
-                                            <div className="grid grid-cols-2 gap-3">
-                                                <div className="space-y-1">
-                                                    <label className="text-[10px] font-bold text-slate-500 uppercase">Tu situación</label>
-                                                    <select required className={`w-full px-4 py-2.5 rounded-lg border bg-slate-50 focus:ring-2 focus:ring-cuidarte-green outline-none text-sm ${fieldErrors.situation?'border-red-400':'border-slate-200'}`} value={admissionForm.situation} onChange={(e) => { setAdmissionForm({...admissionForm,situation:e.target.value}); setFieldErrors(p=>({...p,situation:false})); }}>
-                                                        <option value="" disabled>Selecciona...</option>
-                                                        {["Paciente diagnosticada","En tratamiento","Post-tratamiento","Familiar / Cuidador","Profesional sanitario"].map(s=><option key={s}>{s}</option>)}
-                                                    </select>
-                                                </div>
-                                                <div className="space-y-1">
-                                                    <label className="text-[10px] font-bold text-slate-500 uppercase">Interés principal</label>
-                                                    <input type="text" required placeholder="Ej: Mejorar mi alimentación..." className={`w-full px-4 py-2.5 rounded-lg border bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cuidarte-green outline-none text-sm ${fieldErrors.interest?'border-red-400':'border-slate-200'}`} value={admissionForm.interest} onChange={(e) => { setAdmissionForm({...admissionForm,interest:e.target.value}); setFieldErrors(p=>({...p,interest:false})); }} />
-                                                </div>
+                                            <div className="space-y-1">
+                                                <label className="text-[10px] font-bold text-slate-500 uppercase">Tu situación</label>
+                                                <select required className={`w-full px-4 py-2.5 rounded-lg border bg-slate-50 focus:ring-2 focus:ring-cuidarte-green outline-none text-sm ${fieldErrors.situation?'border-red-400':'border-slate-200'}`} value={admissionForm.situation} onChange={(e) => { setAdmissionForm({...admissionForm,situation:e.target.value}); setFieldErrors(p=>({...p,situation:false})); }}>
+                                                    <option value="" disabled>Selecciona...</option>
+                                                    {["Paciente diagnosticada","En tratamiento","Post-tratamiento","Familiar / Cuidador","Profesional sanitario"].map(s=><option key={s}>{s}</option>)}
+                                                </select>
                                             </div>
                                             <button type="button" onClick={() => {
                                                 const errors = {};
@@ -1263,7 +1365,6 @@
                                                 if (!admissionForm.phone) errors.phone = true;
                                                 if (!admissionForm.age) errors.age = true;
                                                 if (!admissionForm.situation) errors.situation = true;
-                                                if (!admissionForm.interest) errors.interest = true;
                                                 setFieldErrors(errors);
                                                 if (Object.keys(errors).length > 0) { showToast(`Faltan campos: ${Object.keys(errors).join(", ")}`, "error"); return; }
                                                 setFormStep(3);
@@ -1273,9 +1374,10 @@
                                         </div>
                                     )}
 
-                                    {/* STEP 3: DATOS CLÍNICOS */}
+                                    {/* STEP 3: DATOS CLÍNICOS + CUALIFICACIÓN */}
                                     {formStep === 3 && (
                                         <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
+                                            {/* Datos clínicos */}
                                             <div className="grid grid-cols-2 gap-4">
                                                 <div className="space-y-1">
                                                     <label className="text-[10px] font-bold text-slate-500 uppercase">Tipo de Cáncer</label>
@@ -1302,40 +1404,98 @@
                                                     </select>
                                                 </div>
                                             </div>
+
+                                            {/* Compromiso — slider sin valor inicial, fuerza decisión consciente */}
                                             <div className="bg-slate-50 rounded-2xl p-4 space-y-3">
                                                 <label className="text-[10px] font-bold text-slate-500 uppercase block">Del 1 al 10, ¿cuánto estás dispuesta/o a cambiar tus hábitos?</label>
                                                 <div className="text-center">
-                                                    <span className={`text-4xl font-heading font-bold ${admissionForm.compromiso>=8?'text-cuidarte-green-deep':admissionForm.compromiso>=5?'text-cuidarte-gold-deep':'text-slate-400'}`}>{admissionForm.compromiso}</span>
-                                                    <span className="text-sm text-slate-400 font-bold">/10</span>
+                                                    {admissionForm.compromiso ? (
+                                                        <>
+                                                            <span className={`text-4xl font-heading font-bold ${admissionForm.compromiso>=8?'text-cuidarte-green-deep':admissionForm.compromiso>=5?'text-cuidarte-gold-deep':'text-slate-400'}`}>{admissionForm.compromiso}</span>
+                                                            <span className="text-sm text-slate-400 font-bold">/10</span>
+                                                        </>
+                                                    ) : (
+                                                        <span className="text-sm text-slate-400 italic">↓ Mueve el control para responder ↓</span>
+                                                    )}
                                                 </div>
-                                                <input type="range" min="1" max="10" className="w-full h-2.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-cuidarte-green" value={admissionForm.compromiso} onChange={(e) => setAdmissionForm({...admissionForm,compromiso:e.target.value})} />
+                                                <input type="range" min="1" max="10" className="w-full h-2.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-cuidarte-green" value={admissionForm.compromiso || 5} onChange={(e) => setAdmissionForm({...admissionForm,compromiso:e.target.value})} />
                                                 <div className="flex justify-between text-[10px] text-slate-400 font-medium"><span>Poco dispuesta</span><span>Totalmente comprometida</span></div>
                                             </div>
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div className="space-y-1">
-                                                    <label className="text-[10px] font-bold text-slate-500 uppercase">Disponibilidad</label>
-                                                    <select className="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-cuidarte-green outline-none text-sm" value={admissionForm.disponibilidad} onChange={(e) => setAdmissionForm({...admissionForm,disponibilidad:e.target.value})}>
-                                                        <option>Lo antes posible</option><option>En 15 días</option><option>Solo información</option>
-                                                    </select>
+
+                                            {/* PREGUNTA NUEVA: actitud frente a la inversión (sustituye preguntar precio) */}
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-bold text-slate-500 uppercase block">¿Estás preparada para realizar una inversión en tu salud?</label>
+                                                <div className="space-y-1.5">
+                                                    {[
+                                                        { val: 'merece_pena', label: 'Sí, tengo claro que merece la pena' },
+                                                        { val: 'necesito_conocer', label: 'Sí, aunque necesito conocer la inversión exacta antes de decidir' },
+                                                        { val: 'primero_conocer', label: 'No estoy segura, primero quiero conocer el programa' },
+                                                        { val: 'no_lista', label: 'Aún no estoy lista para invertir' },
+                                                    ].map(opt => (
+                                                        <label key={opt.val} className={`flex items-start gap-2 p-2.5 rounded-lg border cursor-pointer transition-all text-xs ${admissionForm.inversion === opt.val ? 'border-cuidarte-green bg-cuidarte-green/5' : 'border-slate-200 bg-slate-50 hover:border-slate-300'}`}>
+                                                            <input
+                                                                type="radio"
+                                                                name="inversion"
+                                                                value={opt.val}
+                                                                checked={admissionForm.inversion === opt.val}
+                                                                onChange={() => setAdmissionForm({...admissionForm, inversion: opt.val})}
+                                                                className="mt-0.5 accent-cuidarte-green"
+                                                            />
+                                                            <span className="text-slate-700 leading-snug">{opt.label}</span>
+                                                        </label>
+                                                    ))}
                                                 </div>
-                                                <div className="space-y-1">
-                                                    <label className="text-[10px] font-bold text-slate-500 uppercase">¿Cómo nos conociste?</label>
-                                                    <select className="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-cuidarte-green outline-none text-sm" value={admissionForm.origen} onChange={(e) => setAdmissionForm({...admissionForm,origen:e.target.value})}>
-                                                        <option>Instagram</option><option>Libros Odile</option><option>Recomendación</option><option>Publicidad</option><option>Otros</option>
-                                                    </select>
+                                            </div>
+
+                                            {/* PREGUNTA NUEVA: timing/urgencia */}
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-bold text-slate-500 uppercase block">¿Cuándo querrías empezar?</label>
+                                                <div className="grid grid-cols-2 gap-2">
+                                                    {[
+                                                        { val: 'esta_semana', label: 'Esta semana' },
+                                                        { val: 'dos_semanas', label: 'En 1-2 semanas' },
+                                                        { val: 'un_mes', label: 'En 1 mes' },
+                                                        { val: 'explorando', label: 'Sólo estoy explorando' },
+                                                    ].map(opt => (
+                                                        <label key={opt.val} className={`text-center py-2 px-2 rounded-lg border cursor-pointer transition-all text-xs font-medium ${admissionForm.timing === opt.val ? 'border-cuidarte-green bg-cuidarte-green text-white' : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300'}`}>
+                                                            <input
+                                                                type="radio"
+                                                                name="timing"
+                                                                value={opt.val}
+                                                                checked={admissionForm.timing === opt.val}
+                                                                onChange={() => setAdmissionForm({...admissionForm, timing: opt.val})}
+                                                                className="hidden"
+                                                            />
+                                                            {opt.label}
+                                                        </label>
+                                                    ))}
                                                 </div>
+                                            </div>
+
+                                            <div className="space-y-1">
+                                                <label className="text-[10px] font-bold text-slate-500 uppercase">¿Cómo nos conociste?</label>
+                                                <select className="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-cuidarte-green outline-none text-sm" value={admissionForm.origen} onChange={(e) => setAdmissionForm({...admissionForm,origen:e.target.value})}>
+                                                    <option>Instagram</option><option>Libros Odile</option><option>Recomendación</option><option>Publicidad</option><option>Otros</option>
+                                                </select>
                                             </div>
                                             <div className="space-y-1">
                                                 <label className="text-[10px] font-bold text-slate-500 uppercase">¿Qué es lo que más te preocupa hoy?</label>
-                                                <textarea rows="2" className="w-full px-4 py-2 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cuidarte-green outline-none text-sm resize-none" placeholder="Háblanos un poco de ti..." value={admissionForm.preocupacion} onChange={(e) => setAdmissionForm({...admissionForm,preocupacion:e.target.value})}></textarea>
+                                                <textarea rows="2" className="w-full px-4 py-2 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cuidarte-green outline-none text-sm resize-none" placeholder="Cuéntanos un poco de ti — esto nos ayuda a prepararnos para tu llamada..." value={admissionForm.preocupacion} onChange={(e) => setAdmissionForm({...admissionForm,preocupacion:e.target.value})}></textarea>
                                             </div>
                                             <label className="flex items-start gap-3 cursor-pointer">
                                                 <input type="checkbox" required className="mt-1 w-4 h-4 accent-cuidarte-green rounded" />
                                                 <span className="text-[10px] text-slate-500 leading-tight">Acepto la <a href="privacidad.html" target="_blank" className="text-cuidarte-green-deep underline">Política de Privacidad</a>. Tus datos se tratarán para gestionar tu solicitud.</span>
                                             </label>
-                                            <button type="submit" disabled={isSubmitting} className="w-full bg-cuidarte-green text-white font-bold py-3.5 rounded-xl hover:bg-cuidarte-green-deep transition-all shadow-lg text-sm disabled:opacity-60 flex items-center justify-center gap-2">
+                                            <button
+                                                type="submit"
+                                                disabled={isSubmitting || !admissionForm.compromiso || !admissionForm.inversion || !admissionForm.timing || !admissionForm.tipoCancer}
+                                                className="w-full bg-cuidarte-green text-white font-bold py-3.5 rounded-xl hover:bg-cuidarte-green-deep transition-all shadow-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                            >
                                                 {isSubmitting ? <><svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>Guardando...</> : "Completar Registro"}
                                             </button>
+                                            {(!admissionForm.compromiso || !admissionForm.inversion || !admissionForm.timing || !admissionForm.tipoCancer) && (
+                                                <p className="text-[10px] text-slate-400 text-center italic">Completa todos los campos para enviar</p>
+                                            )}
                                         </div>
                                     )}
                                 </form>
@@ -1380,6 +1540,71 @@
                             <iframe className="w-full h-full" src="https://www.youtube.com/embed/BtHuYhC0AXI?autoplay=1" title="Mensaje Odile" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
                         </div>
                         <div className="absolute inset-0 -z-10" onClick={() => setIsVideoOpen(false)}></div>
+                    </div>
+                )}
+
+                {/* MINI MODAL — KIT GRATUITO (escribe en CRM principal con downloaded_kit=true) */}
+                {isKitOpen && (
+                    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-cuidarte-dark-deep/70 backdrop-blur-sm animate-in fade-in duration-300">
+                        <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+                            <div className="p-6 bg-gradient-to-r from-cuidarte-gold-deep via-cuidarte-gold to-cuidarte-gold-deep text-white text-center relative">
+                                <button onClick={() => setIsKitOpen(false)} className="absolute top-4 right-4 text-white hover:bg-white/20 rounded-full p-1.5 transition-colors">
+                                    <X className="w-5 h-5" />
+                                </button>
+                                <div className="text-3xl mb-1">📩</div>
+                                <h3 className="text-2xl font-heading font-bold">Tu Kit Gratuito</h3>
+                                <p className="text-white/90 text-sm mt-1 font-medium">Sin compromiso. Sólo nombre y email.</p>
+                            </div>
+                            <form onSubmit={handleKitSubmit} className="p-6 space-y-4">
+                                <div className="bg-cuidarte-gold/10 border border-cuidarte-gold/20 rounded-xl p-3">
+                                    <p className="text-xs text-slate-700 leading-relaxed">
+                                        <strong>Tu Kit incluye:</strong>
+                                        <br />· 3 recetas antiinflamatorias SOS
+                                        <br />· Audio de calma guiado
+                                        <br />· Rutina de movimiento suave
+                                    </p>
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-xs font-bold text-slate-500 uppercase">Nombre</label>
+                                    <input
+                                        type="text"
+                                        required
+                                        placeholder="Tu nombre"
+                                        className="w-full px-4 py-3 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cuidarte-gold outline-none text-sm"
+                                        value={kitForm.name}
+                                        onChange={(e) => setKitForm({ ...kitForm, name: e.target.value })}
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-xs font-bold text-slate-500 uppercase">Email</label>
+                                    <input
+                                        type="email"
+                                        required
+                                        placeholder="tu@email.com"
+                                        className="w-full px-4 py-3 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cuidarte-gold outline-none text-sm"
+                                        value={kitForm.email}
+                                        onChange={(e) => setKitForm({ ...kitForm, email: e.target.value })}
+                                    />
+                                </div>
+                                <label className="flex items-start gap-2 cursor-pointer">
+                                    <input type="checkbox" required className="mt-0.5 w-4 h-4 accent-cuidarte-gold rounded" />
+                                    <span className="text-[10px] text-slate-500 leading-tight">
+                                        Acepto la <a href="privacidad.html" target="_blank" className="text-cuidarte-gold-deep underline">Política de Privacidad</a> y recibir el Kit en mi email.
+                                    </span>
+                                </label>
+                                <button
+                                    type="submit"
+                                    disabled={isKitSubmitting}
+                                    className="w-full bg-gradient-to-r from-cuidarte-gold-deep to-cuidarte-gold text-white font-bold py-3.5 rounded-xl hover:opacity-90 transition-all shadow-lg text-sm disabled:opacity-60 flex items-center justify-center gap-2"
+                                >
+                                    {isKitSubmitting ? "Enviando..." : <>Descargar mi Kit Gratuito <ArrowRight className="w-4 h-4" /></>}
+                                </button>
+                                <p className="text-[10px] text-slate-400 text-center">
+                                    No te llamaremos a menos que tú nos lo pidas.
+                                </p>
+                            </form>
+                        </div>
+                        <div className="absolute inset-0 -z-10" onClick={() => setIsKitOpen(false)}></div>
                     </div>
                 )}
                 
