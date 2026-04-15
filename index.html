@@ -314,6 +314,19 @@
 
             const KIT_SUPERVIVENCIA_URL = "https://kitsupervivenvivneciacuid-arte.netlify.app/";
 
+            // Helper para invocar la edge function de email transaccional.
+            // Fire-and-forget: no bloquea el flujo si el email falla.
+            const sendLeadEmail = async (leadId, action) => {
+                if (!supabase || !leadId) return;
+                try {
+                    await supabase.functions.invoke('send-lead-email', {
+                        body: { lead_id: leadId, action }
+                    });
+                } catch (err) {
+                    console.warn('Email no enviado (no bloqueante):', err);
+                }
+            };
+
             useEffect(() => {
                 const handleScroll = () => setScrolled(window.scrollY > 20);
                 window.addEventListener('scroll', handleScroll);
@@ -433,9 +446,18 @@
                         // NOTA: se eliminó la asignación automática de downloaded_kit=true
                         // (era un bug — todos los nuevos leads se marcaban como descargadores del kit).
                         // El kit ahora tiene su propio mini-modal que pone downloaded_kit=true sólo cuando lo descargan.
-                        const { data, error } = await supabase.from('leads_escuela_cuidarte').upsert(upsertData, { onConflict: 'email' });
-                        if (error) { showToast(`Error: ${error.message || "No se pudieron guardar los datos."}`, "error"); }
-                        else { setFormStep(4); }
+                        const { data, error } = await supabase
+                            .from('leads_escuela_cuidarte')
+                            .upsert(upsertData, { onConflict: 'email' })
+                            .select('id')
+                            .single();
+                        if (error) {
+                            showToast(`Error: ${error.message || "No se pudieron guardar los datos."}`, "error");
+                        } else {
+                            // Email automático según cualificación (no bloqueante)
+                            sendLeadEmail(data?.id, autoStatus === 'new' ? 'qualified' : 'unqualified');
+                            setFormStep(4);
+                        }
                     } catch(err) { showToast("Ha ocurrido un error inesperado.", "error"); }
                     finally { setIsSubmitting(false); }
                 } else {
@@ -453,6 +475,7 @@
                 }
                 setIsKitSubmitting(true);
                 try {
+                    let kitLeadId = null;
                     if (supabase) {
                         const upsertKit = {
                             email: kitForm.email.toLowerCase().trim(),
@@ -464,8 +487,15 @@
                             status: 'unqualified', // No entra al pipeline activo del closer
                             score: 0,
                         };
-                        await supabase.from('leads_escuela_cuidarte').upsert(upsertKit, { onConflict: 'email' });
+                        const { data: kitData } = await supabase
+                            .from('leads_escuela_cuidarte')
+                            .upsert(upsertKit, { onConflict: 'email' })
+                            .select('id')
+                            .single();
+                        kitLeadId = kitData?.id;
                     }
+                    // Email del kit (no bloqueante)
+                    if (kitLeadId) sendLeadEmail(kitLeadId, 'kit_download');
                     // Redirige al kit externo (Netlify) con los datos en query string para autocompletar allí
                     const params = new URLSearchParams({ name: kitForm.name, email: kitForm.email });
                     window.location.href = `${KIT_SUPERVIVENCIA_URL}?${params.toString()}`;
