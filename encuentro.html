@@ -176,6 +176,9 @@
                     const insertData = {
                         event_slug: 'encuentro-cuidarte-2026',
                         full_name: `${form.first_name} ${form.last_name_1} ${form.last_name_2}`.trim(),
+                        first_name: form.first_name,
+                        last_name_1: form.last_name_1,
+                        last_name_2: form.last_name_2,
                         email: form.email.toLowerCase().trim(),
                         phone: fullPhone,
                         is_student: form.is_student === 'yes',
