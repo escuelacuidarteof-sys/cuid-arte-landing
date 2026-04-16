@@ -87,7 +87,7 @@
 
         function App() {
             const [form, setForm] = useState({
-                full_name: '', email: '', phone: '', phonePrefix: '+34',
+                first_name: '', last_name_1: '', last_name_2: '', email: '', phone: '', phonePrefix: '+34',
                 is_student: '', room_type: '', companion_name: '',
                 age_range: '', province: '', relation_to_cancer: '',
                 cancer_type: '', cancer_stage: '', in_active_treatment: false,
@@ -154,7 +154,9 @@
 
             const validateStep1 = () => {
                 const e = {};
-                if (!form.full_name) e.full_name = true;
+                if (!form.first_name) e.first_name = true;
+                if (!form.last_name_1) e.last_name_1 = true;
+                if (!form.last_name_2) e.last_name_2 = true;
                 if (!form.email || !form.email.includes('@')) e.email = true;
                 if (!form.phone) e.phone = true;
                 if (!form.is_student) e.is_student = true;
@@ -173,7 +175,7 @@
                     const fullPhone = form.phone ? `${form.phonePrefix} ${form.phone}`.trim() : null;
                     const insertData = {
                         event_slug: 'encuentro-cuidarte-2026',
-                        full_name: form.full_name,
+                        full_name: `${form.first_name} ${form.last_name_1} ${form.last_name_2}`.trim(),
                         email: form.email.toLowerCase().trim(),
                         phone: fullPhone,
                         is_student: form.is_student === 'yes',
@@ -498,8 +500,18 @@
                             {step === 1 && (
                                 <div className="space-y-5 bg-earth-50/50 rounded-3xl p-8 md:p-10 border border-sage-100">
                                     <div className="space-y-1.5">
-                                        <label className={labelClass}>Nombre completo *</label>
-                                        <input className={inputClass('full_name')} value={form.full_name} onChange={e => { setForm({...form, full_name: e.target.value}); setErrors({...errors, full_name: false}); }} />
+                                        <label className={labelClass}>Nombre *</label>
+                                        <input className={inputClass('first_name')} placeholder="Nombre" value={form.first_name} onChange={e => { setForm({...form, first_name: e.target.value}); setErrors({...errors, first_name: false}); }} />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div className="space-y-1.5">
+                                            <label className={labelClass}>Primer apellido *</label>
+                                            <input className={inputClass('last_name_1')} placeholder="Primer apellido" value={form.last_name_1} onChange={e => { setForm({...form, last_name_1: e.target.value}); setErrors({...errors, last_name_1: false}); }} />
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <label className={labelClass}>Segundo apellido *</label>
+                                            <input className={inputClass('last_name_2')} placeholder="Segundo apellido" value={form.last_name_2} onChange={e => { setForm({...form, last_name_2: e.target.value}); setErrors({...errors, last_name_2: false}); }} />
+                                        </div>
                                     </div>
 
                                     <div className="space-y-1.5">
@@ -637,7 +649,7 @@
                             {step === 2 && (
                                 <div className="space-y-5 bg-earth-50/50 rounded-3xl p-8 md:p-10 border border-sage-100">
                                     <div className="bg-sage-50 border border-sage-200/50 rounded-2xl p-4 text-center">
-                                        <p className="text-sm text-sage-700"><strong>{form.full_name}</strong> · {form.is_student === 'yes' ? 'Alumna' : 'No alumna'} · {form.room_type === 'doble' ? 'Doble' : 'Individual'} · <strong className="font-display text-lg">{getPrice()}€</strong></p>
+                                        <p className="text-sm text-sage-700"><strong>{form.first_name} {form.last_name_1} {form.last_name_2}</strong> · {form.is_student === 'yes' ? 'Alumna' : 'No alumna'} · {form.room_type === 'doble' ? 'Doble' : 'Individual'} · <strong className="font-display text-lg">{getPrice()}€</strong></p>
                                     </div>
 
                                     <div className="space-y-1.5">
