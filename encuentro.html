@@ -282,15 +282,9 @@
 
                             {/* Bottom — info bar */}
                             <div className="flex flex-wrap items-end justify-between gap-6 reveal-up" style={{ animationDelay: '0.8s' }}>
-                                <div className="flex items-center gap-8">
-                                    <div>
-                                        <p className="font-display text-4xl font-bold text-sand-400">{plazasRestantes}</p>
-                                        <p className="font-heading text-[9px] text-white/40 uppercase tracking-[2px]">Plazas libres</p>
-                                    </div>
-                                    <div className="w-px h-10 bg-white/10"></div>
-                                    <div>
-                                        <p className="font-display text-4xl font-bold text-white/30">{TOTAL_PLAZAS}</p>
-                                        <p className="font-heading text-[9px] text-white/40 uppercase tracking-[2px]">Máximo</p>
+                                <div className="flex items-center gap-4">
+                                    <div className="bg-sand-400/15 border border-sand-400/25 backdrop-blur-md rounded-full py-2.5 px-6">
+                                        <p className="text-sand-400 font-heading font-bold text-xs uppercase tracking-[2px]">Plazas limitadas</p>
                                     </div>
                                 </div>
 
@@ -368,7 +362,7 @@
                                         </a>
                                     </div>
                                     <div>
-                                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3152.5!2d-2.994!3d37.728!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd6f4a7c9b3e1f%3A0x0!2sHotel+Rural+Valle+del+Turrilla!5e0!3m2!1ses!2ses!4v1" width="100%" height="100%" style={{border:0, minHeight: '300px'}} allowFullScreen="" loading="lazy"></iframe>
+                                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d12610!2d-2.9944!3d37.7283!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd6f4a8a5b5b5b%3A0x7c8e4e4e4e4e4e4e!2sHinojares%2C+Ja%C3%A9n!5e0!3m2!1ses!2ses!4v1" width="100%" height="100%" style={{border:0, minHeight: '300px'}} allowFullScreen="" loading="lazy"></iframe>
                                     </div>
                                 </div>
                             </div>
@@ -681,7 +675,7 @@
                             <p className="font-display text-4xl md:text-5xl font-bold text-white italic mb-4">¿Te animas?</p>
                             <div className="divider-leaf w-16 h-px mx-auto mb-6"></div>
                             <p className="text-sage-400 text-sm italic mb-8 font-display">Cuidarte hoy, es ganar vida mañana.</p>
-                            {plazasRestantes <= 15 && <p className="text-sand-400 font-heading font-bold text-sm mb-6">{plazasRestantes} plazas disponibles</p>}
+                            <p className="text-sand-400 font-heading font-bold text-xs uppercase tracking-[2px] mb-6">Plazas limitadas</p>
                             <a href="#registro" className="inline-flex items-center gap-3 bg-sand-400 hover:bg-sand-500 text-sage-900 font-heading font-bold py-4 px-12 rounded-full text-lg transition-all shadow-lg shadow-sand-400/20 hover:shadow-xl hover:-translate-y-0.5">
                                 Reservar mi plaza
                             </a>
