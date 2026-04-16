@@ -88,6 +88,16 @@
             const [verified, setVerified] = useState(null);
             const [submitting, setSubmitting] = useState(false);
             const [errors, setErrors] = useState({});
+            const [plazasRestantes, setPlazasRestantes] = useState(20);
+            const [openFaq, setOpenFaq] = useState(null);
+            const TOTAL_PLAZAS = 20;
+
+            useEffect(() => {
+                if (!supabase) return;
+                supabase.from('event_registrations').select('id', { count: 'exact', head: true }).eq('event_slug', 'encuentro-cuidarte-2026').then(({ count }) => {
+                    setPlazasRestantes(Math.max(0, TOTAL_PLAZAS - (count || 0)));
+                });
+            }, []);
             const [toast, setToast] = useState({ msg: '', visible: false, type: 'success' });
 
             const showToast = (msg, type = 'success') => {
@@ -200,39 +210,102 @@
             const selectClass = (field) => inputClass(field);
             const labelClass = 'text-xs font-bold text-slate-500 uppercase tracking-wide';
 
+            const FAQS = [
+                { q: '¿Qué incluye el precio?', a: 'Alojamiento completo (1 noche), pensión completa con comida saludable, todas las actividades del programa (yoga, senderismo, cata AOVE, entrenamiento funcional, tribu de mujeres) y acompañamiento del equipo Cuid-Arte durante todo el fin de semana.' },
+                { q: '¿Puedo ir sola?', a: '¡Por supuesto! La mayoría de asistentes vienen solas. Es una oportunidad perfecta para conectar con otras personas en tu misma situación. Si eliges habitación doble te asignaremos una compañera.' },
+                { q: '¿Se adapta si tengo movilidad reducida?', a: 'Sí, nos adaptamos a tus necesidades. Indícalo en el formulario de inscripción (notas médicas) y lo tendremos en cuenta para las actividades.' },
+                { q: '¿Qué tengo que llevar?', a: 'Ropa cómoda para las actividades, calzado de senderismo, bañador (el hotel tiene piscina) y muchas ganas de cuidarte. ¡Del resto nos encargamos nosotros!' },
+                { q: '¿Puedo llevar acompañante que no sea alumna?', a: 'Sí, hay plazas para personas externas a un precio diferente. También son bienvenidos familiares y cuidadores.' },
+                { q: '¿Hay posibilidad de cancelación?', a: 'Sí, puedes cancelar hasta 15 días antes del evento con reembolso completo. Contacta con nosotros por WhatsApp.' },
+            ];
+
             return (
                 <div className="min-h-screen">
-                    {/* HERO */}
-                    <div className="relative min-h-[70vh] flex items-center justify-center text-center text-white overflow-hidden" style={{ background: 'linear-gradient(135deg, #1a2e1a 0%, #4F7F50 50%, #6BA06B 100%)' }}>
-                        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200)', backgroundSize: 'cover', backgroundPosition: 'center' }}></div>
-                        <div className="relative z-10 max-w-3xl mx-auto px-6 py-20">
-                            <p className="text-cuidarte-gold font-bold text-sm uppercase tracking-[4px] mb-4">Escuela Cuid-Arte presenta</p>
-                            <h1 className="font-heading text-5xl md:text-6xl font-extrabold mb-4 leading-tight">I Encuentro<br/>Cuid-Arte</h1>
-                            <p className="text-xl md:text-2xl font-heading font-semibold text-cuidarte-mint mb-2">9 - 10 Mayo 2026</p>
-                            <p className="text-lg text-white/80 mb-6">Hinojares, Jaén</p>
-                            <p className="text-lg md:text-xl text-white/90 italic font-heading max-w-xl mx-auto leading-relaxed">Un fin de semana para reconectar contigo, con tu cuerpo y con la vida</p>
-                            <a href="#registro" className="inline-block mt-8 bg-cuidarte-gold hover:bg-cuidarte-gold-deep text-white font-bold py-4 px-10 rounded-full text-lg transition-all shadow-lg hover:shadow-xl">Reservar mi plaza</a>
+                    {/* HERO con foto Odile */}
+                    <div className="relative min-h-[85vh] flex items-center text-white overflow-hidden" style={{ background: 'linear-gradient(135deg, #1a2e1a 0%, #2a3e2a 100%)' }}>
+                        <div className="absolute inset-0 opacity-15" style={{ backgroundImage: 'url(imagen/encuentro/cartel.jpeg)', backgroundSize: 'cover', backgroundPosition: 'center' }}></div>
+                        <div className="relative z-10 container mx-auto px-6 py-16 grid md:grid-cols-2 gap-10 items-center">
+                            <div className="text-center md:text-left">
+                                <p className="text-cuidarte-gold font-bold text-xs uppercase tracking-[4px] mb-4">Escuela Cuid-Arte presenta</p>
+                                <h1 className="font-heading text-4xl md:text-6xl font-extrabold mb-3 leading-tight">I Encuentro<br/><span className="text-cuidarte-mint">Cuid-Arte</span></h1>
+                                <p className="text-xl md:text-2xl font-heading font-semibold text-white/90 mb-1">9 - 10 Mayo 2026</p>
+                                <p className="text-base text-white/60 mb-6">Hinojares, Jaén · Sierra de Cazorla</p>
+                                <p className="text-lg text-white/80 italic font-heading max-w-md leading-relaxed mb-4">Un fin de semana para reconectar contigo, con tu cuerpo y con la vida</p>
+                                {plazasRestantes <= 10 && (
+                                    <p className="text-cuidarte-gold font-bold text-sm mb-4 animate-pulse">🔥 Solo quedan {plazasRestantes} plazas</p>
+                                )}
+                                <a href="#registro" className="inline-block bg-cuidarte-gold hover:bg-cuidarte-gold-deep text-white font-bold py-4 px-10 rounded-full text-lg transition-all shadow-lg hover:shadow-xl">Reservar mi plaza</a>
+                            </div>
+                            <div className="flex justify-center">
+                                <div className="relative">
+                                    <div className="w-64 h-80 md:w-80 md:h-96 rounded-3xl overflow-hidden shadow-2xl border-4 border-cuidarte-gold/30">
+                                        <img src="https://i.postimg.cc/vTr73LCx/Odile-transformacion-web.jpg" alt="Dra. Odile Fernández" className="w-full h-full object-cover object-top" />
+                                    </div>
+                                    <div className="absolute -bottom-4 -left-4 bg-white rounded-2xl p-4 shadow-xl max-w-[220px]">
+                                        <p className="font-heading font-bold text-cuidarte-dark-deep text-sm">Dra. Odile Fernández</p>
+                                        <p className="text-[10px] text-slate-500">Directora de Escuela Cuid-Arte</p>
+                                        <p className="text-[10px] text-cuidarte-gold-deep font-bold mt-1">📚 Llévate tu libro firmado</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    {/* DESCRIPCION */}
-                    <div className="max-w-3xl mx-auto px-6 py-20 text-center">
-                        <p className="text-cuidarte-gold font-bold text-xs uppercase tracking-[3px] mb-4">Un retiro, una experiencia transformadora</p>
-                        <h2 className="font-heading text-3xl font-bold text-cuidarte-dark-deep mb-6">Reconecta contigo</h2>
-                        <p className="text-slate-600 text-lg leading-relaxed max-w-2xl mx-auto">Si estás atravesando un proceso oncológico y deseas nutrir cuerpo, mente y alma cuidando de ti con pausa y amor, este encuentro es para ti. Ciencia, autocuidado y conexión en un entorno mágico.</p>
+                    {/* CONTADOR PLAZAS */}
+                    <div className="bg-cuidarte-gold text-white py-4">
+                        <div className="container mx-auto px-6 flex items-center justify-center gap-6 text-center">
+                            <div><span className="font-heading font-extrabold text-3xl">{plazasRestantes}</span><p className="text-[10px] uppercase tracking-wider font-bold">Plazas disponibles</p></div>
+                            <div className="w-px h-10 bg-white/30"></div>
+                            <div><span className="font-heading font-extrabold text-3xl">20</span><p className="text-[10px] uppercase tracking-wider font-bold">Asistentes máximo</p></div>
+                            <div className="w-px h-10 bg-white/30"></div>
+                            <div><span className="font-heading font-extrabold text-3xl">2</span><p className="text-[10px] uppercase tracking-wider font-bold">Días de retiro</p></div>
+                        </div>
                     </div>
 
-                    {/* ACTIVIDADES */}
-                    <div className="max-w-5xl mx-auto px-6 pb-20">
-                        <h2 className="font-heading text-2xl font-bold text-center text-cuidarte-dark-deep mb-10">Esto es solo un adelanto de lo que te espera</h2>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-                            {ACTIVITIES.map((a, i) => (
-                                <div key={i} className="bg-white rounded-2xl p-6 text-center border border-slate-100 shadow-sm hover:shadow-md transition-all">
-                                    <div className="text-4xl mb-3">{a.icon}</div>
-                                    <h3 className="font-heading font-bold text-sm uppercase text-cuidarte-dark-deep mb-2">{a.title}</h3>
-                                    <p className="text-xs text-slate-500 leading-relaxed">{a.desc}</p>
+                    {/* DESCRIPCION con imagen retiro */}
+                    <div className="max-w-5xl mx-auto px-6 py-20">
+                        <div className="grid md:grid-cols-2 gap-12 items-center">
+                            <div className="rounded-3xl overflow-hidden shadow-xl">
+                                <img src="imagen/encuentro/retiro.jpeg" alt="Reconecta contigo" className="w-full h-auto" />
+                            </div>
+                            <div className="text-center md:text-left">
+                                <p className="text-cuidarte-gold font-bold text-xs uppercase tracking-[3px] mb-4">Un retiro, una experiencia transformadora</p>
+                                <h2 className="font-heading text-3xl font-bold text-cuidarte-dark-deep mb-6">Reconecta contigo, con tu cuerpo y con la vida</h2>
+                                <p className="text-slate-600 text-base leading-relaxed mb-4">Si estás atravesando un proceso oncológico y deseas nutrir cuerpo, mente y alma cuidando de ti con pausa y amor, este encuentro es para ti.</p>
+                                <p className="text-slate-600 text-base leading-relaxed">Ciencia, autocuidado y conexión en un entorno mágico y entre mujeres que buscan lo mismo que tú.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* ACTIVIDADES con imagen */}
+                    <div className="bg-cuidarte-mint/15 py-20">
+                        <div className="max-w-5xl mx-auto px-6">
+                            <div className="grid md:grid-cols-2 gap-12 items-center">
+                                <div>
+                                    <h2 className="font-heading text-2xl font-bold text-cuidarte-dark-deep mb-8">Esto es solo un adelanto de lo que te espera</h2>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        {ACTIVITIES.map((a, i) => (
+                                            <div key={i} className="bg-white rounded-2xl p-5 text-center border border-slate-100 shadow-sm hover:shadow-md transition-all">
+                                                <div className="text-3xl mb-2">{a.icon}</div>
+                                                <h3 className="font-heading font-bold text-xs uppercase text-cuidarte-dark-deep mb-1">{a.title}</h3>
+                                                <p className="text-[10px] text-slate-500 leading-relaxed">{a.desc}</p>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
-                            ))}
+                                <div className="rounded-3xl overflow-hidden shadow-xl">
+                                    <img src="imagen/encuentro/actividades.jpeg" alt="Actividades del encuentro" className="w-full h-auto" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* LIBRO FIRMADO */}
+                    <div className="bg-cuidarte-dark-deep py-16">
+                        <div className="max-w-3xl mx-auto px-6 text-center text-white">
+                            <p className="text-cuidarte-gold text-4xl mb-4">📚</p>
+                            <h2 className="font-heading text-2xl font-bold mb-3">Llévate tu libro firmado por la Dra. Odile</h2>
+                            <p className="text-slate-300 text-sm leading-relaxed max-w-lg mx-auto">Todos los asistentes tendrán la oportunidad de llevarse un libro firmado personalmente por la Dra. Odile Fernández, autora de más de 10 libros sobre alimentación y salud oncológica.</p>
                         </div>
                     </div>
 
@@ -504,6 +577,58 @@
                         </div>
                     </div>
 
+                    {/* FAQ */}
+                    <div className="max-w-3xl mx-auto px-6 py-20">
+                        <h2 className="font-heading text-2xl font-bold text-center text-cuidarte-dark-deep mb-10">Preguntas frecuentes</h2>
+                        <div className="space-y-3">
+                            {FAQS.map((faq, i) => (
+                                <div key={i} className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                                    <button onClick={() => setOpenFaq(openFaq === i ? null : i)} className="w-full text-left px-6 py-4 flex justify-between items-center gap-4 hover:bg-slate-50 transition-colors">
+                                        <span className="font-heading font-bold text-sm text-cuidarte-dark-deep">{faq.q}</span>
+                                        <span className={`text-cuidarte-green text-xl transition-transform ${openFaq === i ? 'rotate-45' : ''}`}>+</span>
+                                    </button>
+                                    {openFaq === i && (
+                                        <div className="px-6 pb-4">
+                                            <p className="text-sm text-slate-600 leading-relaxed">{faq.a}</p>
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* CONTACTO */}
+                    <div className="bg-cuidarte-mint/20 py-16">
+                        <div className="max-w-4xl mx-auto px-6 text-center">
+                            <h2 className="font-heading text-2xl font-bold text-cuidarte-dark-deep mb-3">¿Tienes dudas?</h2>
+                            <p className="text-slate-500 text-sm mb-8">Contacta con nosotros por WhatsApp</p>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                {[
+                                    { name: 'Jesús', phone: '34664401328', role: 'Equipo Cuid-Arte' },
+                                    { name: 'Jose Pedro', phone: '34650503871', role: 'Equipo Cuid-Arte' },
+                                    { name: 'Dra. Odile', phone: '34652552096', role: 'Directora' },
+                                    { name: 'Hotel', phone: '34609166737', role: 'Valle del Turrilla' },
+                                ].map((c, i) => (
+                                    <a key={i} href={`https://wa.me/${c.phone}?text=${encodeURIComponent('Hola, tengo una duda sobre el I Encuentro Cuid-Arte.')}`} target="_blank" rel="noopener noreferrer" className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm hover:shadow-md hover:border-cuidarte-green/30 transition-all text-center">
+                                        <p className="text-2xl mb-2">📱</p>
+                                        <p className="font-heading font-bold text-sm text-cuidarte-dark-deep">{c.name}</p>
+                                        <p className="text-[10px] text-slate-400">{c.role}</p>
+                                    </a>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* CTA FINAL */}
+                    <div className="bg-gradient-to-r from-cuidarte-dark-deep to-cuidarte-green-deep py-16">
+                        <div className="max-w-3xl mx-auto px-6 text-center text-white">
+                            <h2 className="font-heading text-3xl font-bold mb-3">¿Te animas?</h2>
+                            <p className="text-white/70 text-sm mb-6 italic">Cuidarte hoy, es ganar vida mañana.</p>
+                            {plazasRestantes <= 10 && <p className="text-cuidarte-gold font-bold text-sm mb-4">🔥 Solo quedan {plazasRestantes} plazas</p>}
+                            <a href="#registro" className="inline-block bg-cuidarte-gold hover:bg-cuidarte-gold-deep text-white font-bold py-4 px-12 rounded-full text-lg transition-all shadow-lg">Reservar mi plaza</a>
+                        </div>
+                    </div>
+
                     {/* FOOTER */}
                     <footer className="bg-cuidarte-dark-deep text-white py-12">
                         <div className="max-w-4xl mx-auto px-6 text-center">
@@ -517,6 +642,11 @@
                             </div>
                         </div>
                     </footer>
+
+                    {/* BOTON WHATSAPP FLOTANTE */}
+                    <a href="https://wa.me/34664401328?text=Hola%2C%20tengo%20una%20duda%20sobre%20el%20I%20Encuentro%20Cuid-Arte." target="_blank" rel="noopener noreferrer" className="fixed bottom-6 left-6 z-50 bg-green-500 hover:bg-green-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-xl hover:shadow-2xl transition-all hover:scale-110">
+                        <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492l4.644-1.217A11.95 11.95 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.153 0-4.144-.68-5.78-1.836l-.404-.263-2.75.72.735-2.686-.29-.421A9.94 9.94 0 012 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>
+                    </a>
 
                     {/* TOAST */}
                     {toast.visible && (
