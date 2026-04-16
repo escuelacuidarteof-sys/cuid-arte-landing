@@ -585,7 +585,8 @@
                                     </div>
 
                                     {/* Alumna + habitación — solo si alojamiento */}
-                                    {needsRoom && <div className="space-y-1.5">
+                                    {needsRoom && (<>
+                                    <div className="space-y-1.5">
                                         <label className={labelClass}>¿Eres alumna de Escuela Cuid-Arte? *</label>
                                         <p className="text-[10px] text-sage-400 italic -mt-0.5 mb-1">Si eres alumna, usa el mismo email de tu registro para verificar</p>
                                         <div className="flex gap-3">
@@ -619,7 +620,7 @@
                                             <input className={inputClass('')} placeholder="Si ya sabes con quién compartirás" value={form.companion_name} onChange={e => setForm({...form, companion_name: e.target.value})} />
                                         </div>
                                     )}
-                                    </div>}
+                                    </>)}
 
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-1.5">
