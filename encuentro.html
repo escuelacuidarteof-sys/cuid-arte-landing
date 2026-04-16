@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>I Encuentro Cuid-Arte | 9-10 Mayo 2026 | Hinojares, Jaén</title>
+    <meta name="description" content="Un fin de semana para reconectar contigo, con tu vida. Retiro de bienestar oncológico en plena naturaleza.">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'cuidarte-green': '#6BA06B',
+                        'cuidarte-mint': '#CDE8CD',
+                        'cuidarte-gold': '#D4AF37',
+                        'cuidarte-dark': '#2C3E50',
+                        'cuidarte-green-deep': '#558055',
+                        'cuidarte-green-light': '#E3F0E3',
+                        'cuidarte-gold-deep': '#B08D26',
+                        'cuidarte-dark-deep': '#1A2530',
+                    },
+                    fontFamily: {
+                        sans: ['Open Sans', 'sans-serif'],
+                        heading: ['Montserrat', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        .bg-hero { background: linear-gradient(135deg, rgba(26,46,26,0.7) 0%, rgba(107,160,107,0.4) 100%); }
+        .golden-glow { box-shadow: 0 0 30px rgba(212,175,55,0.15); }
+    </style>
+</head>
+<body class="font-sans text-cuidarte-dark antialiased bg-[#FAF9F6]">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const SB_URL = "__SUPABASE_URL__";
+        const SB_KEY = "__SUPABASE_ANON_KEY__";
+        const isConfigured = SB_URL.startsWith('http');
+        const supabase = isConfigured ? window.supabase.createClient(SB_URL, SB_KEY) : null;
+
+        const STRIPE_LINKS = {
+            student_doble: 'https://buy.stripe.com/eVq8wQeXC7B53eG2RH8Zq09',
+            student_individual: 'https://buy.stripe.com/7sY4gA3eUf3x3eG63T8Zq0a',
+            external_doble: 'https://buy.stripe.com/cNi3cw9DidZt2aC77X8Zq0b',
+            external_individual: 'https://buy.stripe.com/8x2fZi02I8F93eG63T8Zq0c',
+        };
+
+        const PRICES = {
+            student: { doble: 150, individual: 190 },
+            external: { doble: 200, individual: 250 },
+        };
+
+        const ACTIVITIES = [
+            { icon: '🏠', title: 'Alojamiento', desc: 'Descansaremos en plena naturaleza, con pensión completa saludable' },
+            { icon: '🥾', title: 'Senderismo', desc: 'Rutas para llenar tus pulmones con aire puro y claridad' },
+            { icon: '🫒', title: 'Cata de AOVE', desc: 'Saborea la esencia de nuestra tierra' },
+            { icon: '🧘', title: 'Yoga', desc: 'Respira, estira, activa y reconecta contigo' },
+            { icon: '💪', title: 'Entrenamiento Funcional', desc: 'Fuerza, energía y bienestar para tu día a día' },
+            { icon: '💚', title: 'Tribu de Mujeres', desc: 'Espacios para compartir, conectar y sostenernos desde el corazón' },
+        ];
+
+        function App() {
+            const [form, setForm] = useState({
+                full_name: '', email: '', phone: '', phonePrefix: '+34',
+                is_student: '', room_type: '', companion_name: '',
+                age_range: '', province: '', relation_to_cancer: '',
+                cancer_type: '', cancer_stage: '', in_active_treatment: false,
+                how_found: '', first_event: '', motivation: '',
+                dietary_needs: '', medical_notes: '', needs_transport: false,
+                accepts_privacy: false, accepts_marketing: false,
+            });
+            const [step, setStep] = useState(1);
+            const [verifying, setVerifying] = useState(false);
+            const [verified, setVerified] = useState(null);
+            const [submitting, setSubmitting] = useState(false);
+            const [errors, setErrors] = useState({});
+            const [toast, setToast] = useState({ msg: '', visible: false, type: 'success' });
+
+            const showToast = (msg, type = 'success') => {
+                setToast({ msg, visible: true, type });
+                setTimeout(() => setToast(prev => ({ ...prev, visible: false })), 4000);
+            };
+
+            const verifyStudent = async () => {
+                if (!form.email || !form.email.includes('@')) return;
+                setVerifying(true);
+                try {
+                    const { data } = await supabase
+                        .from('clientes')
+                        .select('email, first_name')
+                        .eq('email', form.email.toLowerCase().trim())
+                        .eq('status', 'active')
+                        .maybeSingle();
+                    setVerified(!!data);
+                    if (data) {
+                        setForm(prev => ({ ...prev, is_student: 'yes' }));
+                        showToast('¡Verificada! Tienes precio especial de alumna.', 'success');
+                    } else {
+                        setForm(prev => ({ ...prev, is_student: 'no' }));
+                        showToast('No hemos encontrado tu email como alumna activa.', 'info');
+                    }
+                } catch (e) { console.error(e); }
+                finally { setVerifying(false); }
+            };
+
+            const getPrice = () => {
+                const tier = form.is_student === 'yes' ? 'student' : 'external';
+                return PRICES[tier]?.[form.room_type] || 0;
+            };
+
+            const getStripeLink = () => {
+                const tier = form.is_student === 'yes' ? 'student' : 'external';
+                return STRIPE_LINKS[`${tier}_${form.room_type}`] || '';
+            };
+
+            const showsCancerFields = form.relation_to_cancer === 'paciente' || form.relation_to_cancer === 'superviviente';
+
+            const validateStep1 = () => {
+                const e = {};
+                if (!form.full_name) e.full_name = true;
+                if (!form.email || !form.email.includes('@')) e.email = true;
+                if (!form.phone) e.phone = true;
+                if (!form.is_student) e.is_student = true;
+                if (!form.room_type) e.room_type = true;
+                if (!form.age_range) e.age_range = true;
+                if (!form.relation_to_cancer) e.relation_to_cancer = true;
+                if (!form.how_found) e.how_found = true;
+                setErrors(e);
+                return Object.keys(e).length === 0;
+            };
+
+            const handleSubmit = async () => {
+                if (!form.accepts_privacy) { showToast('Debes aceptar la política de privacidad', 'error'); return; }
+                setSubmitting(true);
+                try {
+                    const fullPhone = form.phone ? `${form.phonePrefix} ${form.phone}`.trim() : null;
+                    const insertData = {
+                        event_slug: 'encuentro-cuidarte-2026',
+                        full_name: form.full_name,
+                        email: form.email.toLowerCase().trim(),
+                        phone: fullPhone,
+                        is_student: form.is_student === 'yes',
+                        room_type: form.room_type,
+                        companion_name: form.companion_name || null,
+                        age_range: form.age_range || null,
+                        province: form.province || null,
+                        relation_to_cancer: form.relation_to_cancer || null,
+                        cancer_type: showsCancerFields ? (form.cancer_type || null) : null,
+                        cancer_stage: showsCancerFields ? (form.cancer_stage || null) : null,
+                        in_active_treatment: showsCancerFields ? form.in_active_treatment : null,
+                        how_found: form.how_found || null,
+                        first_event: form.first_event === 'yes',
+                        motivation: form.motivation || null,
+                        dietary_needs: form.dietary_needs || null,
+                        medical_notes: form.medical_notes || null,
+                        needs_transport: form.needs_transport,
+                        accepts_privacy: true,
+                        accepts_conditions: true,
+                        accepts_marketing: form.accepts_marketing,
+                        amount_paid: getPrice(),
+                        status: 'pending',
+                    };
+
+                    if (supabase) {
+                        const { error } = await supabase.from('event_registrations').insert(insertData);
+                        if (error) {
+                            if (error.code === '23505') showToast('Ya existe un registro con este email.', 'error');
+                            else showToast('Error al guardar. Inténtalo de nuevo.', 'error');
+                            setSubmitting(false);
+                            return;
+                        }
+                    }
+
+                    // Redirect to Stripe
+                    const stripeLink = getStripeLink();
+                    if (stripeLink) window.location.href = stripeLink;
+                    else showToast('Error con el enlace de pago. Contacta con nosotros.', 'error');
+                } catch (e) {
+                    console.error(e);
+                    showToast('Error inesperado.', 'error');
+                }
+                finally { setSubmitting(false); }
+            };
+
+            const inputClass = (field) => `w-full px-4 py-3 rounded-xl border ${errors[field] ? 'border-red-400' : 'border-slate-200'} bg-white focus:bg-white focus:ring-2 focus:ring-cuidarte-green outline-none text-sm`;
+            const selectClass = (field) => inputClass(field);
+            const labelClass = 'text-xs font-bold text-slate-500 uppercase tracking-wide';
+
+            return (
+                <div className="min-h-screen">
+                    {/* HERO */}
+                    <div className="relative min-h-[70vh] flex items-center justify-center text-center text-white overflow-hidden" style={{ background: 'linear-gradient(135deg, #1a2e1a 0%, #4F7F50 50%, #6BA06B 100%)' }}>
+                        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200)', backgroundSize: 'cover', backgroundPosition: 'center' }}></div>
+                        <div className="relative z-10 max-w-3xl mx-auto px-6 py-20">
+                            <p className="text-cuidarte-gold font-bold text-sm uppercase tracking-[4px] mb-4">Escuela Cuid-Arte presenta</p>
+                            <h1 className="font-heading text-5xl md:text-6xl font-extrabold mb-4 leading-tight">I Encuentro<br/>Cuid-Arte</h1>
+                            <p className="text-xl md:text-2xl font-heading font-semibold text-cuidarte-mint mb-2">9 - 10 Mayo 2026</p>
+                            <p className="text-lg text-white/80 mb-6">Hinojares, Jaén</p>
+                            <p className="text-lg md:text-xl text-white/90 italic font-heading max-w-xl mx-auto leading-relaxed">Un fin de semana para reconectar contigo, con tu cuerpo y con la vida</p>
+                            <a href="#registro" className="inline-block mt-8 bg-cuidarte-gold hover:bg-cuidarte-gold-deep text-white font-bold py-4 px-10 rounded-full text-lg transition-all shadow-lg hover:shadow-xl">Reservar mi plaza</a>
+                        </div>
+                    </div>
+
+                    {/* DESCRIPCION */}
+                    <div className="max-w-3xl mx-auto px-6 py-20 text-center">
+                        <p className="text-cuidarte-gold font-bold text-xs uppercase tracking-[3px] mb-4">Un retiro, una experiencia transformadora</p>
+                        <h2 className="font-heading text-3xl font-bold text-cuidarte-dark-deep mb-6">Reconecta contigo</h2>
+                        <p className="text-slate-600 text-lg leading-relaxed max-w-2xl mx-auto">Si estás atravesando un proceso oncológico y deseas nutrir cuerpo, mente y alma cuidando de ti con pausa y amor, este encuentro es para ti. Ciencia, autocuidado y conexión en un entorno mágico.</p>
+                    </div>
+
+                    {/* ACTIVIDADES */}
+                    <div className="max-w-5xl mx-auto px-6 pb-20">
+                        <h2 className="font-heading text-2xl font-bold text-center text-cuidarte-dark-deep mb-10">Esto es solo un adelanto de lo que te espera</h2>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                            {ACTIVITIES.map((a, i) => (
+                                <div key={i} className="bg-white rounded-2xl p-6 text-center border border-slate-100 shadow-sm hover:shadow-md transition-all">
+                                    <div className="text-4xl mb-3">{a.icon}</div>
+                                    <h3 className="font-heading font-bold text-sm uppercase text-cuidarte-dark-deep mb-2">{a.title}</h3>
+                                    <p className="text-xs text-slate-500 leading-relaxed">{a.desc}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* PLANNING — PLACEHOLDER */}
+                    <div className="bg-cuidarte-mint/20 py-16">
+                        <div className="max-w-4xl mx-auto px-6 text-center">
+                            <h2 className="font-heading text-2xl font-bold text-cuidarte-dark-deep mb-4">Planning del encuentro</h2>
+                            <p className="text-slate-500 text-sm italic">Próximamente se publicará el programa completo del fin de semana.</p>
+                        </div>
+                    </div>
+
+                    {/* PRECIOS */}
+                    <div className="max-w-4xl mx-auto px-6 py-20">
+                        <h2 className="font-heading text-2xl font-bold text-center text-cuidarte-dark-deep mb-10">Precios</h2>
+                        <p className="text-center text-slate-500 text-sm mb-8">Incluye todo el fin de semana: alojamiento, pensión completa y todas las actividades</p>
+                        <div className="grid md:grid-cols-2 gap-8">
+                            <div className="bg-white rounded-2xl p-8 border-2 border-cuidarte-green shadow-md">
+                                <div className="bg-cuidarte-green text-white text-xs font-bold uppercase tracking-wider text-center py-2 rounded-lg mb-6">Alumnas Cuid-Arte</div>
+                                <div className="space-y-4">
+                                    <div className="flex justify-between items-center"><span className="text-slate-600">Habitación doble</span><span className="font-heading font-bold text-2xl text-cuidarte-dark-deep">150€</span></div>
+                                    <div className="flex justify-between items-center"><span className="text-slate-600">Habitación individual</span><span className="font-heading font-bold text-2xl text-cuidarte-dark-deep">190€</span></div>
+                                </div>
+                            </div>
+                            <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
+                                <div className="bg-slate-100 text-slate-600 text-xs font-bold uppercase tracking-wider text-center py-2 rounded-lg mb-6">Otras personas</div>
+                                <div className="space-y-4">
+                                    <div className="flex justify-between items-center"><span className="text-slate-600">Habitación doble</span><span className="font-heading font-bold text-2xl text-cuidarte-dark-deep">200€</span></div>
+                                    <div className="flex justify-between items-center"><span className="text-slate-600">Habitación individual</span><span className="font-heading font-bold text-2xl text-cuidarte-dark-deep">250€</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <p className="text-center text-xs text-slate-400 mt-6">Plazas limitadas</p>
+                    </div>
+
+                    {/* FORMULARIO */}
+                    <div id="registro" className="bg-white py-20">
+                        <div className="max-w-2xl mx-auto px-6">
+                            <h2 className="font-heading text-2xl font-bold text-center text-cuidarte-dark-deep mb-2">Reserva tu plaza</h2>
+                            <p className="text-center text-slate-500 text-sm mb-10">Completa el formulario y te redirigiremos al pago seguro</p>
+
+                            {step === 1 && (
+                                <div className="space-y-5">
+                                    {/* Datos básicos */}
+                                    <div className="space-y-1">
+                                        <label className={labelClass}>Nombre completo *</label>
+                                        <input className={inputClass('full_name')} value={form.full_name} onChange={e => { setForm({...form, full_name: e.target.value}); setErrors({...errors, full_name: false}); }} />
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className={labelClass}>Email *</label>
+                                        <input type="email" className={inputClass('email')} value={form.email} onChange={e => { setForm({...form, email: e.target.value, is_student: '', }); setVerified(null); setErrors({...errors, email: false}); }} />
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className={labelClass}>Teléfono *</label>
+                                        <div className="flex gap-2">
+                                            <select className="w-24 px-2 py-3 rounded-xl border border-slate-200 bg-white text-sm" value={form.phonePrefix} onChange={e => setForm({...form, phonePrefix: e.target.value})}>
+                                                {["+34","+1","+44","+49","+33","+39","+351","+52","+54","+56","+57","+593","+51"].map(p => <option key={p}>{p}</option>)}
+                                            </select>
+                                            <input type="tel" placeholder="612 345 678" className={`flex-1 ${inputClass('phone')}`} value={form.phone} onChange={e => { setForm({...form, phone: e.target.value}); setErrors({...errors, phone: false}); }} />
+                                        </div>
+                                    </div>
+
+                                    {/* Verificación alumna */}
+                                    <div className="space-y-1">
+                                        <label className={labelClass}>¿Eres alumna de Escuela Cuid-Arte? *</label>
+                                        <div className="flex gap-3">
+                                            <button type="button" onClick={() => { setForm({...form, is_student: 'yes'}); verifyStudent(); setErrors({...errors, is_student: false}); }} className={`flex-1 py-3 rounded-xl border-2 font-bold text-sm transition-all ${form.is_student === 'yes' ? 'border-cuidarte-green bg-cuidarte-green-light text-cuidarte-green-deep' : 'border-slate-200 text-slate-500 hover:border-cuidarte-mint'}`}>
+                                                Sí, soy alumna
+                                            </button>
+                                            <button type="button" onClick={() => { setForm({...form, is_student: 'no'}); setVerified(false); setErrors({...errors, is_student: false}); }} className={`flex-1 py-3 rounded-xl border-2 font-bold text-sm transition-all ${form.is_student === 'no' ? 'border-cuidarte-green bg-cuidarte-green-light text-cuidarte-green-deep' : 'border-slate-200 text-slate-500 hover:border-cuidarte-mint'}`}>
+                                                No
+                                            </button>
+                                        </div>
+                                        {form.is_student === 'yes' && verified === true && (
+                                            <p className="text-xs text-cuidarte-green-deep font-medium mt-1">✅ Verificada — tienes precio especial de alumna</p>
+                                        )}
+                                        {form.is_student === 'yes' && verified === false && (
+                                            <p className="text-xs text-amber-600 font-medium mt-1">⚠️ No hemos encontrado tu email como alumna activa. Comprueba que es el mismo con el que te registraste o contacta con nosotros por WhatsApp.</p>
+                                        )}
+                                        {verifying && <p className="text-xs text-slate-400 mt-1">Verificando...</p>}
+                                    </div>
+
+                                    {/* Habitación */}
+                                    <div className="space-y-1">
+                                        <label className={labelClass}>Tipo de habitación *</label>
+                                        <div className="flex gap-3">
+                                            {['doble', 'individual'].map(t => (
+                                                <button key={t} type="button" onClick={() => { setForm({...form, room_type: t}); setErrors({...errors, room_type: false}); }} className={`flex-1 py-4 rounded-xl border-2 font-bold text-sm transition-all ${form.room_type === t ? 'border-cuidarte-green bg-cuidarte-green-light text-cuidarte-green-deep' : 'border-slate-200 text-slate-500 hover:border-cuidarte-mint'}`}>
+                                                    {t === 'doble' ? '🛏️ Doble' : '🛏️ Individual'}
+                                                    {form.is_student && <span className="block text-lg mt-1">{getPrice() || (form.is_student === 'yes' ? PRICES.student[t] : PRICES.external[t])}€</span>}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {form.room_type === 'doble' && (
+                                        <div className="space-y-1">
+                                            <label className={labelClass}>Nombre de tu acompañante (opcional)</label>
+                                            <input className={inputClass('')} placeholder="Si ya sabes con quién compartirás habitación" value={form.companion_name} onChange={e => setForm({...form, companion_name: e.target.value})} />
+                                        </div>
+                                    )}
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-1">
+                                            <label className={labelClass}>Rango de edad *</label>
+                                            <select className={selectClass('age_range')} value={form.age_range} onChange={e => { setForm({...form, age_range: e.target.value}); setErrors({...errors, age_range: false}); }}>
+                                                <option value="">Selecciona...</option>
+                                                {["18-25","26-35","36-45","46-55","56-65","65+"].map(a => <option key={a}>{a}</option>)}
+                                            </select>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className={labelClass}>Provincia</label>
+                                            <input className={inputClass('')} placeholder="Ej: Madrid" value={form.province} onChange={e => setForm({...form, province: e.target.value})} />
+                                        </div>
+                                    </div>
+
+                                    {/* Relación con el cáncer */}
+                                    <div className="space-y-1">
+                                        <label className={labelClass}>¿Cuál es tu relación con el cáncer? *</label>
+                                        <select className={selectClass('relation_to_cancer')} value={form.relation_to_cancer} onChange={e => { setForm({...form, relation_to_cancer: e.target.value}); setErrors({...errors, relation_to_cancer: false}); }}>
+                                            <option value="">Selecciona...</option>
+                                            <option value="paciente">Paciente</option>
+                                            <option value="superviviente">Superviviente</option>
+                                            <option value="familiar">Familiar / Cuidador/a</option>
+                                            <option value="profesional">Profesional sanitario</option>
+                                            <option value="prevencion">Prevención y bienestar</option>
+                                            <option value="otro">Otro</option>
+                                        </select>
+                                    </div>
+
+                                    {/* Campos extra para paciente/superviviente */}
+                                    {showsCancerFields && (
+                                        <div className="bg-cuidarte-mint/20 rounded-2xl p-5 space-y-4">
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="space-y-1">
+                                                    <label className={labelClass}>Tipo de cáncer</label>
+                                                    <input className={inputClass('')} placeholder="Ej: Mama" value={form.cancer_type} onChange={e => setForm({...form, cancer_type: e.target.value})} />
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <label className={labelClass}>Estadío</label>
+                                                    <select className={selectClass('')} value={form.cancer_stage} onChange={e => setForm({...form, cancer_stage: e.target.value})}>
+                                                        <option value="">Selecciona...</option>
+                                                        {["Desconocido","In Situ (0)","I","II","III","IV"].map(s => <option key={s}>{s}</option>)}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <label className="flex items-center gap-3 cursor-pointer">
+                                                <input type="checkbox" className="w-4 h-4 accent-cuidarte-green rounded" checked={form.in_active_treatment} onChange={e => setForm({...form, in_active_treatment: e.target.checked})} />
+                                                <span className="text-sm text-slate-600">Estoy en tratamiento activo actualmente</span>
+                                            </label>
+                                        </div>
+                                    )}
+
+                                    <div className="space-y-1">
+                                        <label className={labelClass}>¿Cómo te has enterado del evento? *</label>
+                                        <select className={selectClass('how_found')} value={form.how_found} onChange={e => { setForm({...form, how_found: e.target.value}); setErrors({...errors, how_found: false}); }}>
+                                            <option value="">Selecciona...</option>
+                                            <option>Instagram</option>
+                                            <option>WhatsApp del equipo</option>
+                                            <option>Recomendación</option>
+                                            <option>Newsletter</option>
+                                            <option>Otro</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className={labelClass}>¿Es tu primer evento presencial relacionado con salud oncológica?</label>
+                                        <div className="flex gap-3">
+                                            {['yes', 'no'].map(v => (
+                                                <button key={v} type="button" onClick={() => setForm({...form, first_event: v})} className={`flex-1 py-3 rounded-xl border-2 font-bold text-sm transition-all ${form.first_event === v ? 'border-cuidarte-green bg-cuidarte-green-light text-cuidarte-green-deep' : 'border-slate-200 text-slate-500'}`}>
+                                                    {v === 'yes' ? 'Sí, es mi primero' : 'No, he ido a otros'}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className={labelClass}>¿Qué es lo que más te motiva a asistir?</label>
+                                        <select className={selectClass('')} value={form.motivation} onChange={e => setForm({...form, motivation: e.target.value})}>
+                                            <option value="">Selecciona...</option>
+                                            <option>Conocer al equipo de Cuid-Arte</option>
+                                            <option>Conectar con otras personas en mi situación</option>
+                                            <option>Actividades al aire libre y naturaleza</option>
+                                            <option>Aprender sobre nutrición y ejercicio</option>
+                                            <option>Desconectar y cuidarme</option>
+                                            <option>Todo lo anterior</option>
+                                        </select>
+                                    </div>
+
+                                    <button type="button" onClick={() => {
+                                        if (validateStep1()) setStep(2);
+                                        else showToast('Completa los campos obligatorios', 'error');
+                                    }} className="w-full bg-cuidarte-dark-deep text-white font-bold py-4 rounded-xl hover:bg-slate-800 transition-all shadow-lg text-sm">
+                                        Continuar →
+                                    </button>
+                                </div>
+                            )}
+
+                            {step === 2 && (
+                                <div className="space-y-5 animate-in">
+                                    <div className="bg-cuidarte-mint/30 border border-cuidarte-green/20 rounded-xl p-4 text-center">
+                                        <p className="text-sm text-cuidarte-green-deep"><strong>{form.full_name}</strong> — {form.is_student === 'yes' ? 'Alumna' : 'No alumna'} — {form.room_type === 'doble' ? 'Doble' : 'Individual'} — <strong>{getPrice()}€</strong></p>
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className={labelClass}>Necesidades alimentarias</label>
+                                        <input className={inputClass('')} placeholder="Vegetariana, intolerancias, alergias..." value={form.dietary_needs} onChange={e => setForm({...form, dietary_needs: e.target.value})} />
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className={labelClass}>Notas médicas relevantes</label>
+                                        <input className={inputClass('')} placeholder="Movilidad reducida, medicación especial..." value={form.medical_notes} onChange={e => setForm({...form, medical_notes: e.target.value})} />
+                                    </div>
+
+                                    <label className="flex items-center gap-3 cursor-pointer">
+                                        <input type="checkbox" className="w-4 h-4 accent-cuidarte-green rounded" checked={form.needs_transport} onChange={e => setForm({...form, needs_transport: e.target.checked})} />
+                                        <span className="text-sm text-slate-600">Necesitaría transporte desde algún punto cercano</span>
+                                    </label>
+
+                                    {/* LEGAL */}
+                                    <div className="bg-slate-50 rounded-2xl p-5 space-y-4">
+                                        <label className="flex items-start gap-3 cursor-pointer">
+                                            <input type="checkbox" required className="mt-1 w-4 h-4 accent-cuidarte-green rounded" checked={form.accepts_privacy} onChange={e => setForm({...form, accepts_privacy: e.target.checked})} />
+                                            <span className="text-xs text-slate-500 leading-tight">Acepto la <a href="privacidad.html" target="_blank" className="text-cuidarte-green-deep underline">Política de Privacidad</a>. Mis datos serán tratados por NEIKO HEALTH S.L. para gestionar mi inscripción al I Encuentro Cuid-Arte. *</span>
+                                        </label>
+
+                                        <label className="flex items-start gap-3 cursor-pointer">
+                                            <input type="checkbox" className="mt-1 w-4 h-4 accent-cuidarte-green rounded" checked={form.accepts_marketing} onChange={e => setForm({...form, accepts_marketing: e.target.checked})} />
+                                            <span className="text-xs text-slate-500 leading-tight">Deseo recibir información sobre futuros eventos y novedades de Escuela Cuid-Arte. Puedo darme de baja en cualquier momento.</span>
+                                        </label>
+                                    </div>
+
+                                    <div className="text-[10px] text-slate-400 leading-relaxed space-y-1">
+                                        <p><strong>Responsable:</strong> NEIKO HEALTH S.L. | <strong>Finalidad:</strong> Gestión de inscripción al evento | <strong>Base legal:</strong> Consentimiento del interesado</p>
+                                        <p><strong>Destinatarios:</strong> No se cederán a terceros salvo obligación legal | <strong>Derechos:</strong> Acceso, rectificación, supresión, portabilidad</p>
+                                    </div>
+
+                                    <div className="flex gap-3">
+                                        <button type="button" onClick={() => setStep(1)} className="flex-1 bg-slate-100 text-slate-600 font-bold py-4 rounded-xl hover:bg-slate-200 transition-all text-sm">
+                                            ← Volver
+                                        </button>
+                                        <button type="button" onClick={handleSubmit} disabled={submitting || !form.accepts_privacy} className="flex-1 bg-cuidarte-green text-white font-bold py-4 rounded-xl hover:bg-cuidarte-green-deep transition-all shadow-lg text-sm disabled:opacity-50">
+                                            {submitting ? 'Procesando...' : `Reservar mi plaza — ${getPrice()}€`}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* FOOTER */}
+                    <footer className="bg-cuidarte-dark-deep text-white py-12">
+                        <div className="max-w-4xl mx-auto px-6 text-center">
+                            <p className="font-heading font-bold text-lg mb-1">Escuela Cuid-Arte</p>
+                            <p className="text-slate-400 text-xs mb-4">By Dra. Odile Fernández</p>
+                            <p className="text-slate-500 text-xs italic">Cuidarte hoy, es ganar vida mañana.</p>
+                            <div className="mt-6 flex justify-center gap-4 text-xs text-slate-400">
+                                <a href="privacidad.html" className="hover:text-white">Privacidad</a>
+                                <a href="legal.html" className="hover:text-white">Aviso Legal</a>
+                                <a href="https://escuelacuidarte.com" className="hover:text-white">escuelacuidarte.com</a>
+                            </div>
+                        </div>
+                    </footer>
+
+                    {/* TOAST */}
+                    {toast.visible && (
+                        <div className={`fixed bottom-6 right-6 z-50 px-6 py-4 rounded-xl shadow-2xl text-white text-sm font-medium max-w-sm transition-all ${toast.type === 'error' ? 'bg-red-500' : toast.type === 'info' ? 'bg-amber-500' : 'bg-cuidarte-green'}`}>
+                            {toast.msg}
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+</html>
