@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>I Encuentro Cuid-Arte | 9-10 Mayo 2026 | Hinojares, Jaén</title>
-    <meta name="description" content="Un fin de semana para reconectar contigo, con tu vida. Retiro de bienestar oncológico en plena naturaleza.">
+    <meta name="description" content="Un fin de semana para reconectar contigo, con tu vida. Retiro de bienestar oncológico en plena naturaleza con la Dra. Odile Fernández.">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -12,18 +12,14 @@
             theme: {
                 extend: {
                     colors: {
-                        'cuidarte-green': '#6BA06B',
-                        'cuidarte-mint': '#CDE8CD',
-                        'cuidarte-gold': '#D4AF37',
-                        'cuidarte-dark': '#2C3E50',
-                        'cuidarte-green-deep': '#558055',
-                        'cuidarte-green-light': '#E3F0E3',
-                        'cuidarte-gold-deep': '#B08D26',
-                        'cuidarte-dark-deep': '#1A2530',
+                        'sage': { 50: '#f6f7f4', 100: '#e8ebe3', 200: '#d4dbc9', 300: '#b4c0a3', 400: '#94a67d', 500: '#6BA06B', 600: '#558055', 700: '#445f43', 800: '#394d38', 900: '#1a2e1a' },
+                        'sand': { 50: '#faf8f5', 100: '#f5f0e8', 200: '#ebe0d0', 300: '#dcc9ad', 400: '#D4AF37', 500: '#B08D26', 600: '#8c6f1e', 700: '#6b5518', 800: '#574615', 900: '#483a13' },
+                        'earth': { 50: '#FAF9F6', 100: '#f0ede6', 200: '#e0dbd0', 800: '#2C3E50', 900: '#1A2530' },
                     },
                     fontFamily: {
-                        sans: ['Open Sans', 'sans-serif'],
+                        display: ['Playfair Display', 'Georgia', 'serif'],
                         heading: ['Montserrat', 'sans-serif'],
+                        sans: ['Open Sans', 'sans-serif'],
                     },
                 }
             }
@@ -31,17 +27,27 @@
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        .bg-hero { background: linear-gradient(135deg, rgba(26,46,26,0.7) 0%, rgba(107,160,107,0.4) 100%); }
-        .golden-glow { box-shadow: 0 0 30px rgba(212,175,55,0.15); }
+        @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes scaleIn { from { opacity:0; transform:scale(0.95); } to { opacity:1; transform:scale(1); } }
+        .float { animation: float 6s ease-in-out infinite; }
+        .fade-up { animation: fadeUp 0.8s ease-out forwards; }
+        .scale-in { animation: scaleIn 0.6s ease-out forwards; }
+        .grain { position: relative; }
+        .grain::after { content:''; position:absolute; inset:0; opacity:0.03; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); pointer-events:none; }
+        .botanical { position: relative; overflow: hidden; }
+        .botanical::before { content: ''; position: absolute; top: -20px; right: -20px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(107,160,107,0.08) 0%, transparent 70%); border-radius: 50%; pointer-events: none; }
+        .botanical::after { content: ''; position: absolute; bottom: -30px; left: -30px; width: 250px; height: 250px; background: radial-gradient(circle, rgba(212,175,55,0.06) 0%, transparent 70%); border-radius: 50%; pointer-events: none; }
+        .divider-leaf { background: linear-gradient(90deg, transparent, #D4AF37 20%, #6BA06B 50%, #D4AF37 80%, transparent); height: 1px; }
     </style>
 </head>
-<body class="font-sans text-cuidarte-dark antialiased bg-[#FAF9F6]">
+<body class="font-sans antialiased bg-earth-50 text-sage-900">
     <div id="root"></div>
 
     <script type="text/babel">
@@ -65,12 +71,12 @@
         };
 
         const ACTIVITIES = [
-            { icon: '🏠', title: 'Alojamiento', desc: 'Descansaremos en plena naturaleza, con pensión completa saludable' },
-            { icon: '🥾', title: 'Senderismo', desc: 'Rutas para llenar tus pulmones con aire puro y claridad' },
+            { icon: '🏡', title: 'Alojamiento', desc: 'En plena naturaleza, con pensión completa saludable' },
+            { icon: '🥾', title: 'Senderismo', desc: 'Rutas para llenar tus pulmones con aire puro' },
             { icon: '🫒', title: 'Cata de AOVE', desc: 'Saborea la esencia de nuestra tierra' },
-            { icon: '🧘', title: 'Yoga', desc: 'Respira, estira, activa y reconecta contigo' },
-            { icon: '💪', title: 'Entrenamiento Funcional', desc: 'Fuerza, energía y bienestar para tu día a día' },
-            { icon: '💚', title: 'Tribu de Mujeres', desc: 'Espacios para compartir, conectar y sostenernos desde el corazón' },
+            { icon: '🧘‍♀️', title: 'Yoga', desc: 'Respira, estira, activa y reconecta contigo' },
+            { icon: '💪', title: 'Entrenamiento', desc: 'Fuerza y bienestar para tu día a día' },
+            { icon: '🤍', title: 'Tribu de Mujeres', desc: 'Compartir, conectar y sostenernos' },
         ];
 
         function App() {
@@ -118,7 +124,7 @@
                     setVerified(!!data);
                     if (data) {
                         setForm(prev => ({ ...prev, is_student: 'yes' }));
-                        showToast('¡Verificada! Tienes precio especial de alumna.', 'success');
+                        showToast('Verificada. Tienes precio especial de alumna.', 'success');
                     } else {
                         setForm(prev => ({ ...prev, is_student: 'no' }));
                         showToast('No hemos encontrado tu email como alumna activa.', 'info');
@@ -195,7 +201,6 @@
                         }
                     }
 
-                    // Redirect to Stripe
                     const stripeLink = getStripeLink();
                     if (stripeLink) window.location.href = stripeLink;
                     else showToast('Error con el enlace de pago. Contacta con nosotros.', 'error');
@@ -206,219 +211,307 @@
                 finally { setSubmitting(false); }
             };
 
-            const inputClass = (field) => `w-full px-4 py-3 rounded-xl border ${errors[field] ? 'border-red-400' : 'border-slate-200'} bg-white focus:bg-white focus:ring-2 focus:ring-cuidarte-green outline-none text-sm`;
+            const inputClass = (field) => `w-full px-4 py-3.5 rounded-2xl border ${errors[field] ? 'border-red-300 bg-red-50/30' : 'border-sage-200/60'} bg-white/80 backdrop-blur-sm focus:bg-white focus:ring-2 focus:ring-sage-400/30 focus:border-sage-400 outline-none text-sm transition-all`;
             const selectClass = (field) => inputClass(field);
-            const labelClass = 'text-xs font-bold text-slate-500 uppercase tracking-wide';
+            const labelClass = 'text-[11px] font-heading font-semibold text-sage-600 uppercase tracking-[1.5px]';
 
             const FAQS = [
-                { q: '¿Qué incluye el precio?', a: 'Alojamiento completo (1 noche), pensión completa con comida saludable, todas las actividades del programa (yoga, senderismo, cata AOVE, entrenamiento funcional, tribu de mujeres) y acompañamiento del equipo Cuid-Arte durante todo el fin de semana.' },
-                { q: '¿Puedo ir sola?', a: '¡Por supuesto! La mayoría de asistentes vienen solas. Es una oportunidad perfecta para conectar con otras personas en tu misma situación. Si eliges habitación doble te asignaremos una compañera.' },
-                { q: '¿Se adapta si tengo movilidad reducida?', a: 'Sí, nos adaptamos a tus necesidades. Indícalo en el formulario de inscripción (notas médicas) y lo tendremos en cuenta para las actividades.' },
-                { q: '¿Qué tengo que llevar?', a: 'Ropa cómoda para las actividades, calzado de senderismo, bañador (el hotel tiene piscina) y muchas ganas de cuidarte. ¡Del resto nos encargamos nosotros!' },
-                { q: '¿Puedo llevar acompañante que no sea alumna?', a: 'Sí, hay plazas para personas externas a un precio diferente. También son bienvenidos familiares y cuidadores.' },
-                { q: '¿Hay posibilidad de cancelación?', a: 'Sí, puedes cancelar hasta 15 días antes del evento con reembolso completo. Contacta con nosotros por WhatsApp.' },
+                { q: '¿Qué incluye el precio?', a: 'Alojamiento completo (1 noche), pensión completa con comida saludable, todas las actividades del programa y acompañamiento del equipo Cuid-Arte durante todo el fin de semana.' },
+                { q: '¿Puedo ir sola?', a: 'Por supuesto. La mayoría de asistentes vienen solas. Es una oportunidad perfecta para conectar con otras personas. Si eliges habitación doble te asignaremos una compañera.' },
+                { q: '¿Se adapta si tengo movilidad reducida?', a: 'Sí, nos adaptamos a tus necesidades. Indícalo en el formulario de inscripción y lo tendremos en cuenta.' },
+                { q: '¿Qué tengo que llevar?', a: 'Ropa cómoda, calzado de senderismo, bañador (hay piscina) y muchas ganas de cuidarte. Del resto nos encargamos nosotros.' },
+                { q: '¿Puedo llevar acompañante que no sea alumna?', a: 'Sí, hay plazas para personas externas a un precio diferente. Familiares y cuidadores también son bienvenidos.' },
+                { q: '¿Puedo cancelar?', a: 'Sí, hasta 15 días antes del evento con reembolso completo. Contacta con nosotros por WhatsApp.' },
             ];
 
             return (
                 <div className="min-h-screen">
-                    {/* HERO con foto Odile */}
-                    <div className="relative min-h-[85vh] flex items-center text-white overflow-hidden" style={{ background: 'linear-gradient(135deg, #1a2e1a 0%, #2a3e2a 100%)' }}>
-                        <div className="absolute inset-0 opacity-15" style={{ backgroundImage: 'url(imagen/encuentro/cartel.jpeg)', backgroundSize: 'cover', backgroundPosition: 'center' }}></div>
-                        <div className="relative z-10 container mx-auto px-6 py-16 grid md:grid-cols-2 gap-10 items-center">
-                            <div className="text-center md:text-left">
-                                <p className="text-cuidarte-gold font-bold text-xs uppercase tracking-[4px] mb-4">Escuela Cuid-Arte presenta</p>
-                                <h1 className="font-heading text-4xl md:text-6xl font-extrabold mb-3 leading-tight">I Encuentro<br/><span className="text-cuidarte-mint">Cuid-Arte</span></h1>
-                                <p className="text-xl md:text-2xl font-heading font-semibold text-white/90 mb-1">9 - 10 Mayo 2026</p>
-                                <p className="text-base text-white/60 mb-6">Hinojares, Jaén · Sierra de Cazorla</p>
-                                <p className="text-lg text-white/80 italic font-heading max-w-md leading-relaxed mb-4">Un fin de semana para reconectar contigo, con tu cuerpo y con la vida</p>
-                                {plazasRestantes <= 10 && (
-                                    <p className="text-cuidarte-gold font-bold text-sm mb-4 animate-pulse">🔥 Solo quedan {plazasRestantes} plazas</p>
+
+                    {/* ═══ HERO ═══ */}
+                    <section className="relative min-h-screen flex items-center grain" style={{ background: 'linear-gradient(160deg, #1a2e1a 0%, #2d4a2d 40%, #3d5f3d 70%, #4a7a4a 100%)' }}>
+                        {/* Decorative orbs */}
+                        <div className="absolute top-20 left-10 w-96 h-96 bg-sand-400/5 rounded-full blur-3xl"></div>
+                        <div className="absolute bottom-20 right-10 w-80 h-80 bg-sage-500/10 rounded-full blur-3xl"></div>
+
+                        <div className="relative z-10 container mx-auto px-6 md:px-12 py-20 grid md:grid-cols-5 gap-12 items-center">
+                            {/* Text — 3 cols */}
+                            <div className="md:col-span-3 text-center md:text-left fade-up">
+                                <div className="inline-flex items-center gap-2 bg-sand-400/15 border border-sand-400/20 rounded-full px-5 py-2 mb-8">
+                                    <span className="w-1.5 h-1.5 bg-sand-400 rounded-full animate-pulse"></span>
+                                    <span className="text-sand-400 font-heading text-[10px] font-bold uppercase tracking-[3px]">Plazas limitadas</span>
+                                </div>
+
+                                <h1 className="font-display text-5xl md:text-7xl font-bold text-white leading-[1.1] mb-6">
+                                    I Encuentro<br/>
+                                    <span className="italic text-sage-300">Cuid-Arte</span>
+                                </h1>
+
+                                <div className="flex items-center gap-4 mb-6 justify-center md:justify-start">
+                                    <div className="h-px w-8 bg-sand-400"></div>
+                                    <p className="font-heading text-lg md:text-xl text-white/90 font-semibold tracking-wide">9 — 10 Mayo 2026</p>
+                                    <div className="h-px w-8 bg-sand-400"></div>
+                                </div>
+
+                                <p className="text-sage-300/80 font-heading text-sm tracking-widest uppercase mb-8">Hinojares, Jaén · Sierra de Cazorla</p>
+
+                                <p className="font-display text-xl md:text-2xl text-white/85 italic leading-relaxed max-w-lg mb-10">
+                                    Un fin de semana para reconectar contigo, con tu cuerpo y con la vida
+                                </p>
+
+                                {plazasRestantes <= 15 && (
+                                    <p className="text-sand-400 font-heading font-bold text-sm mb-6 tracking-wide">{plazasRestantes} plazas disponibles de {TOTAL_PLAZAS}</p>
                                 )}
-                                <a href="#registro" className="inline-block bg-cuidarte-gold hover:bg-cuidarte-gold-deep text-white font-bold py-4 px-10 rounded-full text-lg transition-all shadow-lg hover:shadow-xl">Reservar mi plaza</a>
+
+                                <a href="#registro" className="inline-flex items-center gap-3 bg-sand-400 hover:bg-sand-500 text-sage-900 font-heading font-bold py-4 px-10 rounded-full text-base transition-all shadow-lg shadow-sand-400/20 hover:shadow-xl hover:shadow-sand-400/30 hover:-translate-y-0.5">
+                                    Reservar mi plaza
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3"/></svg>
+                                </a>
                             </div>
-                            <div className="flex justify-center">
+
+                            {/* Photo — 2 cols */}
+                            <div className="md:col-span-2 flex justify-center fade-up" style={{ animationDelay: '0.3s' }}>
                                 <div className="relative">
-                                    <div className="w-72 h-[420px] md:w-80 md:h-[480px] rounded-[2rem] overflow-hidden shadow-2xl border-4 border-white/20">
-                                        <img src="https://i.postimg.cc/vTr73LCx/Odile-transformacion-web.jpg" alt="Dra. Odile Fernández" className="w-full h-full object-cover object-center" />
+                                    <div className="absolute -inset-3 bg-gradient-to-br from-sand-400/20 to-sage-500/10 rounded-[2.5rem] blur-sm"></div>
+                                    <div className="relative w-72 md:w-80 rounded-[2rem] overflow-hidden shadow-2xl shadow-black/30">
+                                        <img src="https://i.postimg.cc/mrFw7fFR/OIP.jpg" alt="Dra. Odile Fernández" className="w-full aspect-[3/4] object-cover object-top" />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-sage-900/60 via-transparent to-transparent"></div>
+                                        <div className="absolute bottom-0 left-0 right-0 p-6">
+                                            <p className="font-display text-white text-lg font-bold">Dra. Odile Fernández</p>
+                                            <p className="text-sage-300 text-xs font-heading tracking-wide">Directora · Escuela Cuid-Arte</p>
+                                        </div>
                                     </div>
-                                    <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 bg-white rounded-2xl py-3 px-5 shadow-xl text-center whitespace-nowrap">
-                                        <p className="font-heading font-bold text-cuidarte-dark-deep text-sm">Dra. Odile Fernández</p>
-                                        <p className="text-[10px] text-slate-500">Directora de Escuela Cuid-Arte</p>
-                                        <p className="text-[10px] text-cuidarte-gold-deep font-bold mt-1">📚 Llévate tu libro firmado</p>
+                                    <div className="absolute -bottom-4 -right-4 bg-white rounded-2xl py-3 px-5 shadow-xl scale-in" style={{ animationDelay: '0.8s' }}>
+                                        <p className="text-sand-600 font-heading font-bold text-xs flex items-center gap-1.5">📚 Libro firmado incluido</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    {/* CONTADOR PLAZAS */}
-                    <div className="bg-cuidarte-gold text-white py-4">
-                        <div className="container mx-auto px-6 flex items-center justify-center gap-6 text-center">
-                            <div><span className="font-heading font-extrabold text-3xl">{plazasRestantes}</span><p className="text-[10px] uppercase tracking-wider font-bold">Plazas disponibles</p></div>
-                            <div className="w-px h-10 bg-white/30"></div>
-                            <div><span className="font-heading font-extrabold text-3xl">20</span><p className="text-[10px] uppercase tracking-wider font-bold">Asistentes máximo</p></div>
-                            <div className="w-px h-10 bg-white/30"></div>
-                            <div><span className="font-heading font-extrabold text-3xl">2</span><p className="text-[10px] uppercase tracking-wider font-bold">Días de retiro</p></div>
-                        </div>
-                    </div>
-
-                    {/* IMAGENES CARTEL — protagonistas */}
-                    <div className="max-w-5xl mx-auto px-6 py-20">
-                        <div className="grid md:grid-cols-2 gap-8">
-                            <div className="rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-shadow">
-                                <img src="imagen/encuentro/retiro.jpeg" alt="Reconecta contigo — Un retiro, una experiencia transformadora" className="w-full h-auto" />
-                            </div>
-                            <div className="rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-shadow">
-                                <img src="imagen/encuentro/actividades.jpeg" alt="Actividades del encuentro — Alojamiento, senderismo, yoga, cata AOVE" className="w-full h-auto" />
+                        {/* Scroll hint */}
+                        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 float">
+                            <div className="w-6 h-10 border-2 border-white/20 rounded-full flex justify-center pt-2">
+                                <div className="w-1 h-2.5 bg-white/40 rounded-full"></div>
                             </div>
                         </div>
-                    </div>
+                    </section>
 
-                    {/* LIBRO FIRMADO */}
-                    <div className="bg-cuidarte-dark-deep py-16">
-                        <div className="max-w-3xl mx-auto px-6 text-center text-white">
-                            <p className="text-cuidarte-gold text-4xl mb-4">📚</p>
-                            <h2 className="font-heading text-2xl font-bold mb-3">Llévate tu libro firmado por la Dra. Odile</h2>
-                            <p className="text-slate-300 text-sm leading-relaxed max-w-lg mx-auto">Todos los asistentes tendrán la oportunidad de llevarse un libro firmado personalmente por la Dra. Odile Fernández, autora de más de 10 libros sobre alimentación y salud oncológica.</p>
+                    {/* ═══ METRICS BAR ═══ */}
+                    <div className="bg-sage-900 border-y border-sage-700/30">
+                        <div className="container mx-auto px-6 py-5 flex items-center justify-center gap-8 md:gap-16 text-center">
+                            {[
+                                { n: plazasRestantes, l: 'Plazas libres' },
+                                { n: TOTAL_PLAZAS, l: 'Asistentes máx.' },
+                                { n: 2, l: 'Días de retiro' },
+                            ].map((m, i) => (
+                                <div key={i} className="flex items-center gap-3">
+                                    <span className="font-display text-3xl md:text-4xl font-bold text-sand-400">{m.n}</span>
+                                    <span className="text-sage-400 text-[10px] font-heading uppercase tracking-widest text-left leading-tight">{m.l}</span>
+                                </div>
+                            ))}
                         </div>
                     </div>
 
-                    {/* UBICACIÓN */}
-                    <div className="bg-cuidarte-dark-deep text-white py-16">
+                    {/* ═══ ABOUT ═══ */}
+                    <section className="py-24 botanical">
+                        <div className="max-w-3xl mx-auto px-6 text-center">
+                            <div className="inline-block mb-6">
+                                <div className="divider-leaf w-24 h-px mx-auto mb-6"></div>
+                                <p className="text-sand-500 font-heading text-[10px] font-bold uppercase tracking-[4px]">Un retiro transformador</p>
+                            </div>
+                            <h2 className="font-display text-4xl md:text-5xl font-bold text-sage-900 leading-tight mb-8">
+                                Reconecta contigo,<br/><span className="italic text-sage-500">con tu cuerpo y con la vida</span>
+                            </h2>
+                            <p className="text-sage-600 text-lg leading-relaxed max-w-2xl mx-auto mb-4">Si estás atravesando un proceso oncológico y deseas nutrir cuerpo, mente y alma cuidando de ti con pausa y amor, este encuentro es para ti.</p>
+                            <p className="text-sage-500 text-base leading-relaxed max-w-xl mx-auto">Ciencia, autocuidado y conexión en un entorno mágico y entre mujeres que buscan lo mismo que tú.</p>
+                        </div>
+                    </section>
+
+                    {/* ═══ ACTIVITIES ═══ */}
+                    <section className="pb-24">
+                        <div className="max-w-5xl mx-auto px-6">
+                            <h2 className="font-display text-3xl font-bold text-center text-sage-900 mb-4">Esto es solo un adelanto</h2>
+                            <p className="text-center text-sage-500 text-sm mb-12 font-heading italic">de lo que te espera</p>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
+                                {ACTIVITIES.map((a, i) => (
+                                    <div key={i} className="group bg-white/70 backdrop-blur-sm rounded-3xl p-7 text-center border border-sage-100 hover:border-sand-300/50 hover:shadow-lg hover:shadow-sand-400/5 transition-all duration-500 hover:-translate-y-1">
+                                        <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">{a.icon}</div>
+                                        <h3 className="font-heading font-bold text-xs uppercase tracking-[2px] text-sage-800 mb-2">{a.title}</h3>
+                                        <p className="text-[11px] text-sage-500 leading-relaxed">{a.desc}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* ═══ BOOK SIGNING ═══ */}
+                    <section className="py-20 grain" style={{ background: 'linear-gradient(135deg, #1a2e1a, #2d4a2d)' }}>
+                        <div className="max-w-3xl mx-auto px-6 text-center">
+                            <p className="text-5xl mb-5">📖</p>
+                            <h2 className="font-display text-3xl md:text-4xl font-bold text-white mb-4 italic">Llévate tu libro firmado</h2>
+                            <div className="divider-leaf w-16 h-px mx-auto mb-6"></div>
+                            <p className="text-sage-300 text-base leading-relaxed max-w-lg mx-auto">Todos los asistentes tendrán la oportunidad de llevarse un libro firmado personalmente por la Dra. Odile Fernández, autora de más de 10 libros sobre alimentación y salud oncológica.</p>
+                        </div>
+                    </section>
+
+                    {/* ═══ LOCATION ═══ */}
+                    <section className="py-24 botanical">
                         <div className="max-w-4xl mx-auto px-6">
-                            <h2 className="font-heading text-2xl font-bold text-center mb-8">Dónde nos encontramos</h2>
-                            <div className="grid md:grid-cols-2 gap-8 items-center">
-                                <div className="space-y-4">
-                                    <h3 className="font-heading font-bold text-xl text-cuidarte-mint">Hotel Rural Valle del Turrilla</h3>
-                                    <p className="text-slate-300 text-sm leading-relaxed">Un hotel rural con encanto en el corazón de la Sierra de Cazorla. 11 habitaciones rústicas rodeadas de naturaleza, con piscina, restaurante de cocina casera y unas vistas impresionantes.</p>
-                                    <p className="text-slate-400 text-xs">Ctra de Huesa, C. Veguetas, S/N<br/>23486 Hinojares, Jaén</p>
-                                    <a href="https://maps.google.com/?q=Hotel+Rural+Valle+del+Turrilla+Hinojares+Jaen" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 bg-cuidarte-green hover:bg-cuidarte-green-deep text-white font-bold text-sm px-6 py-3 rounded-full transition-all shadow-lg">
-                                        📍 Cómo llegar (Google Maps)
-                                    </a>
-                                </div>
-                                <div className="rounded-2xl overflow-hidden shadow-xl">
-                                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3152.5!2d-2.994!3d37.728!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd6f4a7c9b3e1f%3A0x0!2sHotel+Rural+Valle+del+Turrilla!5e0!3m2!1ses!2ses!4v1" width="100%" height="250" style={{border:0}} allowFullScreen="" loading="lazy" className="w-full"></iframe>
+                            <div className="text-center mb-12">
+                                <p className="text-sand-500 font-heading text-[10px] font-bold uppercase tracking-[4px] mb-3">El escenario</p>
+                                <h2 className="font-display text-3xl font-bold text-sage-900">Dónde nos encontramos</h2>
+                            </div>
+                            <div className="bg-white/70 backdrop-blur-sm rounded-3xl border border-sage-100 overflow-hidden shadow-sm">
+                                <div className="grid md:grid-cols-2">
+                                    <div className="p-10 space-y-5">
+                                        <h3 className="font-display text-2xl font-bold text-sage-800 italic">Hotel Rural Valle del Turrilla</h3>
+                                        <p className="text-sage-600 text-sm leading-relaxed">Un hotel rural con encanto en el corazón de la Sierra de Cazorla. Habitaciones rústicas rodeadas de naturaleza, piscina, restaurante de cocina casera y unas vistas impresionantes.</p>
+                                        <p className="text-sage-400 text-xs leading-relaxed">Ctra de Huesa, C. Veguetas, S/N · 23486 Hinojares, Jaén</p>
+                                        <a href="https://maps.google.com/?q=Hotel+Rural+Valle+del+Turrilla+Hinojares+Jaen" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 bg-sage-500 hover:bg-sage-600 text-white font-heading font-bold text-sm px-6 py-3 rounded-full transition-all">
+                                            📍 Cómo llegar
+                                        </a>
+                                    </div>
+                                    <div>
+                                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3152.5!2d-2.994!3d37.728!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd6f4a7c9b3e1f%3A0x0!2sHotel+Rural+Valle+del+Turrilla!5e0!3m2!1ses!2ses!4v1" width="100%" height="100%" style={{border:0, minHeight: '300px'}} allowFullScreen="" loading="lazy"></iframe>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </section>
 
-                    {/* PLANNING — PLACEHOLDER */}
-                    <div className="bg-cuidarte-mint/20 py-16">
+                    {/* ═══ PLANNING PLACEHOLDER ═══ */}
+                    <section className="py-16 bg-sage-50/50">
                         <div className="max-w-4xl mx-auto px-6 text-center">
-                            <h2 className="font-heading text-2xl font-bold text-cuidarte-dark-deep mb-4">Planning del encuentro</h2>
-                            <p className="text-slate-500 text-sm italic">Próximamente se publicará el programa completo del fin de semana.</p>
+                            <p className="text-sand-500 font-heading text-[10px] font-bold uppercase tracking-[4px] mb-3">Programa</p>
+                            <h2 className="font-display text-3xl font-bold text-sage-900 mb-4">Planning del encuentro</h2>
+                            <p className="text-sage-400 text-sm italic">Próximamente se publicará el programa completo del fin de semana.</p>
                         </div>
-                    </div>
+                    </section>
 
-                    {/* PRECIOS */}
-                    <div className="max-w-4xl mx-auto px-6 py-20">
-                        <h2 className="font-heading text-2xl font-bold text-center text-cuidarte-dark-deep mb-10">Precios</h2>
-                        <p className="text-center text-slate-500 text-sm mb-8">Incluye todo el fin de semana: alojamiento, pensión completa y todas las actividades</p>
-                        <div className="grid md:grid-cols-2 gap-8">
-                            <div className="bg-white rounded-2xl p-8 border-2 border-cuidarte-green shadow-md">
-                                <div className="bg-cuidarte-green text-white text-xs font-bold uppercase tracking-wider text-center py-2 rounded-lg mb-6">Alumnas Cuid-Arte</div>
-                                <div className="space-y-4">
-                                    <div className="flex justify-between items-center"><span className="text-slate-600">Habitación doble</span><span className="font-heading font-bold text-2xl text-cuidarte-dark-deep">150€</span></div>
-                                    <div className="flex justify-between items-center"><span className="text-slate-600">Habitación individual</span><span className="font-heading font-bold text-2xl text-cuidarte-dark-deep">190€</span></div>
+                    {/* ═══ PRICING ═══ */}
+                    <section className="py-24 botanical">
+                        <div className="max-w-4xl mx-auto px-6">
+                            <div className="text-center mb-12">
+                                <p className="text-sand-500 font-heading text-[10px] font-bold uppercase tracking-[4px] mb-3">Inversión</p>
+                                <h2 className="font-display text-3xl font-bold text-sage-900 mb-3">Elige tu experiencia</h2>
+                                <p className="text-sage-500 text-sm">Incluye todo el fin de semana: alojamiento, pensión completa y todas las actividades</p>
+                            </div>
+                            <div className="grid md:grid-cols-2 gap-6">
+                                {/* Alumnas */}
+                                <div className="relative bg-white rounded-3xl p-8 border-2 border-sage-500 shadow-lg shadow-sage-500/5 overflow-hidden">
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-sage-500/5 rounded-full blur-2xl -mr-10 -mt-10"></div>
+                                    <div className="relative">
+                                        <span className="inline-block bg-sage-500 text-white text-[10px] font-heading font-bold uppercase tracking-[2px] px-4 py-1.5 rounded-full mb-6">Alumnas Cuid-Arte</span>
+                                        <div className="space-y-5">
+                                            <div className="flex justify-between items-baseline border-b border-sage-100 pb-4">
+                                                <span className="text-sage-700 text-sm">Habitación doble</span>
+                                                <div className="flex items-baseline gap-1"><span className="font-display text-3xl font-bold text-sage-800">150</span><span className="text-sage-500 text-sm">€</span></div>
+                                            </div>
+                                            <div className="flex justify-between items-baseline">
+                                                <span className="text-sage-700 text-sm">Habitación individual</span>
+                                                <div className="flex items-baseline gap-1"><span className="font-display text-3xl font-bold text-sage-800">190</span><span className="text-sage-500 text-sm">€</span></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {/* Externas */}
+                                <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-8 border border-sage-200/60">
+                                    <span className="inline-block bg-sage-100 text-sage-600 text-[10px] font-heading font-bold uppercase tracking-[2px] px-4 py-1.5 rounded-full mb-6">Otras personas</span>
+                                    <div className="space-y-5">
+                                        <div className="flex justify-between items-baseline border-b border-sage-100 pb-4">
+                                            <span className="text-sage-600 text-sm">Habitación doble</span>
+                                            <div className="flex items-baseline gap-1"><span className="font-display text-3xl font-bold text-sage-700">200</span><span className="text-sage-400 text-sm">€</span></div>
+                                        </div>
+                                        <div className="flex justify-between items-baseline">
+                                            <span className="text-sage-600 text-sm">Habitación individual</span>
+                                            <div className="flex items-baseline gap-1"><span className="font-display text-3xl font-bold text-sage-700">250</span><span className="text-sage-400 text-sm">€</span></div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
-                                <div className="bg-slate-100 text-slate-600 text-xs font-bold uppercase tracking-wider text-center py-2 rounded-lg mb-6">Otras personas</div>
-                                <div className="space-y-4">
-                                    <div className="flex justify-between items-center"><span className="text-slate-600">Habitación doble</span><span className="font-heading font-bold text-2xl text-cuidarte-dark-deep">200€</span></div>
-                                    <div className="flex justify-between items-center"><span className="text-slate-600">Habitación individual</span><span className="font-heading font-bold text-2xl text-cuidarte-dark-deep">250€</span></div>
-                                </div>
-                            </div>
                         </div>
-                        <p className="text-center text-xs text-slate-400 mt-6">Plazas limitadas</p>
-                    </div>
+                    </section>
 
-                    {/* FORMULARIO */}
-                    <div id="registro" className="bg-white py-20">
+                    {/* ═══ FORM ═══ */}
+                    <section id="registro" className="py-24 bg-white grain">
                         <div className="max-w-2xl mx-auto px-6">
-                            <h2 className="font-heading text-2xl font-bold text-center text-cuidarte-dark-deep mb-2">Reserva tu plaza</h2>
-                            <p className="text-center text-slate-500 text-sm mb-10">Completa el formulario y te redirigiremos al pago seguro</p>
+                            <div className="text-center mb-12">
+                                <p className="text-sand-500 font-heading text-[10px] font-bold uppercase tracking-[4px] mb-3">Tu plaza te espera</p>
+                                <h2 className="font-display text-3xl md:text-4xl font-bold text-sage-900 mb-3">Reserva tu plaza</h2>
+                                <p className="text-sage-500 text-sm">Completa el formulario y te redirigiremos al pago seguro</p>
+                            </div>
 
                             {step === 1 && (
-                                <div className="space-y-5">
-                                    {/* Datos básicos */}
-                                    <div className="space-y-1">
+                                <div className="space-y-5 bg-earth-50/50 rounded-3xl p-8 md:p-10 border border-sage-100">
+                                    <div className="space-y-1.5">
                                         <label className={labelClass}>Nombre completo *</label>
                                         <input className={inputClass('full_name')} value={form.full_name} onChange={e => { setForm({...form, full_name: e.target.value}); setErrors({...errors, full_name: false}); }} />
                                     </div>
 
-                                    <div className="space-y-1">
+                                    <div className="space-y-1.5">
                                         <label className={labelClass}>Email *</label>
-                                        <input type="email" className={inputClass('email')} value={form.email} onChange={e => { setForm({...form, email: e.target.value, is_student: '', }); setVerified(null); setErrors({...errors, email: false}); }} />
+                                        <input type="email" className={inputClass('email')} value={form.email} onChange={e => { setForm({...form, email: e.target.value, is_student: ''}); setVerified(null); setErrors({...errors, email: false}); }} />
                                     </div>
 
-                                    <div className="space-y-1">
+                                    <div className="space-y-1.5">
                                         <label className={labelClass}>Teléfono *</label>
                                         <div className="flex gap-2">
-                                            <select className="w-24 px-2 py-3 rounded-xl border border-slate-200 bg-white text-sm" value={form.phonePrefix} onChange={e => setForm({...form, phonePrefix: e.target.value})}>
+                                            <select className="w-24 px-2 py-3.5 rounded-2xl border border-sage-200/60 bg-white/80 text-sm" value={form.phonePrefix} onChange={e => setForm({...form, phonePrefix: e.target.value})}>
                                                 {["+34","+1","+44","+49","+33","+39","+351","+52","+54","+56","+57","+593","+51"].map(p => <option key={p}>{p}</option>)}
                                             </select>
                                             <input type="tel" placeholder="612 345 678" className={`flex-1 ${inputClass('phone')}`} value={form.phone} onChange={e => { setForm({...form, phone: e.target.value}); setErrors({...errors, phone: false}); }} />
                                         </div>
                                     </div>
 
-                                    {/* Verificación alumna */}
-                                    <div className="space-y-1">
+                                    <div className="space-y-1.5">
                                         <label className={labelClass}>¿Eres alumna de Escuela Cuid-Arte? *</label>
+                                        <p className="text-[10px] text-sage-400 italic -mt-0.5 mb-1">Si eres alumna, usa el mismo email de tu registro para verificar</p>
                                         <div className="flex gap-3">
-                                            <button type="button" onClick={() => { setForm({...form, is_student: 'yes'}); verifyStudent(); setErrors({...errors, is_student: false}); }} className={`flex-1 py-3 rounded-xl border-2 font-bold text-sm transition-all ${form.is_student === 'yes' ? 'border-cuidarte-green bg-cuidarte-green-light text-cuidarte-green-deep' : 'border-slate-200 text-slate-500 hover:border-cuidarte-mint'}`}>
+                                            <button type="button" onClick={() => { setForm({...form, is_student: 'yes'}); verifyStudent(); setErrors({...errors, is_student: false}); }} className={`flex-1 py-3.5 rounded-2xl border-2 font-heading font-semibold text-sm transition-all ${form.is_student === 'yes' ? 'border-sage-500 bg-sage-50 text-sage-700' : 'border-sage-200/60 text-sage-400 hover:border-sage-300'}`}>
                                                 Sí, soy alumna
                                             </button>
-                                            <button type="button" onClick={() => { setForm({...form, is_student: 'no'}); setVerified(false); setErrors({...errors, is_student: false}); }} className={`flex-1 py-3 rounded-xl border-2 font-bold text-sm transition-all ${form.is_student === 'no' ? 'border-cuidarte-green bg-cuidarte-green-light text-cuidarte-green-deep' : 'border-slate-200 text-slate-500 hover:border-cuidarte-mint'}`}>
+                                            <button type="button" onClick={() => { setForm({...form, is_student: 'no'}); setVerified(false); setErrors({...errors, is_student: false}); }} className={`flex-1 py-3.5 rounded-2xl border-2 font-heading font-semibold text-sm transition-all ${form.is_student === 'no' ? 'border-sage-500 bg-sage-50 text-sage-700' : 'border-sage-200/60 text-sage-400 hover:border-sage-300'}`}>
                                                 No
                                             </button>
                                         </div>
-                                        {form.is_student === 'yes' && verified === true && (
-                                            <p className="text-xs text-cuidarte-green-deep font-medium mt-1">✅ Verificada — tienes precio especial de alumna</p>
-                                        )}
-                                        {form.is_student === 'yes' && verified === false && (
-                                            <p className="text-xs text-amber-600 font-medium mt-1">⚠️ No hemos encontrado tu email como alumna activa. Comprueba que es el mismo con el que te registraste o contacta con nosotros por WhatsApp.</p>
-                                        )}
-                                        {verifying && <p className="text-xs text-slate-400 mt-1">Verificando...</p>}
+                                        {form.is_student === 'yes' && verified === true && <p className="text-xs text-sage-600 font-medium mt-1">✓ Verificada — precio especial aplicado</p>}
+                                        {form.is_student === 'yes' && verified === false && <p className="text-xs text-sand-600 font-medium mt-1">No encontramos tu email. Verifica o contacta por WhatsApp.</p>}
+                                        {verifying && <p className="text-xs text-sage-400 mt-1">Verificando...</p>}
                                     </div>
 
-                                    {/* Habitación */}
-                                    <div className="space-y-1">
+                                    <div className="space-y-1.5">
                                         <label className={labelClass}>Tipo de habitación *</label>
                                         <div className="flex gap-3">
                                             {['doble', 'individual'].map(t => (
-                                                <button key={t} type="button" onClick={() => { setForm({...form, room_type: t}); setErrors({...errors, room_type: false}); }} className={`flex-1 py-4 rounded-xl border-2 font-bold text-sm transition-all ${form.room_type === t ? 'border-cuidarte-green bg-cuidarte-green-light text-cuidarte-green-deep' : 'border-slate-200 text-slate-500 hover:border-cuidarte-mint'}`}>
+                                                <button key={t} type="button" onClick={() => { setForm({...form, room_type: t}); setErrors({...errors, room_type: false}); }} className={`flex-1 py-5 rounded-2xl border-2 font-heading font-semibold text-sm transition-all ${form.room_type === t ? 'border-sage-500 bg-sage-50 text-sage-700' : 'border-sage-200/60 text-sage-400 hover:border-sage-300'}`}>
                                                     {t === 'doble' ? '🛏️ Doble' : '🛏️ Individual'}
-                                                    {form.is_student && <span className="block text-lg mt-1">{getPrice() || (form.is_student === 'yes' ? PRICES.student[t] : PRICES.external[t])}€</span>}
+                                                    {form.is_student && <span className="block font-display text-xl mt-1">{form.is_student === 'yes' ? PRICES.student[t] : PRICES.external[t]}€</span>}
                                                 </button>
                                             ))}
                                         </div>
                                     </div>
 
                                     {form.room_type === 'doble' && (
-                                        <div className="space-y-1">
+                                        <div className="space-y-1.5">
                                             <label className={labelClass}>Nombre de tu acompañante (opcional)</label>
-                                            <input className={inputClass('')} placeholder="Si ya sabes con quién compartirás habitación" value={form.companion_name} onChange={e => setForm({...form, companion_name: e.target.value})} />
+                                            <input className={inputClass('')} placeholder="Si ya sabes con quién compartirás" value={form.companion_name} onChange={e => setForm({...form, companion_name: e.target.value})} />
                                         </div>
                                     )}
 
                                     <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-1">
+                                        <div className="space-y-1.5">
                                             <label className={labelClass}>Rango de edad *</label>
                                             <select className={selectClass('age_range')} value={form.age_range} onChange={e => { setForm({...form, age_range: e.target.value}); setErrors({...errors, age_range: false}); }}>
                                                 <option value="">Selecciona...</option>
                                                 {["18-25","26-35","36-45","46-55","56-65","65+"].map(a => <option key={a}>{a}</option>)}
                                             </select>
                                         </div>
-                                        <div className="space-y-1">
+                                        <div className="space-y-1.5">
                                             <label className={labelClass}>Provincia</label>
                                             <input className={inputClass('')} placeholder="Ej: Madrid" value={form.province} onChange={e => setForm({...form, province: e.target.value})} />
                                         </div>
                                     </div>
 
-                                    {/* Relación con el cáncer */}
-                                    <div className="space-y-1">
+                                    <div className="space-y-1.5">
                                         <label className={labelClass}>¿Cuál es tu relación con el cáncer? *</label>
                                         <select className={selectClass('relation_to_cancer')} value={form.relation_to_cancer} onChange={e => { setForm({...form, relation_to_cancer: e.target.value}); setErrors({...errors, relation_to_cancer: false}); }}>
                                             <option value="">Selecciona...</option>
@@ -431,15 +524,14 @@
                                         </select>
                                     </div>
 
-                                    {/* Campos extra para paciente/superviviente */}
                                     {showsCancerFields && (
-                                        <div className="bg-cuidarte-mint/20 rounded-2xl p-5 space-y-4">
+                                        <div className="bg-sage-50/80 rounded-2xl p-5 space-y-4 border border-sage-100">
                                             <div className="grid grid-cols-2 gap-4">
-                                                <div className="space-y-1">
+                                                <div className="space-y-1.5">
                                                     <label className={labelClass}>Tipo de cáncer</label>
                                                     <input className={inputClass('')} placeholder="Ej: Mama" value={form.cancer_type} onChange={e => setForm({...form, cancer_type: e.target.value})} />
                                                 </div>
-                                                <div className="space-y-1">
+                                                <div className="space-y-1.5">
                                                     <label className={labelClass}>Estadío</label>
                                                     <select className={selectClass('')} value={form.cancer_stage} onChange={e => setForm({...form, cancer_stage: e.target.value})}>
                                                         <option value="">Selecciona...</option>
@@ -448,183 +540,178 @@
                                                 </div>
                                             </div>
                                             <label className="flex items-center gap-3 cursor-pointer">
-                                                <input type="checkbox" className="w-4 h-4 accent-cuidarte-green rounded" checked={form.in_active_treatment} onChange={e => setForm({...form, in_active_treatment: e.target.checked})} />
-                                                <span className="text-sm text-slate-600">Estoy en tratamiento activo actualmente</span>
+                                                <input type="checkbox" className="w-4 h-4 accent-sage-500 rounded" checked={form.in_active_treatment} onChange={e => setForm({...form, in_active_treatment: e.target.checked})} />
+                                                <span className="text-sm text-sage-600">Estoy en tratamiento activo actualmente</span>
                                             </label>
                                         </div>
                                     )}
 
-                                    <div className="space-y-1">
+                                    <div className="space-y-1.5">
                                         <label className={labelClass}>¿Cómo te has enterado del evento? *</label>
                                         <select className={selectClass('how_found')} value={form.how_found} onChange={e => { setForm({...form, how_found: e.target.value}); setErrors({...errors, how_found: false}); }}>
                                             <option value="">Selecciona...</option>
-                                            <option>Instagram</option>
-                                            <option>WhatsApp del equipo</option>
-                                            <option>Recomendación</option>
-                                            <option>Newsletter</option>
-                                            <option>Otro</option>
+                                            <option>Instagram</option><option>WhatsApp del equipo</option><option>Recomendación</option><option>Newsletter</option><option>Otro</option>
                                         </select>
                                     </div>
 
-                                    <div className="space-y-1">
-                                        <label className={labelClass}>¿Es tu primer evento presencial relacionado con salud oncológica?</label>
+                                    <div className="space-y-1.5">
+                                        <label className={labelClass}>¿Es tu primer evento presencial de salud oncológica?</label>
                                         <div className="flex gap-3">
                                             {['yes', 'no'].map(v => (
-                                                <button key={v} type="button" onClick={() => setForm({...form, first_event: v})} className={`flex-1 py-3 rounded-xl border-2 font-bold text-sm transition-all ${form.first_event === v ? 'border-cuidarte-green bg-cuidarte-green-light text-cuidarte-green-deep' : 'border-slate-200 text-slate-500'}`}>
+                                                <button key={v} type="button" onClick={() => setForm({...form, first_event: v})} className={`flex-1 py-3 rounded-2xl border-2 font-heading font-semibold text-sm transition-all ${form.first_event === v ? 'border-sage-500 bg-sage-50 text-sage-700' : 'border-sage-200/60 text-sage-400'}`}>
                                                     {v === 'yes' ? 'Sí, es mi primero' : 'No, he ido a otros'}
                                                 </button>
                                             ))}
                                         </div>
                                     </div>
 
-                                    <div className="space-y-1">
-                                        <label className={labelClass}>¿Qué es lo que más te motiva a asistir?</label>
+                                    <div className="space-y-1.5">
+                                        <label className={labelClass}>¿Qué te motiva a asistir?</label>
                                         <select className={selectClass('')} value={form.motivation} onChange={e => setForm({...form, motivation: e.target.value})}>
                                             <option value="">Selecciona...</option>
-                                            <option>Conocer al equipo de Cuid-Arte</option>
-                                            <option>Conectar con otras personas en mi situación</option>
-                                            <option>Actividades al aire libre y naturaleza</option>
-                                            <option>Aprender sobre nutrición y ejercicio</option>
-                                            <option>Desconectar y cuidarme</option>
-                                            <option>Todo lo anterior</option>
+                                            <option>Conocer al equipo de Cuid-Arte</option><option>Conectar con otras personas</option><option>Naturaleza y aire libre</option><option>Nutrición y ejercicio</option><option>Desconectar y cuidarme</option><option>Todo lo anterior</option>
                                         </select>
                                     </div>
 
-                                    <button type="button" onClick={() => {
-                                        if (validateStep1()) setStep(2);
-                                        else showToast('Completa los campos obligatorios', 'error');
-                                    }} className="w-full bg-cuidarte-dark-deep text-white font-bold py-4 rounded-xl hover:bg-slate-800 transition-all shadow-lg text-sm">
+                                    <button type="button" onClick={() => { if (validateStep1()) setStep(2); else showToast('Completa los campos obligatorios', 'error'); }} className="w-full bg-sage-800 hover:bg-sage-900 text-white font-heading font-bold py-4 rounded-2xl transition-all shadow-lg text-sm tracking-wide">
                                         Continuar →
                                     </button>
                                 </div>
                             )}
 
                             {step === 2 && (
-                                <div className="space-y-5 animate-in">
-                                    <div className="bg-cuidarte-mint/30 border border-cuidarte-green/20 rounded-xl p-4 text-center">
-                                        <p className="text-sm text-cuidarte-green-deep"><strong>{form.full_name}</strong> — {form.is_student === 'yes' ? 'Alumna' : 'No alumna'} — {form.room_type === 'doble' ? 'Doble' : 'Individual'} — <strong>{getPrice()}€</strong></p>
+                                <div className="space-y-5 bg-earth-50/50 rounded-3xl p-8 md:p-10 border border-sage-100">
+                                    <div className="bg-sage-50 border border-sage-200/50 rounded-2xl p-4 text-center">
+                                        <p className="text-sm text-sage-700"><strong>{form.full_name}</strong> · {form.is_student === 'yes' ? 'Alumna' : 'No alumna'} · {form.room_type === 'doble' ? 'Doble' : 'Individual'} · <strong className="font-display text-lg">{getPrice()}€</strong></p>
                                     </div>
 
-                                    <div className="space-y-1">
+                                    <div className="space-y-1.5">
                                         <label className={labelClass}>Necesidades alimentarias</label>
                                         <input className={inputClass('')} placeholder="Vegetariana, intolerancias, alergias..." value={form.dietary_needs} onChange={e => setForm({...form, dietary_needs: e.target.value})} />
                                     </div>
 
-                                    <div className="space-y-1">
+                                    <div className="space-y-1.5">
                                         <label className={labelClass}>Notas médicas relevantes</label>
                                         <input className={inputClass('')} placeholder="Movilidad reducida, medicación especial..." value={form.medical_notes} onChange={e => setForm({...form, medical_notes: e.target.value})} />
                                     </div>
 
                                     <label className="flex items-center gap-3 cursor-pointer">
-                                        <input type="checkbox" className="w-4 h-4 accent-cuidarte-green rounded" checked={form.needs_transport} onChange={e => setForm({...form, needs_transport: e.target.checked})} />
-                                        <span className="text-sm text-slate-600">Necesitaría transporte desde algún punto cercano</span>
+                                        <input type="checkbox" className="w-4 h-4 accent-sage-500 rounded" checked={form.needs_transport} onChange={e => setForm({...form, needs_transport: e.target.checked})} />
+                                        <span className="text-sm text-sage-600">Necesitaría transporte desde algún punto cercano</span>
                                     </label>
 
-                                    {/* LEGAL */}
-                                    <div className="bg-slate-50 rounded-2xl p-5 space-y-4">
+                                    <div className="bg-earth-100/50 rounded-2xl p-5 space-y-4 border border-sage-200/30">
                                         <label className="flex items-start gap-3 cursor-pointer">
-                                            <input type="checkbox" required className="mt-1 w-4 h-4 accent-cuidarte-green rounded" checked={form.accepts_privacy} onChange={e => setForm({...form, accepts_privacy: e.target.checked})} />
-                                            <span className="text-xs text-slate-500 leading-tight">Acepto la <a href="privacidad.html" target="_blank" className="text-cuidarte-green-deep underline">Política de Privacidad</a>. Mis datos serán tratados por NEIKO HEALTH S.L. para gestionar mi inscripción al I Encuentro Cuid-Arte. *</span>
+                                            <input type="checkbox" required className="mt-1 w-4 h-4 accent-sage-500 rounded" checked={form.accepts_privacy} onChange={e => setForm({...form, accepts_privacy: e.target.checked})} />
+                                            <span className="text-[11px] text-sage-500 leading-relaxed">Acepto la <a href="privacidad.html" target="_blank" className="text-sage-700 underline">Política de Privacidad</a>. Mis datos serán tratados por NEIKO HEALTH S.L. para gestionar mi inscripción al I Encuentro Cuid-Arte. *</span>
                                         </label>
 
                                         <label className="flex items-start gap-3 cursor-pointer">
-                                            <input type="checkbox" className="mt-1 w-4 h-4 accent-cuidarte-green rounded" checked={form.accepts_marketing} onChange={e => setForm({...form, accepts_marketing: e.target.checked})} />
-                                            <span className="text-xs text-slate-500 leading-tight">Deseo recibir información sobre futuros eventos y novedades de Escuela Cuid-Arte. Puedo darme de baja en cualquier momento.</span>
+                                            <input type="checkbox" className="mt-1 w-4 h-4 accent-sage-500 rounded" checked={form.accepts_marketing} onChange={e => setForm({...form, accepts_marketing: e.target.checked})} />
+                                            <span className="text-[11px] text-sage-500 leading-relaxed">Deseo recibir información sobre futuros eventos y novedades de Escuela Cuid-Arte.</span>
                                         </label>
                                     </div>
 
-                                    <div className="text-[10px] text-slate-400 leading-relaxed space-y-1">
-                                        <p><strong>Responsable:</strong> NEIKO HEALTH S.L. | <strong>Finalidad:</strong> Gestión de inscripción al evento | <strong>Base legal:</strong> Consentimiento del interesado</p>
-                                        <p><strong>Destinatarios:</strong> No se cederán a terceros salvo obligación legal | <strong>Derechos:</strong> Acceso, rectificación, supresión, portabilidad</p>
+                                    <div className="text-[9px] text-sage-400 leading-relaxed">
+                                        <p><strong>Responsable:</strong> NEIKO HEALTH S.L. · <strong>Finalidad:</strong> Gestión de inscripción · <strong>Base legal:</strong> Consentimiento · <strong>Derechos:</strong> Acceso, rectificación, supresión, portabilidad</p>
                                     </div>
 
                                     <div className="flex gap-3">
-                                        <button type="button" onClick={() => setStep(1)} className="flex-1 bg-slate-100 text-slate-600 font-bold py-4 rounded-xl hover:bg-slate-200 transition-all text-sm">
+                                        <button type="button" onClick={() => setStep(1)} className="flex-1 bg-earth-100 text-sage-600 font-heading font-bold py-4 rounded-2xl hover:bg-earth-200 transition-all text-sm">
                                             ← Volver
                                         </button>
-                                        <button type="button" onClick={handleSubmit} disabled={submitting || !form.accepts_privacy} className="flex-1 bg-cuidarte-green text-white font-bold py-4 rounded-xl hover:bg-cuidarte-green-deep transition-all shadow-lg text-sm disabled:opacity-50">
-                                            {submitting ? 'Procesando...' : `Reservar mi plaza — ${getPrice()}€`}
+                                        <button type="button" onClick={handleSubmit} disabled={submitting || !form.accepts_privacy} className="flex-1 bg-sand-400 hover:bg-sand-500 text-sage-900 font-heading font-bold py-4 rounded-2xl transition-all shadow-lg text-sm disabled:opacity-50">
+                                            {submitting ? 'Procesando...' : `Reservar — ${getPrice()}€`}
                                         </button>
                                     </div>
                                 </div>
                             )}
                         </div>
-                    </div>
+                    </section>
 
-                    {/* FAQ */}
-                    <div className="max-w-3xl mx-auto px-6 py-20">
-                        <h2 className="font-heading text-2xl font-bold text-center text-cuidarte-dark-deep mb-10">Preguntas frecuentes</h2>
-                        <div className="space-y-3">
-                            {FAQS.map((faq, i) => (
-                                <div key={i} className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                                    <button onClick={() => setOpenFaq(openFaq === i ? null : i)} className="w-full text-left px-6 py-4 flex justify-between items-center gap-4 hover:bg-slate-50 transition-colors">
-                                        <span className="font-heading font-bold text-sm text-cuidarte-dark-deep">{faq.q}</span>
-                                        <span className={`text-cuidarte-green text-xl transition-transform ${openFaq === i ? 'rotate-45' : ''}`}>+</span>
-                                    </button>
-                                    {openFaq === i && (
-                                        <div className="px-6 pb-4">
-                                            <p className="text-sm text-slate-600 leading-relaxed">{faq.a}</p>
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
+                    {/* ═══ FAQ ═══ */}
+                    <section className="py-24 botanical">
+                        <div className="max-w-3xl mx-auto px-6">
+                            <div className="text-center mb-12">
+                                <p className="text-sand-500 font-heading text-[10px] font-bold uppercase tracking-[4px] mb-3">Dudas</p>
+                                <h2 className="font-display text-3xl font-bold text-sage-900">Preguntas frecuentes</h2>
+                            </div>
+                            <div className="space-y-3">
+                                {FAQS.map((faq, i) => (
+                                    <div key={i} className="bg-white/70 backdrop-blur-sm rounded-2xl border border-sage-100 overflow-hidden transition-all hover:border-sage-200">
+                                        <button onClick={() => setOpenFaq(openFaq === i ? null : i)} className="w-full text-left px-7 py-5 flex justify-between items-center gap-4">
+                                            <span className="font-heading font-semibold text-sm text-sage-800">{faq.q}</span>
+                                            <span className={`text-sand-500 text-lg font-light transition-transform duration-300 ${openFaq === i ? 'rotate-45' : ''}`}>+</span>
+                                        </button>
+                                        {openFaq === i && (
+                                            <div className="px-7 pb-5 -mt-1">
+                                                <p className="text-sm text-sage-600 leading-relaxed">{faq.a}</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
                         </div>
-                    </div>
+                    </section>
 
-                    {/* CONTACTO */}
-                    <div className="bg-cuidarte-mint/20 py-16">
+                    {/* ═══ CONTACT ═══ */}
+                    <section className="py-20 bg-sage-50/50">
                         <div className="max-w-4xl mx-auto px-6 text-center">
-                            <h2 className="font-heading text-2xl font-bold text-cuidarte-dark-deep mb-3">¿Tienes dudas?</h2>
-                            <p className="text-slate-500 text-sm mb-8">Contacta con nosotros por WhatsApp</p>
+                            <h2 className="font-display text-3xl font-bold text-sage-900 mb-3">¿Tienes dudas?</h2>
+                            <p className="text-sage-500 text-sm mb-10">Escríbenos por WhatsApp</p>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                 {[
-                                    { name: 'Jesús', phone: '34664401328', role: 'Equipo Cuid-Arte' },
-                                    { name: 'Jose Pedro', phone: '34650503871', role: 'Equipo Cuid-Arte' },
+                                    { name: 'Jesús', phone: '34664401328', role: 'Equipo' },
+                                    { name: 'Jose Pedro', phone: '34650503871', role: 'Equipo' },
                                     { name: 'Dra. Odile', phone: '34652552096', role: 'Directora' },
-                                    { name: 'Hotel', phone: '34609166737', role: 'Valle del Turrilla' },
+                                    { name: 'Hotel', phone: '34609166737', role: 'Alojamiento' },
                                 ].map((c, i) => (
-                                    <a key={i} href={`https://wa.me/${c.phone}?text=${encodeURIComponent('Hola, tengo una duda sobre el I Encuentro Cuid-Arte.')}`} target="_blank" rel="noopener noreferrer" className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm hover:shadow-md hover:border-cuidarte-green/30 transition-all text-center">
-                                        <p className="text-2xl mb-2">📱</p>
-                                        <p className="font-heading font-bold text-sm text-cuidarte-dark-deep">{c.name}</p>
-                                        <p className="text-[10px] text-slate-400">{c.role}</p>
+                                    <a key={i} href={`https://wa.me/${c.phone}?text=${encodeURIComponent('Hola, tengo una duda sobre el I Encuentro Cuid-Arte.')}`} target="_blank" rel="noopener noreferrer" className="bg-white rounded-2xl p-6 border border-sage-100 hover:border-sage-300 hover:shadow-md transition-all text-center group">
+                                        <div className="w-10 h-10 bg-sage-50 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-sage-100 transition-colors">
+                                            <svg className="w-5 h-5 text-sage-500" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
+                                        </div>
+                                        <p className="font-heading font-bold text-sm text-sage-800">{c.name}</p>
+                                        <p className="text-[10px] text-sage-400 mt-0.5">{c.role}</p>
                                     </a>
                                 ))}
                             </div>
                         </div>
-                    </div>
+                    </section>
 
-                    {/* CTA FINAL */}
-                    <div className="bg-gradient-to-r from-cuidarte-dark-deep to-cuidarte-green-deep py-16">
-                        <div className="max-w-3xl mx-auto px-6 text-center text-white">
-                            <h2 className="font-heading text-3xl font-bold mb-3">¿Te animas?</h2>
-                            <p className="text-white/70 text-sm mb-6 italic">Cuidarte hoy, es ganar vida mañana.</p>
-                            {plazasRestantes <= 10 && <p className="text-cuidarte-gold font-bold text-sm mb-4">🔥 Solo quedan {plazasRestantes} plazas</p>}
-                            <a href="#registro" className="inline-block bg-cuidarte-gold hover:bg-cuidarte-gold-deep text-white font-bold py-4 px-12 rounded-full text-lg transition-all shadow-lg">Reservar mi plaza</a>
+                    {/* ═══ FINAL CTA ═══ */}
+                    <section className="py-24 grain" style={{ background: 'linear-gradient(160deg, #1a2e1a 0%, #2d4a2d 50%, #3d5f3d 100%)' }}>
+                        <div className="max-w-3xl mx-auto px-6 text-center">
+                            <p className="font-display text-4xl md:text-5xl font-bold text-white italic mb-4">¿Te animas?</p>
+                            <div className="divider-leaf w-16 h-px mx-auto mb-6"></div>
+                            <p className="text-sage-400 text-sm italic mb-8 font-display">Cuidarte hoy, es ganar vida mañana.</p>
+                            {plazasRestantes <= 15 && <p className="text-sand-400 font-heading font-bold text-sm mb-6">{plazasRestantes} plazas disponibles</p>}
+                            <a href="#registro" className="inline-flex items-center gap-3 bg-sand-400 hover:bg-sand-500 text-sage-900 font-heading font-bold py-4 px-12 rounded-full text-lg transition-all shadow-lg shadow-sand-400/20 hover:shadow-xl hover:-translate-y-0.5">
+                                Reservar mi plaza
+                            </a>
                         </div>
-                    </div>
+                    </section>
 
-                    {/* FOOTER */}
-                    <footer className="bg-cuidarte-dark-deep text-white py-12">
+                    {/* ═══ FOOTER ═══ */}
+                    <footer className="bg-sage-900 text-white py-12 border-t border-sage-800">
                         <div className="max-w-4xl mx-auto px-6 text-center">
-                            <p className="font-heading font-bold text-lg mb-1">Escuela Cuid-Arte</p>
-                            <p className="text-slate-400 text-xs mb-4">By Dra. Odile Fernández</p>
-                            <p className="text-slate-500 text-xs italic">Cuidarte hoy, es ganar vida mañana.</p>
-                            <div className="mt-6 flex justify-center gap-4 text-xs text-slate-400">
-                                <a href="privacidad.html" className="hover:text-white">Privacidad</a>
-                                <a href="legal.html" className="hover:text-white">Aviso Legal</a>
-                                <a href="https://escuelacuidarte.com" className="hover:text-white">escuelacuidarte.com</a>
+                            <p className="font-display text-xl font-bold mb-1 italic">Escuela Cuid-Arte</p>
+                            <p className="text-sage-500 text-xs mb-6">By Dra. Odile Fernández</p>
+                            <div className="flex justify-center gap-6 text-xs text-sage-500">
+                                <a href="privacidad.html" className="hover:text-white transition-colors">Privacidad</a>
+                                <a href="legal.html" className="hover:text-white transition-colors">Aviso Legal</a>
+                                <a href="https://escuelacuidarte.com" className="hover:text-white transition-colors">escuelacuidarte.com</a>
                             </div>
                         </div>
                     </footer>
 
-                    {/* BOTON WHATSAPP FLOTANTE */}
-                    <a href="https://wa.me/34664401328?text=Hola%2C%20tengo%20una%20duda%20sobre%20el%20I%20Encuentro%20Cuid-Arte." target="_blank" rel="noopener noreferrer" className="fixed bottom-6 left-6 z-50 bg-green-500 hover:bg-green-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-xl hover:shadow-2xl transition-all hover:scale-110">
+                    {/* ═══ WHATSAPP FLOAT ═══ */}
+                    <a href="https://wa.me/34664401328?text=Hola%2C%20tengo%20una%20duda%20sobre%20el%20I%20Encuentro%20Cuid-Arte." target="_blank" rel="noopener noreferrer" className="fixed bottom-6 left-6 z-50 bg-green-500 hover:bg-green-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-xl shadow-green-500/25 hover:shadow-2xl transition-all hover:scale-110">
                         <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492l4.644-1.217A11.95 11.95 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.153 0-4.144-.68-5.78-1.836l-.404-.263-2.75.72.735-2.686-.29-.421A9.94 9.94 0 012 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>
                     </a>
 
-                    {/* TOAST */}
+                    {/* ═══ TOAST ═══ */}
                     {toast.visible && (
-                        <div className={`fixed bottom-6 right-6 z-50 px-6 py-4 rounded-xl shadow-2xl text-white text-sm font-medium max-w-sm transition-all ${toast.type === 'error' ? 'bg-red-500' : toast.type === 'info' ? 'bg-amber-500' : 'bg-cuidarte-green'}`}>
+                        <div className={`fixed bottom-6 right-6 z-50 px-6 py-4 rounded-2xl shadow-2xl text-white text-sm font-medium max-w-sm transition-all ${toast.type === 'error' ? 'bg-red-500' : toast.type === 'info' ? 'bg-sand-500' : 'bg-sage-500'}`}>
                             {toast.msg}
                         </div>
                     )}
