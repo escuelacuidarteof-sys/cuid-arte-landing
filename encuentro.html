@@ -69,11 +69,14 @@
             student_individual: 'https://buy.stripe.com/7sY4gA3eUf3x3eG63T8Zq0a',
             external_doble: 'https://buy.stripe.com/cNi3cw9DidZt2aC77X8Zq0b',
             external_individual: 'https://buy.stripe.com/8x2fZi02I8F93eG63T8Zq0c',
+            actividades: '', // Pendiente enlace Stripe
+            actividades_comida: '', // Pendiente enlace Stripe + precio
         };
 
         const PRICES = {
             student: { doble: 150, individual: 190 },
             external: { doble: 200, individual: 250 },
+            daypass: { actividades: 60, actividades_comida: 0 },
         };
 
         const ACTIVITIES = [
@@ -88,7 +91,7 @@
         function App() {
             const [form, setForm] = useState({
                 first_name: '', last_name_1: '', last_name_2: '', email: '', phone: '', phonePrefix: '+34',
-                is_student: '', room_type: '', companion_name: '',
+                experience_type: '', is_student: '', room_type: '', companion_name: '',
                 age_range: '', province: '', relation_to_cancer: '',
                 cancer_type: '', cancer_stage: '', in_active_treatment: false,
                 how_found: '', first_event: '', motivation: '',
@@ -141,14 +144,21 @@
             };
 
             const getPrice = () => {
+                if (form.experience_type === 'daypass') return PRICES.daypass.actividades;
+                if (form.experience_type === 'daypass_comida') return PRICES.daypass.actividades_comida;
                 const tier = form.is_student === 'yes' ? 'student' : 'external';
                 return PRICES[tier]?.[form.room_type] || 0;
             };
 
             const getStripeLink = () => {
+                if (form.experience_type === 'daypass') return STRIPE_LINKS.actividades;
+                if (form.experience_type === 'daypass_comida') return STRIPE_LINKS.actividades_comida;
                 const tier = form.is_student === 'yes' ? 'student' : 'external';
                 return STRIPE_LINKS[`${tier}_${form.room_type}`] || '';
             };
+
+            const isDaypass = form.experience_type === 'daypass' || form.experience_type === 'daypass_comida';
+            const needsRoom = form.experience_type === 'alojamiento';
 
             const showsCancerFields = form.relation_to_cancer === 'paciente' || form.relation_to_cancer === 'superviviente';
 
@@ -159,8 +169,9 @@
                 if (!form.last_name_2) e.last_name_2 = true;
                 if (!form.email || !form.email.includes('@')) e.email = true;
                 if (!form.phone) e.phone = true;
-                if (!form.is_student) e.is_student = true;
-                if (!form.room_type) e.room_type = true;
+                if (!form.experience_type) e.experience_type = true;
+                if (needsRoom && !form.is_student) e.is_student = true;
+                if (needsRoom && !form.room_type) e.room_type = true;
                 if (!form.age_range) e.age_range = true;
                 if (!form.relation_to_cancer) e.relation_to_cancer = true;
                 if (!form.how_found) e.how_found = true;
@@ -181,8 +192,9 @@
                         last_name_2: form.last_name_2,
                         email: form.email.toLowerCase().trim(),
                         phone: fullPhone,
-                        is_student: form.is_student === 'yes',
-                        room_type: form.room_type,
+                        experience_type: form.experience_type,
+                        is_student: needsRoom ? form.is_student === 'yes' : false,
+                        room_type: needsRoom ? form.room_type : null,
                         companion_name: form.companion_name || null,
                         age_range: form.age_range || null,
                         province: form.province || null,
@@ -455,19 +467,20 @@
                                 <h2 className="font-display text-3xl font-bold text-sage-900 mb-3">Elige tu experiencia</h2>
                                 <p className="text-sage-500 text-sm">Incluye todo el fin de semana: alojamiento, pensión completa y todas las actividades</p>
                             </div>
-                            <div className="grid md:grid-cols-2 gap-6">
+                            <div className="grid md:grid-cols-3 gap-6">
                                 {/* Alumnas */}
                                 <div className="relative bg-white rounded-3xl p-8 border-2 border-sage-500 shadow-lg shadow-sage-500/5 overflow-hidden">
                                     <div className="absolute top-0 right-0 w-32 h-32 bg-sage-500/5 rounded-full blur-2xl -mr-10 -mt-10"></div>
                                     <div className="relative">
                                         <span className="inline-block bg-sage-500 text-white text-[10px] font-heading font-bold uppercase tracking-[2px] px-4 py-1.5 rounded-full mb-6">Alumnas Cuid-Arte</span>
+                                        <p className="text-sage-500 text-[10px] mb-4 font-heading">Alojamiento + pensión completa + actividades</p>
                                         <div className="space-y-5">
                                             <div className="flex justify-between items-baseline border-b border-sage-100 pb-4">
-                                                <span className="text-sage-700 text-sm">Habitación doble</span>
+                                                <span className="text-sage-700 text-sm">Hab. doble</span>
                                                 <div className="flex items-baseline gap-1"><span className="font-display text-3xl font-bold text-sage-800">150</span><span className="text-sage-500 text-sm">€</span></div>
                                             </div>
                                             <div className="flex justify-between items-baseline">
-                                                <span className="text-sage-700 text-sm">Habitación individual</span>
+                                                <span className="text-sage-700 text-sm">Hab. individual</span>
                                                 <div className="flex items-baseline gap-1"><span className="font-display text-3xl font-bold text-sage-800">190</span><span className="text-sage-500 text-sm">€</span></div>
                                             </div>
                                         </div>
@@ -476,14 +489,30 @@
                                 {/* Externas */}
                                 <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-8 border border-sage-200/60">
                                     <span className="inline-block bg-sage-100 text-sage-600 text-[10px] font-heading font-bold uppercase tracking-[2px] px-4 py-1.5 rounded-full mb-6">Otras personas</span>
+                                    <p className="text-sage-500 text-[10px] mb-4 font-heading">Alojamiento + pensión completa + actividades</p>
                                     <div className="space-y-5">
                                         <div className="flex justify-between items-baseline border-b border-sage-100 pb-4">
-                                            <span className="text-sage-600 text-sm">Habitación doble</span>
+                                            <span className="text-sage-600 text-sm">Hab. doble</span>
                                             <div className="flex items-baseline gap-1"><span className="font-display text-3xl font-bold text-sage-700">200</span><span className="text-sage-400 text-sm">€</span></div>
                                         </div>
                                         <div className="flex justify-between items-baseline">
-                                            <span className="text-sage-600 text-sm">Habitación individual</span>
+                                            <span className="text-sage-600 text-sm">Hab. individual</span>
                                             <div className="flex items-baseline gap-1"><span className="font-display text-3xl font-bold text-sage-700">250</span><span className="text-sage-400 text-sm">€</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {/* Solo actividades */}
+                                <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-8 border border-sand-300/40">
+                                    <span className="inline-block bg-sand-400/15 text-sand-600 text-[10px] font-heading font-bold uppercase tracking-[2px] px-4 py-1.5 rounded-full mb-6">Sin alojamiento</span>
+                                    <p className="text-sage-500 text-[10px] mb-4 font-heading">Participa sin quedarte a dormir</p>
+                                    <div className="space-y-5">
+                                        <div className="flex justify-between items-baseline border-b border-sage-100 pb-4">
+                                            <span className="text-sage-600 text-sm">Solo actividades</span>
+                                            <div className="flex items-baseline gap-1"><span className="font-display text-3xl font-bold text-sage-700">60</span><span className="text-sage-400 text-sm">€</span></div>
+                                        </div>
+                                        <div className="flex justify-between items-baseline">
+                                            <span className="text-sage-600 text-sm">Actividades + comida</span>
+                                            <div className="flex items-baseline gap-1"><span className="font-heading text-sm text-sage-400 italic">Próximamente</span></div>
                                         </div>
                                     </div>
                                 </div>
@@ -532,7 +561,31 @@
                                         </div>
                                     </div>
 
+                                    {/* Tipo de experiencia */}
                                     <div className="space-y-1.5">
+                                        <label className={labelClass}>¿Cómo quieres vivir el encuentro? *</label>
+                                        <div className="space-y-2">
+                                            {[
+                                                { val: 'alojamiento', label: '🏡 Fin de semana completo', desc: 'Alojamiento + pensión completa + actividades', price: 'desde 150€' },
+                                                { val: 'daypass', label: '☀️ Solo actividades', desc: 'Participa en las actividades sin alojamiento', price: '60€' },
+                                                { val: 'daypass_comida', label: '🍽️ Actividades + comida', desc: 'Actividades + comidas del día', price: 'Próximamente' },
+                                            ].map(opt => (
+                                                <button key={opt.val} type="button" onClick={() => { setForm({...form, experience_type: opt.val, room_type: opt.val !== 'alojamiento' ? '' : form.room_type, is_student: opt.val !== 'alojamiento' ? 'no' : form.is_student }); setErrors({...errors, experience_type: false}); }} className={`w-full text-left p-4 rounded-2xl border-2 transition-all ${form.experience_type === opt.val ? 'border-sage-500 bg-sage-50' : 'border-sage-200/60 hover:border-sage-300'}`}>
+                                                    <div className="flex justify-between items-center">
+                                                        <div>
+                                                            <p className="font-heading font-semibold text-sm text-sage-800">{opt.label}</p>
+                                                            <p className="text-[11px] text-sage-500 mt-0.5">{opt.desc}</p>
+                                                        </div>
+                                                        <span className={`font-heading font-bold text-sm ${form.experience_type === opt.val ? 'text-sage-700' : 'text-sage-400'}`}>{opt.price}</span>
+                                                    </div>
+                                                </button>
+                                            ))}
+                                        </div>
+                                        {errors.experience_type && <p className="text-xs text-red-400">Selecciona una opción</p>}
+                                    </div>
+
+                                    {/* Alumna + habitación — solo si alojamiento */}
+                                    {needsRoom && <div className="space-y-1.5">
                                         <label className={labelClass}>¿Eres alumna de Escuela Cuid-Arte? *</label>
                                         <p className="text-[10px] text-sage-400 italic -mt-0.5 mb-1">Si eres alumna, usa el mismo email de tu registro para verificar</p>
                                         <div className="flex gap-3">
@@ -566,6 +619,7 @@
                                             <input className={inputClass('')} placeholder="Si ya sabes con quién compartirás" value={form.companion_name} onChange={e => setForm({...form, companion_name: e.target.value})} />
                                         </div>
                                     )}
+                                    </div>}
 
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-1.5">
