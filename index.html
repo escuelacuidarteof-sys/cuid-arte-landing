@@ -1471,14 +1471,8 @@
                                                 if (!admissionForm.phone) errors.phone = true;
                                                 if (!admissionForm.age) errors.age = true;
                                                 if (!admissionForm.situation) errors.situation = true;
-                                                if (!admissionForm.inversion) errors.inversion = true;
-                                                if (!admissionForm.timing) errors.timing = true;
                                                 setFieldErrors(errors);
                                                 if (Object.keys(errors).length > 0) { showToast("Por favor, completa todos los campos", "error"); return; }
-                                                if (admissionForm.inversion === 'no_lista' || (admissionForm.inversion === 'primero_conocer' && admissionForm.timing === 'explorando')) {
-                                                    setFormStep(5);
-                                                    return;
-                                                }
                                                 setFormStep(3);
                                             }} className="w-full bg-cuidarte-dark-deep text-white font-bold py-4 rounded-xl hover:bg-slate-800 transition-all shadow-lg flex items-center justify-center gap-2">
                                                 Paso Final <ArrowRight className="w-4 h-4" />
