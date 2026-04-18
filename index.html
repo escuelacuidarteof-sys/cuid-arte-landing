@@ -647,6 +647,10 @@
 
 
             const faqs = [
+                { q: "¿Cuánto cuesta Cuid-Arte?", a: "Cuid-Arte es un programa profesional con un equipo dedicado a ti, por lo que tiene una inversión asociada. El detalle exacto depende del plan que mejor encaje con tu situación, y lo conocerás durante la entrevista de valoración. Existen distintas modalidades de pago según el plan elegido." },
+                { q: "¿Cuánto dura el programa?", a: "El compromiso inicial es de 3 meses, pero Cuid-Arte no es un curso con inicio y fin: somos una comunidad de aprendizaje continuo donde lo ideal es que te quedes el tiempo que tu proceso lo necesite. Hay alumnas que llevan con nosotras desde el primer día." },
+                { q: "¿Es online o presencial?", a: "El programa es online y se complementa con eventos presenciales puntuales (encuentros, retiros, jornadas) a los que puedes apuntarte si quieres. Toda la atención del día a día la recibes desde casa." },
+                { q: "¿Qué pasa después de enviar mi solicitud?", a: "Revisamos cada solicitud de forma personalizada. Si tu caso encaja con el programa, te contactamos en un plazo máximo de 48h para una entrevista de valoración sin compromiso. En esa llamada conocerás el detalle del programa, el plan que mejor te encaje y la inversión." },
                 { q: "¿Puedo hacer este programa si estoy en tratamiento oncológico?", a: "Sí. Cuid-Arte está diseñado para adaptarse a cada fase del proceso oncológico: cirugía, quimioterapia, radioterapia, inmunoterapia y hormonoterapia. Todas las recomendaciones se ajustan a tu situación clínica." },
                 { q: "¿Necesito permiso de mi oncólogo?", a: "No es obligatorio, pero sí recomendable. Nuestro enfoque se basa en evidencia y es completamente compatible con los tratamientos médicos; aun así, mantener informada a tu oncóloga/o siempre suma." },
                 { q: "¿Este programa sustituye a mi tratamiento médico?", a: "No. Cuid-Arte no sustituye cirugías, quimioterapia, radioterapia ni ningún tratamiento oncológico. Es un apoyo complementario para mejorar tu calidad de vida y aliviar síntomas." },
@@ -1047,6 +1051,99 @@
                 </section>
 
 
+                {/* SECCIÓN: QUÉ INCLUYE TU PLAZA */}
+                <section className="py-28 bg-cuidarte-mint/10 relative overflow-hidden">
+                    <div className="container mx-auto px-6">
+                        <Reveal className="text-center mb-16 max-w-3xl mx-auto">
+                            <span className="text-cuidarte-green-deep font-bold tracking-widest uppercase text-xs bg-cuidarte-mint/40 px-4 py-2 rounded-full border border-cuidarte-mint/50">Tu plaza incluye</span>
+                            <h2 className="text-4xl lg:text-5xl font-bold text-cuidarte-dark-deep mt-6 font-heading leading-tight">Todo lo que necesitas, <br/><span className="text-cuidarte-green font-medium italic">en un único espacio</span></h2>
+                            <p className="text-lg text-slate-600 mt-6">Cuid-Arte es una comunidad de aprendizaje continuo. El compromiso inicial es de 3 meses, pero lo ideal es que te quedes el tiempo que tu proceso lo necesite.</p>
+                        </Reveal>
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+                            {[
+                                { icon: '🥗', title: 'Plan nutricional personalizado', desc: 'Adaptado a tu fase de tratamiento y a tu evolución.' },
+                                { icon: '💪', title: 'Programa de entrenamiento adaptado', desc: 'Pensado para tu nivel de energía y tu situación clínica.' },
+                                { icon: '👥', title: 'Acompañamiento personal de tu coach', desc: 'No estás sola. Tienes a alguien que te conoce y te guía.' },
+                                { icon: '🎥', title: 'Sesiones en directo y contenidos exclusivos', desc: 'Entrenamientos, talleres y sesiones temáticas con la comunidad.' },
+                                { icon: '📱', title: 'Tu plataforma personal con todos tus recursos', desc: 'Tu plan, tus clases, tu progreso, todo en un solo sitio.' },
+                                { icon: '🌿', title: 'Comunidad privada de pacientes y supervivientes', desc: 'Un espacio seguro para compartir y aprender juntas.' },
+                                { icon: '🤝', title: 'Eventos presenciales puntuales', desc: 'Encuentros, retiros y jornadas para conocernos en persona.' },
+                                { icon: '🔬', title: 'Recomendaciones basadas en evidencia', desc: 'Todo lo que recibes está sustentado en ciencia actual.' },
+                                { icon: '🌱', title: 'Una comunidad de aprendizaje continuo', desc: 'No es un curso con inicio y fin. Es un camino para crecer.' },
+                            ].map((item, idx) => (
+                                <Reveal key={idx}>
+                                    <div className="bg-white rounded-2xl p-6 h-full border border-cuidarte-mint/30 hover:border-cuidarte-green/40 hover:shadow-md transition-all">
+                                        <div className="text-4xl mb-3">{item.icon}</div>
+                                        <h3 className="font-heading font-bold text-lg text-cuidarte-dark-deep mb-2">{item.title}</h3>
+                                        <p className="text-slate-600 text-sm leading-relaxed">{item.desc}</p>
+                                    </div>
+                                </Reveal>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
+
+                {/* SECCIÓN: PARA QUIÉN ES (Y PARA QUIÉN NO) */}
+                <section className="py-28 bg-white relative overflow-hidden">
+                    <div className="container mx-auto px-6">
+                        <Reveal className="text-center mb-16 max-w-3xl mx-auto">
+                            <span className="text-cuidarte-green-deep font-bold tracking-widest uppercase text-xs bg-cuidarte-mint/40 px-4 py-2 rounded-full border border-cuidarte-mint/50">¿Encajamos?</span>
+                            <h2 className="text-4xl lg:text-5xl font-bold text-cuidarte-dark-deep mt-6 font-heading leading-tight">Cuid-Arte no es para todo el mundo, <br/><span className="text-cuidarte-green font-medium italic">y eso está bien</span></h2>
+                            <p className="text-lg text-slate-600 mt-6">Trabajamos con plazas limitadas porque queremos garantizar la atención que mereces. Por eso nos importa que encajemos desde el principio.</p>
+                        </Reveal>
+                        <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+                            <Reveal>
+                                <div className="bg-cuidarte-mint/20 border-2 border-cuidarte-green/30 rounded-3xl p-8 h-full">
+                                    <h3 className="font-heading font-bold text-2xl text-cuidarte-dark-deep mb-6 flex items-center gap-2">
+                                        <span className="w-10 h-10 rounded-full bg-cuidarte-green text-white flex items-center justify-center text-xl">✓</span>
+                                        Es para ti si...
+                                    </h3>
+                                    <ul className="space-y-4">
+                                        {[
+                                            'Estás diagnosticada, en tratamiento o en post-tratamiento oncológico.',
+                                            'Quieres mejorar tu calidad de vida con apoyo profesional.',
+                                            'Estás preparada para comprometerte con tu salud.',
+                                            'Buscas un equipo que te acompañe en serio y a largo plazo.',
+                                            'Valoras una comunidad de mujeres que viven lo mismo que tú.',
+                                            'Eres familiar o cuidadora y quieres aprender a sostener mejor.',
+                                        ].map((item, idx) => (
+                                            <li key={idx} className="flex gap-3 text-slate-700 leading-relaxed">
+                                                <span className="text-cuidarte-green-deep font-bold mt-0.5">✓</span>
+                                                <span>{item}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            </Reveal>
+                            <Reveal>
+                                <div className="bg-slate-50 border-2 border-slate-200 rounded-3xl p-8 h-full">
+                                    <h3 className="font-heading font-bold text-2xl text-cuidarte-dark-deep mb-6 flex items-center gap-2">
+                                        <span className="w-10 h-10 rounded-full bg-slate-400 text-white flex items-center justify-center text-xl">✗</span>
+                                        No es para ti si...
+                                    </h3>
+                                    <ul className="space-y-4">
+                                        {[
+                                            'Solo buscas información puntual o gratuita (descarga nuestro Kit).',
+                                            'No puedes dedicar al menos 2 horas semanales a cuidarte.',
+                                            'Esperas resultados rápidos sin compromiso ni constancia.',
+                                            'Buscas que sustituyamos tu tratamiento médico actual.',
+                                            'Necesitas atención psicológica clínica especializada.',
+                                            'Aún no es tu momento para dar este paso.',
+                                        ].map((item, idx) => (
+                                            <li key={idx} className="flex gap-3 text-slate-500 leading-relaxed">
+                                                <span className="text-slate-400 font-bold mt-0.5">✗</span>
+                                                <span>{item}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            </Reveal>
+                        </div>
+                    </div>
+                </section>
+
+
                 {/* SECCIÓN: EL EQUIPO */}
                 <section className="py-28 bg-white relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-96 h-96 bg-cuidarte-mint/20 rounded-full blur-3xl -z-10 -translate-x-1/2 -translate-y-1/2"></div>
@@ -1360,20 +1457,20 @@
                                     {/* STEP 1: EMAIL */}
                                     {formStep === 1 && (
                                         <div className="space-y-4">
-                                            {/* Disclaimer cualificador (versión B) — comunica que es de pago sin mencionar precio */}
+                                            {/* Disclaimer cualificador — tono cercano, comunica equipo + inversión sin números */}
                                             <div className="bg-cuidarte-green/5 border border-cuidarte-green/20 rounded-2xl p-4 space-y-3">
                                                 <div className="flex items-start gap-2">
                                                     <span className="text-cuidarte-green-deep text-lg leading-none mt-0.5">🌿</span>
                                                     <div className="space-y-2">
-                                                        <p className="text-sm font-bold text-cuidarte-dark-deep leading-snug">Antes de continuar, hay algo que debes saber:</p>
+                                                        <p className="text-sm font-bold text-cuidarte-dark-deep leading-snug">Antes de seguir, queremos contarte cómo trabajamos</p>
                                                         <p className="text-xs text-slate-600 leading-relaxed">
-                                                            Cuid-Arte <strong>NO es un curso ni una consulta gratuita</strong>. Es un acompañamiento profesional de pago, con plazas limitadas y atención personalizada.
+                                                            Cuid-Arte es un acompañamiento profesional con un equipo dedicándote tiempo cada semana. Como cualquier servicio sanitario personalizado, <strong>conlleva una inversión</strong>, y trabajamos con plazas limitadas para garantizar la atención que mereces.
                                                         </p>
                                                     </div>
                                                 </div>
                                                 <div className="bg-white border border-cuidarte-gold/30 rounded-xl p-3 space-y-2">
                                                     <p className="text-xs text-slate-600 leading-relaxed">
-                                                        Si lo que necesitas es <strong>información gratuita</strong> para empezar, te regalamos nuestro Kit:
+                                                        ¿Solo buscas información? Te regalamos nuestro Kit con todo lo esencial para empezar a cuidarte:
                                                     </p>
                                                     <button
                                                         type="button"
@@ -1384,7 +1481,7 @@
                                                     </button>
                                                 </div>
                                                 <p className="text-xs text-slate-500 leading-relaxed">
-                                                    Si estás <strong>lista para entrar al programa</strong>, completa esta solicitud (5 min). Te llamaremos para valorar tu caso sin compromiso.
+                                                    Si estás <strong>lista para dar el paso</strong>, cuéntanos tu caso (5 min). Si tu solicitud encaja con el programa, te llamamos en 48h.
                                                 </p>
                                             </div>
 
