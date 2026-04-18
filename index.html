@@ -301,7 +301,7 @@
             // Admission Form — estado completo
             const [formSubject, setFormSubject] = useState("Recién diagnosticado/a");
             const [admissionForm, setAdmissionForm] = useState({
-                email: "", name: "", phonePrefix: "+34", phone: "",
+                email: "", name: "", firstName: "", lastName1: "", lastName2: "", phonePrefix: "+34", phone: "",
                 age: "", sex: "Mujer", country: "España",
                 situation: "",
                 tipoCancer: "", estadio: "Desconocido",
@@ -388,7 +388,10 @@
                         for (const prefix of knownPrefixes) {
                             if (parsedPhone.startsWith(prefix)) { parsedPrefix = prefix; parsedPhone = parsedPhone.slice(prefix.length).trim(); break; }
                         }
-                        setAdmissionForm(prev => ({ ...prev, name: data.name||"", phonePrefix: parsedPrefix, phone: parsedPhone, age: data.age||"", sex: data.sex||"Mujer", country: data.country||"España", situation: data.situation||"", isPrioritized: true, isFullyRegistered: registrationComplete }));
+                        const fName = data.first_name || (data.name ? String(data.name).trim().split(/\s+/)[0] : "");
+                        const lName1 = data.last_name_1 || (data.name ? String(data.name).trim().split(/\s+/)[1] || "" : "");
+                        const lName2 = data.last_name_2 || (data.name ? String(data.name).trim().split(/\s+/).slice(2).join(' ') || "" : "");
+                        setAdmissionForm(prev => ({ ...prev, name: data.name||"", firstName: fName, lastName1: lName1, lastName2: lName2, phonePrefix: parsedPrefix, phone: parsedPhone, age: data.age||"", sex: data.sex||"Mujer", country: data.country||"España", situation: data.situation||"", isPrioritized: true, isFullyRegistered: registrationComplete }));
                         setFormStep(2);
                     } else {
                         setFormStep(2);
@@ -449,12 +452,18 @@
                     try {
                         const fullPhone = admissionForm.phone ? `${admissionForm.phonePrefix} ${admissionForm.phone}`.trim() : null;
                         const score = calculateLeadScore(admissionForm);
-                        const autoStatus = score >= 30 ? 'new' : 'unqualified';
+                        // Threshold subido a 45 (basado en analisis de 361 leads historicos)
+                        const autoStatus = score >= 45 ? 'new' : 'unqualified';
                         // Construye un "interest" estructurado a partir de las respuestas (sustituye al campo libre)
                         const structuredInterest = [admissionForm.timing, admissionForm.inversion].filter(Boolean).join(' · ') || 'No indicado';
+                        // Reconstruye name desde los 3 campos separados (compatibilidad con sistemas existentes)
+                        const fullName = [admissionForm.firstName, admissionForm.lastName1, admissionForm.lastName2].map(s => (s || '').trim()).filter(Boolean).join(' ') || admissionForm.name || "Sin nombre";
                         const upsertData = {
                             email: admissionForm.email.toLowerCase().trim(),
-                            name: admissionForm.name || "Sin nombre",
+                            name: fullName,
+                            first_name: admissionForm.firstName || null,
+                            last_name_1: admissionForm.lastName1 || null,
+                            last_name_2: admissionForm.lastName2 || null,
                             phone: fullPhone || null,
                             age: admissionForm.age || "No indicado",
                             sex: admissionForm.sex || "No indicado",
@@ -1522,8 +1531,18 @@
                                     {formStep === 2 && !admissionForm.isPrioritized && (
                                         <div className="space-y-3 animate-in fade-in slide-in-from-right-4 duration-300">
                                             <div className="space-y-1">
-                                                <label className="text-[10px] font-bold text-slate-500 uppercase">Nombre completo</label>
-                                                <input type="text" required className={`w-full px-4 py-2.5 rounded-lg border bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cuidarte-green outline-none text-sm ${fieldErrors.name?'border-red-400':'border-slate-200'}`} value={admissionForm.name} onChange={(e) => { setAdmissionForm({...admissionForm,name:e.target.value}); setFieldErrors(p=>({...p,name:false})); }} />
+                                                <label className="text-[10px] font-bold text-slate-500 uppercase">Nombre</label>
+                                                <input type="text" required placeholder="Tu nombre" className={`w-full px-4 py-2.5 rounded-lg border bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cuidarte-green outline-none text-sm ${fieldErrors.firstName?'border-red-400':'border-slate-200'}`} value={admissionForm.firstName} onChange={(e) => { setAdmissionForm({...admissionForm, firstName: e.target.value, name: [e.target.value, admissionForm.lastName1, admissionForm.lastName2].filter(Boolean).join(' ')}); setFieldErrors(p=>({...p,firstName:false})); }} />
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div className="space-y-1">
+                                                    <label className="text-[10px] font-bold text-slate-500 uppercase">Primer apellido</label>
+                                                    <input type="text" required placeholder="Obligatorio" className={`w-full px-4 py-2.5 rounded-lg border bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cuidarte-green outline-none text-sm ${fieldErrors.lastName1?'border-red-400':'border-slate-200'}`} value={admissionForm.lastName1} onChange={(e) => { setAdmissionForm({...admissionForm, lastName1: e.target.value, name: [admissionForm.firstName, e.target.value, admissionForm.lastName2].filter(Boolean).join(' ')}); setFieldErrors(p=>({...p,lastName1:false})); }} />
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <label className="text-[10px] font-bold text-slate-500 uppercase">Segundo apellido</label>
+                                                    <input type="text" placeholder="Opcional" className="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cuidarte-green outline-none text-sm" value={admissionForm.lastName2} onChange={(e) => setAdmissionForm({...admissionForm, lastName2: e.target.value, name: [admissionForm.firstName, admissionForm.lastName1, e.target.value].filter(Boolean).join(' ')})} />
+                                                </div>
                                             </div>
                                             <div className="space-y-1">
                                                 <label className="text-[10px] font-bold text-slate-500 uppercase">Teléfono</label>
@@ -1564,7 +1583,8 @@
                                             </div>
                                             <button type="button" onClick={() => {
                                                 const errors = {};
-                                                if (!admissionForm.name) errors.name = true;
+                                                if (!admissionForm.firstName || !admissionForm.firstName.trim()) errors.firstName = true;
+                                                if (!admissionForm.lastName1 || !admissionForm.lastName1.trim()) errors.lastName1 = true;
                                                 if (!admissionForm.phone) errors.phone = true;
                                                 if (!admissionForm.age) errors.age = true;
                                                 if (!admissionForm.situation) errors.situation = true;
@@ -1684,8 +1704,13 @@
                                                 </select>
                                             </div>
                                             <div className="space-y-1">
-                                                <label className="text-[10px] font-bold text-slate-500 uppercase">¿Qué es lo que más te preocupa hoy?</label>
-                                                <textarea rows="2" className="w-full px-4 py-2 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cuidarte-green outline-none text-sm resize-none" placeholder="Cuéntanos un poco de ti — esto nos ayuda a prepararnos para tu llamada..." value={admissionForm.preocupacion} onChange={(e) => setAdmissionForm({...admissionForm,preocupacion:e.target.value})}></textarea>
+                                                <div className="flex items-baseline justify-between">
+                                                    <label className="text-[10px] font-bold text-slate-500 uppercase">¿Qué es lo que más te preocupa hoy?</label>
+                                                    <span className={`text-[10px] font-bold ${(admissionForm.preocupacion || '').trim().length >= 50 ? 'text-cuidarte-green-deep' : 'text-slate-400'}`}>
+                                                        {(admissionForm.preocupacion || '').trim().length} / 50 mín
+                                                    </span>
+                                                </div>
+                                                <textarea rows="3" required minLength={50} className="w-full px-4 py-2 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cuidarte-green outline-none text-sm resize-none" placeholder="Cuéntanos un poco de ti, qué te preocupa, qué necesitas... Cuanto más nos cuentes, mejor podremos prepararnos para hablar contigo." value={admissionForm.preocupacion} onChange={(e) => setAdmissionForm({...admissionForm,preocupacion:e.target.value})}></textarea>
                                             </div>
                                             <label className="flex items-start gap-3 cursor-pointer">
                                                 <input type="checkbox" required className="mt-1 w-4 h-4 accent-cuidarte-green rounded" />
@@ -1693,12 +1718,12 @@
                                             </label>
                                             <button
                                                 type="submit"
-                                                disabled={isSubmitting || !admissionForm.compromiso || !admissionForm.inversion || !admissionForm.timing || !admissionForm.tipoCancer}
+                                                disabled={isSubmitting || !admissionForm.compromiso || !admissionForm.inversion || !admissionForm.timing || !admissionForm.tipoCancer || (admissionForm.preocupacion || '').trim().length < 50}
                                                 className="w-full bg-cuidarte-green text-white font-bold py-3.5 rounded-xl hover:bg-cuidarte-green-deep transition-all shadow-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                                             >
                                                 {isSubmitting ? <><svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>Guardando...</> : "Completar Registro"}
                                             </button>
-                                            {(!admissionForm.compromiso || !admissionForm.inversion || !admissionForm.timing || !admissionForm.tipoCancer) && (
+                                            {(!admissionForm.compromiso || !admissionForm.inversion || !admissionForm.timing || !admissionForm.tipoCancer || (admissionForm.preocupacion || '').trim().length < 50) && (
                                                 <p className="text-[10px] text-slate-400 text-center italic">Completa todos los campos para enviar</p>
                                             )}
                                         </div>
