@@ -92,8 +92,16 @@
 
 
     <footer class="bg-white border-t border-slate-200 py-8 text-center text-sm text-slate-500">
-        <p>&copy; 2025 Servicio Integral Cuid-Arte.</p>
+        <div class="container mx-auto px-6 max-w-4xl">
+            <div class="flex justify-center gap-6 mb-3 flex-wrap text-xs">
+                <a href="legal.html" class="hover:text-rose-500 transition-colors">Aviso Legal</a>
+                <a href="privacidad.html" class="hover:text-rose-500 transition-colors">Privacidad</a>
+                <a href="condiciones.html" class="hover:text-rose-500 transition-colors">Condiciones y Devoluciones</a>
+            </div>
+            <p>&copy; <span id="priv-year"></span> NEIKO HEALTH, S.L. · NIF B22928311.</p>
+        </div>
     </footer>
+    <script>document.getElementById('priv-year').textContent = new Date().getFullYear();</script>
 
 
 </body>
