@@ -313,10 +313,6 @@
                 origen: "Instagram", preocupacion: "",
                 isPrioritized: false, isFullyRegistered: false
             });
-            // Mini-modal del Kit Gratuito (separado del flujo principal)
-            const [isKitOpen, setIsKitOpen] = useState(false);
-            const [kitForm, setKitForm] = useState({ name: "", email: "" });
-            const [isKitSubmitting, setIsKitSubmitting] = useState(false);
             const [formStep, setFormStep] = useState(1);
             const [isValidatingEmail, setIsValidatingEmail] = useState(false);
             const [isSubmitting, setIsSubmitting] = useState(false);
@@ -327,8 +323,6 @@
             const SB_KEY = "__SUPABASE_ANON_KEY__";
             const isConfigured = SB_URL.startsWith('http');
             const supabase = isConfigured ? window.supabase.createClient(SB_URL, SB_KEY) : null;
-
-            const KIT_SUPERVIVENCIA_URL = "https://kitsupervivenvivneciacuid-arte.netlify.app/";
 
             // Helper para invocar la edge function de email transaccional.
             // Fire-and-forget: no bloquea el flujo si el email falla.
@@ -355,12 +349,12 @@
             }, []);
 
             useEffect(() => {
-                document.body.style.overflow = (isAdmissionOpen || isVideoOpen || isMenuOpen || isKitOpen) ? 'hidden' : 'auto';
+                document.body.style.overflow = (isAdmissionOpen || isVideoOpen || isMenuOpen) ? 'hidden' : 'auto';
                 return () => { document.body.style.overflow = 'auto'; };
-            }, [isAdmissionOpen, isVideoOpen, isMenuOpen, isKitOpen]);
+            }, [isAdmissionOpen, isVideoOpen, isMenuOpen]);
 
             useEffect(() => {
-                const handleEsc = (e) => { if (e.key === 'Escape') { setIsVideoOpen(false); setIsAdmissionOpen(false); setIsKitOpen(false); } };
+                const handleEsc = (e) => { if (e.key === 'Escape') { setIsVideoOpen(false); setIsAdmissionOpen(false); } };
                 window.addEventListener('keydown', handleEsc);
                 return () => window.removeEventListener('keydown', handleEsc);
             }, []);
@@ -436,7 +430,6 @@
                 else if (preocLen > 20) score += 5;
 
                 if (form.isPrioritized) score += 5;
-                if (form.downloaded_kit) score += 5;
 
                 // TIER 4: Encaje (10pts max)
                 if (form.country === 'España') score += 10;
@@ -482,10 +475,7 @@
                             score: score,
                             status: autoStatus,
                         };
-                        // NOTA: se eliminó la asignación automática de downloaded_kit=true
-                        // (era un bug — todos los nuevos leads se marcaban como descargadores del kit).
-                        // El kit ahora tiene su propio mini-modal que pone downloaded_kit=true sólo cuando lo descargan.
-                        // Usa RPC SECURITY DEFINER para evitar exponer UPDATE/SELECT a anon en la tabla
+                        // RPC SECURITY DEFINER: evita exponer UPDATE/SELECT a anon en la tabla
                         const { data, error } = await supabase
                             .rpc('submit_landing_lead', { payload: upsertData });
                         if (error) {
@@ -502,45 +492,6 @@
                     setIsSubmitting(false);
                 }
             };
-
-            // Submit del mini-modal Kit Gratuito — escribe al CRM principal antes de enviar al kit
-            const handleKitSubmit = async (e) => {
-                e.preventDefault();
-                if (!kitForm.email || !kitForm.email.includes('@') || !kitForm.name) {
-                    showToast("Completa nombre y email", "error");
-                    return;
-                }
-                setIsKitSubmitting(true);
-                try {
-                    let kitLeadId = null;
-                    if (supabase) {
-                        const upsertKit = {
-                            email: kitForm.email.toLowerCase().trim(),
-                            name: kitForm.name,
-                            consent: true,
-                            origen: 'Kit Gratuito',
-                            interest: 'kit_gratuito',
-                            downloaded_kit: true,
-                            status: 'unqualified', // No entra al pipeline activo del closer
-                            score: 0,
-                        };
-                        const { data: kitData } = await supabase.rpc('submit_landing_lead', { payload: upsertKit });
-                        kitLeadId = kitData;
-                    }
-                    // Email del kit (no bloqueante)
-                    if (kitLeadId) sendLeadEmail(kitLeadId, 'kit_download');
-                    // Redirige al kit externo (Netlify) con los datos en query string para autocompletar allí
-                    const params = new URLSearchParams({ name: kitForm.name, email: kitForm.email });
-                    window.location.href = `${KIT_SUPERVIVENCIA_URL}?${params.toString()}`;
-                } catch (err) {
-                    console.error(err);
-                    showToast("Error guardando datos. Te redirigimos igualmente.", "error");
-                    window.location.href = KIT_SUPERVIVENCIA_URL;
-                } finally {
-                    setIsKitSubmitting(false);
-                }
-            };
-
 
             const handleDownload = async () => {
                 if(!lmEmail || !lmName) {
@@ -1474,18 +1425,6 @@
                                                         </p>
                                                     </div>
                                                 </div>
-                                                <div className="bg-white border border-cuidarte-gold/30 rounded-xl p-3 space-y-2">
-                                                    <p className="text-xs text-slate-600 leading-relaxed">
-                                                        ¿Solo buscas información? Te regalamos nuestro Kit con todo lo esencial para empezar a cuidarte:
-                                                    </p>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setIsKitOpen(true)}
-                                                        className="w-full bg-cuidarte-gold/15 hover:bg-cuidarte-gold/25 text-cuidarte-gold-deep font-bold py-2.5 rounded-lg text-xs flex items-center justify-center gap-2 transition-colors border border-cuidarte-gold/30"
-                                                    >
-                                                        📩 Quiero el Kit Gratuito
-                                                    </button>
-                                                </div>
                                                 <p className="text-xs text-slate-500 leading-relaxed">
                                                     Si estás <strong>lista para dar el paso</strong>, cuéntanos tu caso (5 min). Si tu solicitud encaja con el programa, te llamamos en 48h.
                                                 </p>
@@ -1518,8 +1457,8 @@
                                                 </div>
                                                 <p className="text-slate-500 text-sm leading-relaxed max-w-xs mx-auto">{admissionForm.isFullyRegistered ? "Tu equipo está revisando tu caso. Te contactaremos pronto." : "Nos encanta verte de nuevo. Para completar tu inscripción necesitamos unos datos más."}</p>
                                             </div>
-                                            <button type="button" onClick={() => admissionForm.isFullyRegistered ? window.location.href = KIT_SUPERVIVENCIA_URL : setFormStep(3)} className="w-full bg-gradient-to-r from-cuidarte-gold-deep to-cuidarte-gold text-white font-bold py-4 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2">
-                                                {admissionForm.isFullyRegistered ? "Acceder a mi Kit de Supervivencia" : "Completar Mi Registro"} <ArrowRight className="w-4 h-4" />
+                                            <button type="button" onClick={() => admissionForm.isFullyRegistered ? setIsAdmissionOpen(false) : setFormStep(3)} className="w-full bg-gradient-to-r from-cuidarte-gold-deep to-cuidarte-gold text-white font-bold py-4 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2">
+                                                {admissionForm.isFullyRegistered ? "Entendido, gracias" : "Completar Mi Registro"} <ArrowRight className="w-4 h-4" />
                                             </button>
                                         </div>
                                     )}
@@ -1738,12 +1677,6 @@
                                             <p className="text-sm text-slate-500 leading-relaxed">Entendemos que cada persona tiene su momento. Mientras tanto, queremos acompañarte con estos recursos gratuitos:</p>
                                         </div>
                                         <div className="space-y-3 text-left">
-                                            <a href={KIT_SUPERVIVENCIA_URL} target="_blank" rel="noopener noreferrer" className="block bg-gradient-to-br from-cuidarte-dark-deep to-slate-800 rounded-2xl p-4 text-white space-y-2 shadow-xl hover:shadow-2xl transition-shadow">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-xl bg-cuidarte-gold/20 flex items-center justify-center flex-shrink-0"><Gift className="w-5 h-5 text-cuidarte-gold" /></div>
-                                                    <div><p className="font-heading font-bold leading-tight">Kit de Supervivencia Gratuito</p><p className="text-slate-400 text-xs">Recetas, audio de calma y rutina de movimiento</p></div>
-                                                </div>
-                                            </a>
                                             <a href="https://www.instagram.com/misrecetasanticancer/?hl=es" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 bg-cuidarte-mint/30 border border-cuidarte-green/20 rounded-xl p-4 hover:bg-cuidarte-mint/50 transition-colors">
                                                 <div className="w-10 h-10 rounded-xl bg-cuidarte-green/10 flex items-center justify-center flex-shrink-0"><Users className="w-5 h-5 text-cuidarte-green" /></div>
                                                 <div><p className="font-bold text-sm text-cuidarte-dark-deep">Síguenos en Instagram</p><p className="text-xs text-slate-500">Contenido diario gratuito sobre salud oncológica</p></div>
@@ -1791,16 +1724,6 @@
                                         <h4 className="text-xl font-heading font-bold text-cuidarte-dark-deep">
                                             {admissionForm.isPrioritized ? `¡Valoración actualizada, ${admissionForm.name.split(' ')[0]}!` : `¡Solicitud recibida, ${admissionForm.name.split(' ')[0]}!`}
                                         </h4>
-                                        {!admissionForm.isPrioritized && (
-                                            <div className="bg-gradient-to-br from-cuidarte-dark-deep to-slate-800 rounded-2xl p-5 text-white text-left space-y-3 shadow-xl">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-xl bg-cuidarte-gold/20 flex items-center justify-center flex-shrink-0"><Gift className="w-5 h-5 text-cuidarte-gold" /></div>
-                                                    <div><p className="font-heading font-bold leading-tight">Kit de Supervivencia</p><p className="text-slate-400 text-xs">Tu regalo de bienvenida</p></div>
-                                                </div>
-                                                <ul className="space-y-1.5">{['3 Recetas Antiinflamatorias SOS','Audio de Calma Guiado','Rutina de Movimiento Suave'].map((item,i)=><li key={i} className="flex items-center gap-2 text-sm text-slate-300"><Check className="w-3.5 h-3.5 text-cuidarte-green flex-shrink-0"/>{item}</li>)}</ul>
-                                                <a href={KIT_SUPERVIVENCIA_URL} target="_blank" rel="noopener noreferrer" className="block w-full bg-cuidarte-gold text-cuidarte-dark-deep font-bold py-3 rounded-xl hover:bg-yellow-400 transition-all text-center text-sm">Acceder a Mi Kit Gratuito</a>
-                                            </div>
-                                        )}
                                         <div className="bg-cuidarte-mint/30 border border-cuidarte-green/20 rounded-2xl p-5 text-left space-y-3">
                                             <div className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-cuidarte-gold"/><p className="text-xs font-bold text-cuidarte-dark-deep uppercase tracking-wider">Próximos pasos</p></div>
                                             <p className="text-sm text-slate-600 leading-relaxed">En menos de 24 horas <strong className="text-cuidarte-dark-deep">una de nosotras te escribirá por WhatsApp</strong> para conocerte mejor y contarte el detalle del programa que mejor encaje contigo 🌿</p>
@@ -1825,71 +1748,6 @@
                     </div>
                 )}
 
-                {/* MINI MODAL — KIT GRATUITO (escribe en CRM principal con downloaded_kit=true) */}
-                {isKitOpen && (
-                    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-cuidarte-dark-deep/70 backdrop-blur-sm animate-in fade-in duration-300">
-                        <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-                            <div className="p-6 bg-gradient-to-r from-cuidarte-gold-deep via-cuidarte-gold to-cuidarte-gold-deep text-white text-center relative">
-                                <button onClick={() => setIsKitOpen(false)} className="absolute top-4 right-4 text-white hover:bg-white/20 rounded-full p-1.5 transition-colors">
-                                    <X className="w-5 h-5" />
-                                </button>
-                                <div className="text-3xl mb-1">📩</div>
-                                <h3 className="text-2xl font-heading font-bold">Tu Kit Gratuito</h3>
-                                <p className="text-white/90 text-sm mt-1 font-medium">Sin compromiso. Sólo nombre y email.</p>
-                            </div>
-                            <form onSubmit={handleKitSubmit} className="p-6 space-y-4">
-                                <div className="bg-cuidarte-gold/10 border border-cuidarte-gold/20 rounded-xl p-3">
-                                    <p className="text-xs text-slate-700 leading-relaxed">
-                                        <strong>Tu Kit incluye:</strong>
-                                        <br />· 3 recetas antiinflamatorias SOS
-                                        <br />· Audio de calma guiado
-                                        <br />· Rutina de movimiento suave
-                                    </p>
-                                </div>
-                                <div className="space-y-1">
-                                    <label className="text-xs font-bold text-slate-500 uppercase">Nombre</label>
-                                    <input
-                                        type="text"
-                                        required
-                                        placeholder="Tu nombre"
-                                        className="w-full px-4 py-3 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cuidarte-gold outline-none text-sm"
-                                        value={kitForm.name}
-                                        onChange={(e) => setKitForm({ ...kitForm, name: e.target.value })}
-                                    />
-                                </div>
-                                <div className="space-y-1">
-                                    <label className="text-xs font-bold text-slate-500 uppercase">Email</label>
-                                    <input
-                                        type="email"
-                                        required
-                                        placeholder="tu@email.com"
-                                        className="w-full px-4 py-3 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cuidarte-gold outline-none text-sm"
-                                        value={kitForm.email}
-                                        onChange={(e) => setKitForm({ ...kitForm, email: e.target.value })}
-                                    />
-                                </div>
-                                <label className="flex items-start gap-2 cursor-pointer">
-                                    <input type="checkbox" required className="mt-0.5 w-4 h-4 accent-cuidarte-gold rounded" />
-                                    <span className="text-[10px] text-slate-500 leading-tight">
-                                        Acepto la <a href="privacidad.html" target="_blank" className="text-cuidarte-gold-deep underline">Política de Privacidad</a> y recibir el Kit en mi email.
-                                    </span>
-                                </label>
-                                <button
-                                    type="submit"
-                                    disabled={isKitSubmitting}
-                                    className="w-full bg-gradient-to-r from-cuidarte-gold-deep to-cuidarte-gold text-white font-bold py-3.5 rounded-xl hover:opacity-90 transition-all shadow-lg text-sm disabled:opacity-60 flex items-center justify-center gap-2"
-                                >
-                                    {isKitSubmitting ? "Enviando..." : <>Descargar mi Kit Gratuito <ArrowRight className="w-4 h-4" /></>}
-                                </button>
-                                <p className="text-[10px] text-slate-400 text-center">
-                                    No te llamaremos a menos que tú nos lo pidas.
-                                </p>
-                            </form>
-                        </div>
-                        <div className="absolute inset-0 -z-10" onClick={() => setIsKitOpen(false)}></div>
-                    </div>
-                )}
-                
                 <div className="fixed bottom-6 right-6 lg:hidden z-40">
                     <button 
                         onClick={openAdmission}
