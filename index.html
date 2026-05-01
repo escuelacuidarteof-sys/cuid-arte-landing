@@ -485,16 +485,14 @@
                         // NOTA: se eliminó la asignación automática de downloaded_kit=true
                         // (era un bug — todos los nuevos leads se marcaban como descargadores del kit).
                         // El kit ahora tiene su propio mini-modal que pone downloaded_kit=true sólo cuando lo descargan.
+                        // Usa RPC SECURITY DEFINER para evitar exponer UPDATE/SELECT a anon en la tabla
                         const { data, error } = await supabase
-                            .from('leads_escuela_cuidarte')
-                            .upsert(upsertData, { onConflict: 'email' })
-                            .select('id')
-                            .single();
+                            .rpc('submit_landing_lead', { payload: upsertData });
                         if (error) {
                             showToast(`Error: ${error.message || "No se pudieron guardar los datos."}`, "error");
                         } else {
                             // Email automático según cualificación (no bloqueante)
-                            sendLeadEmail(data?.id, autoStatus === 'new' ? 'qualified' : 'unqualified');
+                            sendLeadEmail(data, autoStatus === 'new' ? 'qualified' : 'unqualified');
                             setFormStep(4);
                         }
                     } catch(err) { showToast("Ha ocurrido un error inesperado.", "error"); }
@@ -526,12 +524,8 @@
                             status: 'unqualified', // No entra al pipeline activo del closer
                             score: 0,
                         };
-                        const { data: kitData } = await supabase
-                            .from('leads_escuela_cuidarte')
-                            .upsert(upsertKit, { onConflict: 'email' })
-                            .select('id')
-                            .single();
-                        kitLeadId = kitData?.id;
+                        const { data: kitData } = await supabase.rpc('submit_landing_lead', { payload: upsertKit });
+                        kitLeadId = kitData;
                     }
                     // Email del kit (no bloqueante)
                     if (kitLeadId) sendLeadEmail(kitLeadId, 'kit_download');
@@ -1764,7 +1758,7 @@
                                             if (supabase) {
                                                 try {
                                                     const fullPhone = admissionForm.phone ? `${admissionForm.phonePrefix} ${admissionForm.phone}`.trim() : null;
-                                                    const { data } = await supabase.from('leads_escuela_cuidarte').upsert({
+                                                    const { data } = await supabase.rpc('submit_landing_lead', { payload: {
                                                         email: admissionForm.email.toLowerCase().trim(),
                                                         name: admissionForm.name || "Sin nombre",
                                                         phone: fullPhone,
@@ -1777,9 +1771,9 @@
                                                         nivel_compromiso: 2,
                                                         score: 0,
                                                         status: 'unqualified'
-                                                    }, { onConflict: 'email' }).select('id').single();
-                                                    if (data?.id) {
-                                                        sendLeadEmail(data.id, 'unqualified');
+                                                    }});
+                                                    if (data) {
+                                                        sendLeadEmail(data, 'unqualified');
                                                     }
                                                 } catch(e) { console.warn(e); }
                                             }
