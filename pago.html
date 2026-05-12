@@ -143,10 +143,11 @@
 </footer>
 
 <script>
+(function () {
     // ────── Config (placeholders reemplazados por entrypoint.sh) ──────
     const SB_URL = "__SUPABASE_URL__";
     const SB_KEY = "__SUPABASE_ANON_KEY__";
-    const supabase = SB_URL.startsWith('http') ? window.supabase.createClient(SB_URL, SB_KEY) : null;
+    const sb = SB_URL.startsWith('http') ? window.supabase.createClient(SB_URL, SB_KEY) : null;
 
     // ────── Helpers ──────
     const $ = (id) => document.getElementById(id);
@@ -166,9 +167,9 @@
     // ────── Carga del link ──────
     async function loadLink() {
         if (!token) return showError('Falta el código del enlace en la URL.');
-        if (!supabase) return showError('Servicio no disponible. Inténtalo más tarde.');
+        if (!sb) return showError('Servicio no disponible. Inténtalo más tarde.');
 
-        const { data: link, error } = await supabase
+        const { data: link, error } = await sb
             .from('redsys_payment_links')
             .select('token, amount_cents, concept, plan_name, methods_allowed, expires_at, status')
             .eq('token', token)
@@ -293,6 +294,7 @@
     }
 
     loadLink();
+})();
 </script>
 
 </body>
