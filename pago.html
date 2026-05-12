@@ -103,24 +103,67 @@
             </p>
         </div>
 
-        <!-- Datos básicos clienta -->
+        <!-- Datos para factura -->
         <div class="bg-white border border-sage-200 rounded-3xl p-6 md:p-8 shadow-sm mb-6">
-            <h3 class="heading text-sm font-bold text-sage-800 uppercase tracking-wider mb-4">Tus datos</h3>
+            <div class="flex items-center justify-between mb-4 gap-3 flex-wrap">
+                <h3 class="heading text-sm font-bold text-sage-800 uppercase tracking-wider">Datos para tu factura</h3>
+                <div class="flex bg-sage-50 border border-sage-200 rounded-xl p-1 text-xs heading font-semibold">
+                    <button id="btn-particular" type="button" class="px-3 py-1.5 rounded-lg bg-sage-700 text-white transition-all">Particular</button>
+                    <button id="btn-empresa" type="button" class="px-3 py-1.5 rounded-lg text-sage-600 hover:text-sage-800 transition-all">Empresa</button>
+                </div>
+            </div>
+
+            <!-- B2B fields (hidden by default) -->
+            <div id="b2b-fields" class="hidden mb-4 p-4 bg-sage-50/60 border border-sage-200/60 rounded-2xl space-y-4">
+                <div>
+                    <label class="block text-[11px] heading font-semibold text-sage-600 uppercase tracking-wider mb-1.5">Razón social <span class="text-rose-500">*</span></label>
+                    <input id="company_name" type="text" autocomplete="organization" class="w-full px-4 py-3 rounded-xl border border-sage-200 focus:border-sage-500 focus:ring-2 focus:ring-sage-500/20 outline-none text-sm bg-white" placeholder="Nombre de la empresa, S.L.">
+                </div>
+                <div>
+                    <label class="block text-[11px] heading font-semibold text-sage-600 uppercase tracking-wider mb-1.5">CIF <span class="text-rose-500">*</span></label>
+                    <input id="company_tax_id" type="text" autocomplete="off" class="w-full px-4 py-3 rounded-xl border border-sage-200 focus:border-sage-500 focus:ring-2 focus:ring-sage-500/20 outline-none text-sm bg-white uppercase" placeholder="B12345678" maxlength="9">
+                </div>
+            </div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-[11px] heading font-semibold text-sage-600 uppercase tracking-wider mb-1.5">Nombre completo</label>
+                    <label class="block text-[11px] heading font-semibold text-sage-600 uppercase tracking-wider mb-1.5">Nombre completo <span class="text-rose-500">*</span></label>
                     <input id="customer_name" type="text" autocomplete="name" class="w-full px-4 py-3 rounded-xl border border-sage-200 focus:border-sage-500 focus:ring-2 focus:ring-sage-500/20 outline-none text-sm bg-white" placeholder="Tu nombre y apellidos">
                 </div>
+                <div id="dni-wrapper">
+                    <label class="block text-[11px] heading font-semibold text-sage-600 uppercase tracking-wider mb-1.5">DNI / NIE <span class="text-rose-500">*</span></label>
+                    <input id="customer_dni" type="text" autocomplete="off" class="w-full px-4 py-3 rounded-xl border border-sage-200 focus:border-sage-500 focus:ring-2 focus:ring-sage-500/20 outline-none text-sm bg-white uppercase" placeholder="12345678A" maxlength="9">
+                </div>
                 <div>
-                    <label class="block text-[11px] heading font-semibold text-sage-600 uppercase tracking-wider mb-1.5">Email</label>
+                    <label class="block text-[11px] heading font-semibold text-sage-600 uppercase tracking-wider mb-1.5">Email <span class="text-rose-500">*</span></label>
                     <input id="customer_email" type="email" autocomplete="email" class="w-full px-4 py-3 rounded-xl border border-sage-200 focus:border-sage-500 focus:ring-2 focus:ring-sage-500/20 outline-none text-sm bg-white" placeholder="tucorreo@ejemplo.com">
                 </div>
-                <div class="md:col-span-2">
+                <div>
                     <label class="block text-[11px] heading font-semibold text-sage-600 uppercase tracking-wider mb-1.5">Teléfono <span class="text-sage-400 normal-case font-normal">(opcional)</span></label>
                     <input id="customer_phone" type="tel" autocomplete="tel" class="w-full px-4 py-3 rounded-xl border border-sage-200 focus:border-sage-500 focus:ring-2 focus:ring-sage-500/20 outline-none text-sm bg-white" placeholder="+34 600 00 00 00">
                 </div>
+
+                <div class="md:col-span-2">
+                    <label class="block text-[11px] heading font-semibold text-sage-600 uppercase tracking-wider mb-1.5">Dirección <span class="text-rose-500">*</span></label>
+                    <input id="customer_address" type="text" autocomplete="street-address" class="w-full px-4 py-3 rounded-xl border border-sage-200 focus:border-sage-500 focus:ring-2 focus:ring-sage-500/20 outline-none text-sm bg-white" placeholder="Calle, número, piso, puerta">
+                </div>
+                <div>
+                    <label class="block text-[11px] heading font-semibold text-sage-600 uppercase tracking-wider mb-1.5">Código postal <span class="text-rose-500">*</span></label>
+                    <input id="customer_postal_code" type="text" inputmode="numeric" autocomplete="postal-code" class="w-full px-4 py-3 rounded-xl border border-sage-200 focus:border-sage-500 focus:ring-2 focus:ring-sage-500/20 outline-none text-sm bg-white" placeholder="28008" maxlength="5">
+                </div>
+                <div>
+                    <label class="block text-[11px] heading font-semibold text-sage-600 uppercase tracking-wider mb-1.5">Ciudad <span class="text-rose-500">*</span></label>
+                    <input id="customer_city" type="text" autocomplete="address-level2" class="w-full px-4 py-3 rounded-xl border border-sage-200 focus:border-sage-500 focus:ring-2 focus:ring-sage-500/20 outline-none text-sm bg-white" placeholder="Madrid">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-[11px] heading font-semibold text-sage-600 uppercase tracking-wider mb-1.5">Provincia <span class="text-rose-500">*</span></label>
+                    <input id="customer_province" type="text" autocomplete="address-level1" class="w-full px-4 py-3 rounded-xl border border-sage-200 focus:border-sage-500 focus:ring-2 focus:ring-sage-500/20 outline-none text-sm bg-white" placeholder="Madrid">
+                </div>
             </div>
             <p id="form-error" class="hidden mt-3 text-xs text-rose-600"></p>
+            <p class="mt-4 text-[11px] text-sage-500 leading-relaxed">
+                <strong>NEIKO HEALTH, S.L.</strong> emitirá una factura a tu nombre con estos datos. Asegúrate de que sean correctos.
+            </p>
         </div>
 
         <!-- Métodos de pago -->
@@ -227,16 +270,59 @@
         });
     }
 
+    // ────── Toggle Particular / Empresa ──────
+    let isCompany = false;
+    function setEntityType(company) {
+        isCompany = company;
+        $('btn-particular').className = `px-3 py-1.5 rounded-lg transition-all ${!company ? 'bg-sage-700 text-white' : 'text-sage-600 hover:text-sage-800'}`;
+        $('btn-empresa').className = `px-3 py-1.5 rounded-lg transition-all ${company ? 'bg-sage-700 text-white' : 'text-sage-600 hover:text-sage-800'}`;
+        $('b2b-fields').classList.toggle('hidden', !company);
+        $('dni-wrapper').classList.toggle('hidden', company);
+    }
+    $('btn-particular').addEventListener('click', () => setEntityType(false));
+    $('btn-empresa').addEventListener('click', () => setEntityType(true));
+
+    // ────── Validadores fiscales (España, regex básica) ──────
+    const reDNI  = /^[0-9]{8}[A-Z]$/;
+    const reNIE  = /^[XYZ][0-9]{7}[A-Z]$/;
+    const reCIF  = /^[A-HJ-NP-SUVW][0-9]{7}[0-9A-J]$/;
+    const reCP   = /^[0-9]{5}$/;
+    const isValidTaxIdParticular = (v) => reDNI.test(v) || reNIE.test(v);
+    const isValidTaxIdEmpresa    = (v) => reCIF.test(v);
+
     // ────── Pago ──────
     async function pay(method, clickedBtn) {
-        const name = $('customer_name').value.trim();
-        const email = $('customer_email').value.trim();
-        const phone = $('customer_phone').value.trim();
+        const name    = $('customer_name').value.trim();
+        const email   = $('customer_email').value.trim();
+        const phone   = $('customer_phone').value.trim();
+        const address = $('customer_address').value.trim();
+        const cp      = $('customer_postal_code').value.trim();
+        const city    = $('customer_city').value.trim();
+        const province= $('customer_province').value.trim();
+        const dni     = $('customer_dni').value.trim().toUpperCase();
+        const companyName  = $('company_name').value.trim();
+        const companyTaxId = $('company_tax_id').value.trim().toUpperCase();
         const err = $('form-error');
         err.classList.add('hidden');
 
-        if (!name || name.length < 2) { err.textContent = 'Indica tu nombre completo.'; err.classList.remove('hidden'); return; }
-        if (!email || !email.includes('@')) { err.textContent = 'Indica un email válido.'; err.classList.remove('hidden'); return; }
+        // Validación
+        if (!name || name.length < 2) return failForm('Indica tu nombre completo.');
+        if (!email || !email.includes('@')) return failForm('Indica un email válido.');
+        if (!address) return failForm('Indica tu dirección.');
+        if (!reCP.test(cp)) return failForm('El código postal debe tener 5 dígitos.');
+        if (!city) return failForm('Indica tu ciudad.');
+        if (!province) return failForm('Indica tu provincia.');
+        if (isCompany) {
+            if (!companyName || companyName.length < 2) return failForm('Indica la razón social de la empresa.');
+            if (!isValidTaxIdEmpresa(companyTaxId)) return failForm('CIF inválido. Formato: B12345678.');
+        } else {
+            if (!isValidTaxIdParticular(dni)) return failForm('DNI/NIE inválido. Formato: 12345678A o X1234567A.');
+        }
+
+        function failForm(msg) {
+            err.textContent = msg; err.classList.remove('hidden');
+            window.scrollTo({ top: err.offsetTop - 80, behavior: 'smooth' });
+        }
 
         // Deshabilitar todos los botones
         document.querySelectorAll('#payment-methods button').forEach(b => b.disabled = true);
@@ -252,6 +338,12 @@
                     customer_name: name,
                     customer_email: email,
                     customer_phone: phone || null,
+                    billing: {
+                        is_company: isCompany,
+                        tax_id: isCompany ? companyTaxId : dni,
+                        company_name: isCompany ? companyName : null,
+                        address, postal_code: cp, city, province, country: 'España',
+                    },
                 }),
             });
             const data = await resp.json();
