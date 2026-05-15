@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pago seguro · Escuela Cuid-Arte</title>
+    <title>Pago seguro · Cuid-Arte</title>
     <meta name="robots" content="noindex,nofollow">
-    <meta name="description" content="Página de pago seguro de Escuela Cuid-Arte.">
+    <meta name="description" content="Página de pago seguro de Cuid-Arte.">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -78,7 +78,7 @@
     <div id="state-ready" class="hidden">
 
         <div class="text-center mb-10">
-            <p class="heading text-xs font-semibold text-sand-500 uppercase tracking-[2px] mb-2">Escuela Cuid-Arte</p>
+            <p class="heading text-xs font-semibold text-sand-500 uppercase tracking-[2px] mb-2">Cuid-Arte</p>
             <h1 class="display text-3xl md:text-4xl font-bold text-sage-900">Finalizar tu pago</h1>
         </div>
 
@@ -185,6 +185,32 @@
             </p>
         </div>
 
+        <!-- Consentimiento contractual (clickwrap obligatorio) -->
+        <div class="bg-white border border-sage-200 rounded-3xl p-6 md:p-8 shadow-sm mb-6">
+            <h3 class="heading text-sm font-bold text-sage-800 uppercase tracking-wider mb-4">Antes de pagar</h3>
+            <div class="space-y-3">
+                <label class="flex items-start gap-3 text-sm text-sage-800 cursor-pointer group">
+                    <input id="consent-terms" type="checkbox" class="mt-0.5 w-5 h-5 text-sage-700 border-sage-300 rounded focus:ring-sage-500 cursor-pointer flex-shrink-0">
+                    <span class="leading-relaxed">
+                        He leído y acepto las <a href="condiciones.html" target="_blank" rel="noopener" class="underline font-semibold text-sage-700 hover:text-sage-900">Condiciones de Contratación</a>, la <a href="condiciones.html#desistimiento" target="_blank" rel="noopener" class="underline font-semibold text-sage-700 hover:text-sage-900">Política de Devoluciones (14 días)</a> y el <a href="legal.html" target="_blank" rel="noopener" class="underline font-semibold text-sage-700 hover:text-sage-900">Aviso Legal</a>. <span class="text-rose-500">*</span>
+                    </span>
+                </label>
+                <label class="flex items-start gap-3 text-sm text-sage-800 cursor-pointer group">
+                    <input id="consent-privacy" type="checkbox" class="mt-0.5 w-5 h-5 text-sage-700 border-sage-300 rounded focus:ring-sage-500 cursor-pointer flex-shrink-0">
+                    <span class="leading-relaxed">
+                        He leído la <a href="privacidad.html" target="_blank" rel="noopener" class="underline font-semibold text-sage-700 hover:text-sage-900">Política de Privacidad</a> y consiento el tratamiento de mis datos personales por NEIKO HEALTH, S.L. para gestionar la contratación, emitir factura y prestar el servicio. <span class="text-rose-500">*</span>
+                    </span>
+                </label>
+                <label class="flex items-start gap-3 text-sm text-sage-800 cursor-pointer group">
+                    <input id="consent-anticipated" type="checkbox" class="mt-0.5 w-5 h-5 text-sage-700 border-sage-300 rounded focus:ring-sage-500 cursor-pointer flex-shrink-0">
+                    <span class="leading-relaxed">
+                        Solicito expresamente comenzar el servicio antes de que finalice el plazo de desistimiento de 14 días y entiendo que, conforme al art. 103.a) del RD Leg. 1/2007, <strong>pierdo el derecho de desistimiento</strong> respecto a la parte del servicio ya prestada. Las prestaciones no realizadas serán reembolsables proporcionalmente. <span class="text-rose-500">*</span>
+                    </span>
+                </label>
+            </div>
+            <p id="consent-error" class="hidden mt-4 text-xs text-rose-600 font-semibold">Debes marcar las tres casillas para poder continuar con el pago.</p>
+        </div>
+
         <!-- Métodos de pago -->
         <div class="bg-white border border-sage-200 rounded-3xl p-6 md:p-8 shadow-sm mb-6">
             <h3 class="heading text-sm font-bold text-sage-800 uppercase tracking-wider mb-4">Elige cómo pagar</h3>
@@ -227,7 +253,8 @@
 </main>
 
 <footer class="border-t border-sage-100 py-6 mt-10 text-center text-xs text-sage-500">
-    <p>&copy; 2026 NEIKO HEALTH, S.L. · Escuela Cuid-Arte</p>
+    <p>&copy; 2026 NEIKO HEALTH, S.L. · Cuid-Arte · NIF B22928311 · RM Madrid, hoja M-865423</p>
+    <p class="mt-2"><a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener" class="hover:text-sage-700 underline">Resolución de litigios en línea (UE)</a></p>
 </footer>
 
 <script>
@@ -364,10 +391,22 @@
         const dni     = $('customer_dni').value.trim().toUpperCase();
         const companyName  = $('company_name').value.trim();
         const companyTaxId = $('company_tax_id').value.trim().toUpperCase();
+        const consentTerms = $('consent-terms').checked;
+        const consentPrivacy = $('consent-privacy').checked;
+        const consentAnticipated = $('consent-anticipated').checked;
         const err = $('form-error');
+        const consentErr = $('consent-error');
         err.classList.add('hidden');
+        consentErr.classList.add('hidden');
 
-        // Validación
+        // Validación de consentimiento contractual (clickwrap, art. 27 LSSICE)
+        if (!consentTerms || !consentPrivacy || !consentAnticipated) {
+            consentErr.classList.remove('hidden');
+            window.scrollTo({ top: consentErr.offsetTop - 100, behavior: 'smooth' });
+            return;
+        }
+
+        // Validación de datos
         if (!firstName) return failForm('Indica tu nombre.');
         if (!lastName) return failForm('Indica tus apellidos.');
         if (!email || !email.includes('@')) return failForm('Indica un email válido.');
@@ -381,6 +420,17 @@
         } else {
             if (!isValidTaxIdParticular(dni)) return failForm('DNI/NIE inválido. Formato: 12345678A o X1234567A.');
         }
+
+        // Snapshot del consentimiento para trazabilidad / auditoría
+        const consentRecord = {
+            accepted_terms: consentTerms,
+            accepted_privacy: consentPrivacy,
+            accepted_anticipated_service: consentAnticipated,
+            accepted_at: new Date().toISOString(),
+            user_agent: navigator.userAgent,
+            terms_version: '2026-05',
+            privacy_version: '2026-05',
+        };
 
         function failForm(msg) {
             err.textContent = msg; err.classList.remove('hidden');
@@ -409,6 +459,7 @@
                         company_name: isCompany ? companyName : null,
                         address, postal_code: cp, city, province, country: 'España',
                     },
+                    consent: consentRecord,
                 }),
             });
             const data = await resp.json();
