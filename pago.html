@@ -108,10 +108,14 @@
 
             <div class="h-px bg-gradient-to-r from-transparent via-sand-300 to-transparent my-5"></div>
 
-            <p class="text-xs text-sage-600 leading-relaxed">
-                Pago procesado por <strong>BBVA</strong> mediante TPV Virtual seguro.
-                Tu información bancaria nunca llega a Cuid-Arte: la introduces directamente en la pasarela del banco.
-            </p>
+            <div class="text-xs text-sage-600 leading-relaxed space-y-2">
+                <p>
+                    Pago procesado por <strong>BBVA</strong> mediante <strong>TPV Virtual Redsys</strong> con cifrado y autenticación reforzada <strong>3D Secure</strong>. Tu información bancaria nunca llega a Cuid-Arte: la introduces directamente en la pasarela del banco.
+                </p>
+                <p>
+                    Moneda: <strong>EUR (€)</strong>. La factura electrónica se emitirá a nombre de los datos fiscales que indiques abajo y se enviará al email facilitado tras la confirmación del pago.
+                </p>
+            </div>
         </div>
 
         <!-- Datos para factura -->
@@ -185,10 +189,36 @@
         <div class="bg-white border border-sage-200 rounded-3xl p-6 md:p-8 shadow-sm mb-6">
             <h3 class="heading text-sm font-bold text-sage-800 uppercase tracking-wider mb-4">Elige cómo pagar</h3>
             <div id="payment-methods" class="grid grid-cols-1 gap-3"></div>
+
+            <!-- Marcas aceptadas + sellos de seguridad -->
+            <div class="mt-6 pt-5 border-t border-sage-100">
+                <p class="text-[10px] heading font-semibold text-sage-500 uppercase tracking-[1.5px] mb-3 text-center">Métodos y sellos de seguridad</p>
+                <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-3">
+                    <!-- Visa -->
+                    <svg aria-label="Visa" role="img" width="42" height="14" viewBox="0 0 48 16" xmlns="http://www.w3.org/2000/svg"><title>Visa</title><path fill="#1A1F71" d="M19.6 1.2L13.1 14.8h-4.2L5.7 4c-.2-.8-.4-1.1-1-1.4-1-.5-2.6-1-4-1.3L.8 1.2h6.8c.9 0 1.6.6 1.9 1.5l1.7 9.2 4.2-10.7h4.2zm16.7 9.2c0-4.1-5.7-4.3-5.6-6.2 0-.5.6-1.1 1.8-1.3 1.5-.2 3.2.1 4.5.7l.7-3.3C36.4.1 34.8 0 32.9 0c-3.9 0-6.7 2.1-6.7 5.1 0 2.2 2 3.4 3.5 4.2 1.6.7 2.1 1.2 2.1 1.9 0 1-1.2 1.5-2.4 1.5-2 0-3.2-.5-4.1-1L24.6 15c.9.4 2.6.8 4.4.8 4.1 0 6.8-2 6.8-5.2.1-1.7-.9-2.9-.5-3.2zM47.3 14.8L44.1 1.2h-3.4c-.8 0-1.4.4-1.7 1.2l-6.1 12.4h4.2l.8-2.3h5.1l.5 2.3h3.8zm-5.9-5.5l2.1-5.7 1.2 5.7h-3.3zM25.3 1.2L22 14.8h-4l3.3-13.6h4z"/></svg>
+                    <!-- Mastercard -->
+                    <svg aria-label="Mastercard" role="img" width="32" height="20" viewBox="0 0 36 22" xmlns="http://www.w3.org/2000/svg"><title>Mastercard</title><circle cx="13" cy="11" r="9" fill="#EB001B"/><circle cx="23" cy="11" r="9" fill="#F79E1B" fill-opacity="0.9"/><path fill="#FF5F00" d="M18 4.5a8.97 8.97 0 0 1 0 13c-2.3-1.8-3.7-4.6-3.7-6.5 0-2 1.4-4.7 3.7-6.5z"/></svg>
+                    <!-- American Express -->
+                    <svg aria-label="American Express" role="img" width="32" height="20" viewBox="0 0 32 20" xmlns="http://www.w3.org/2000/svg"><title>American Express</title><rect width="32" height="20" rx="2" fill="#2E77BC"/><text x="16" y="13.5" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="6.5" fill="#fff" letter-spacing="0.5">AMEX</text></svg>
+                    <!-- Bizum -->
+                    <svg aria-label="Bizum" role="img" width="44" height="14" viewBox="0 0 56 18" xmlns="http://www.w3.org/2000/svg"><title>Bizum</title><text x="28" y="13" text-anchor="middle" font-family="Arial, sans-serif" font-weight="800" font-size="13" fill="#00C2E7" letter-spacing="-0.5">Bizum</text></svg>
+                    <span class="w-px h-5 bg-sage-200" aria-hidden="true"></span>
+                    <!-- 3D Secure -->
+                    <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-sage-50 border border-sage-200">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#558055" stroke-width="2.5"><path d="M12 2L4 6v6c0 5 3.5 9.5 8 10 4.5-.5 8-5 8-10V6l-8-4z"/><path d="M9 12l2 2 4-4"/></svg>
+                        <span class="text-[10px] heading font-bold text-sage-700 uppercase tracking-wider">3D&nbsp;Secure</span>
+                    </div>
+                    <!-- BBVA -->
+                    <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-sage-50 border border-sage-200">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#558055" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        <span class="text-[10px] heading font-bold text-sage-700 uppercase tracking-wider">TPV BBVA</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <p class="text-center text-[11px] text-sage-500 leading-relaxed mt-8">
-            Al pagar aceptas las <a href="legal.html" class="underline">condiciones</a> y la <a href="privacidad.html" class="underline">política de privacidad</a> de Escuela Cuid-Arte.<br>
+            Al pagar aceptas las <a href="condiciones.html" class="underline">condiciones de contratación</a>, la <a href="condiciones.html#desistimiento" class="underline">política de devoluciones (14 días)</a> y la <a href="privacidad.html" class="underline">política de privacidad</a> de Cuid-Arte.<br>
             ¿Tienes dudas? Escríbenos por <a href="https://wa.me/34692183833" class="underline font-semibold">WhatsApp</a>.
         </p>
 
